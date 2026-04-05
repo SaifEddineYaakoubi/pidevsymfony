@@ -1,0 +1,53 @@
+{% extends 'front/base_stock.html.twig' %}
+
+{% block title %}Responsable Stock - Services{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Services (Stock)',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_stock_home' },
+            { label: 'Services' }
+        ]
+    } %}
+
+    <section id="services" class="services section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>SERVICES</h2>
+            <p>Services spécifiques au stock</p>
+        </div>
+
+        <div class="content">
+            <div class="container">
+                <div class="row g-0">
+                    {% set services = [
+                        { number: '01', title: 'Inventaire', desc: 'Gestion d’inventaire et contrôle périodique.', icon: 'bi-box-seam' },
+                        { number: '02', title: 'Réception', desc: 'Réception des produits et contrôle qualité.', icon: 'bi-truck' },
+                        { number: '03', title: 'Sorties', desc: 'Préparation des sorties et traçabilité.', icon: 'bi-arrow-up-right-square' },
+                        { number: '04', title: 'Alertes', desc: 'Alertes de seuil et ruptures.', icon: 'bi-bell' },
+                        { number: '05', title: 'Traçabilité', desc: 'Suivi par lot et historique des mouvements.', icon: 'bi-qr-code-scan' },
+                        { number: '06', title: 'Rapports', desc: 'Rapports et statistiques stock.', icon: 'bi-graph-up' },
+                        { number: '07', title: 'Emplacements', desc: 'Organisation des emplacements de stockage.', icon: 'bi-geo-alt' },
+                        { number: '08', title: 'Optimisation', desc: 'Optimisation des niveaux de stock.', icon: 'bi-sliders' }
+                    ] %}
+
+                    {% for s in services %}
+                        <div class="col-lg-3 col-md-6">
+                            <div class="service-item">
+                                <span class="number">{{ s.number }}</span>
+                                <div class="service-item-icon">
+                                    <i class="bi {{ s.icon }}" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="service-item-content">
+                                    <h3 class="service-heading">{{ s.title }}</h3>
+                                    <p>{{ s.desc }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

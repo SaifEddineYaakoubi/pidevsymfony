@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+    <div class="container py-5" style="max-width: 520px;">
+        <h1 class="h3 mb-4">Connexion</h1>
+
+        <div class="alert alert-info">
+            <strong>Démo</strong> : cette page est commune.
+            <br>
+            Quand on branchera Symfony Security, la redirection se fera automatiquement selon le rôle.
+        </div>
+
+        <form method="post" action="#">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input class="form-control" type="email" placeholder="email@exemple.com" autocomplete="username">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mot de passe</label>
+                <input class="form-control" type="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit" disabled>
+                Se connecter (à brancher)
+            </button>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="d-grid gap-2">
+            <a class="btn btn-outline-dark" href="{{ path('app_login', {as: 'admin'}) }}">Entrer comme Admin (démo)</a>
+            <a class="btn btn-outline-success" href="{{ path('app_login', {as: 'agriculteur'}) }}">Entrer comme Agriculteur (démo)</a>
+            <a class="btn btn-outline-primary" href="{{ path('app_login', {as: 'stock'}) }}">Entrer comme Responsable Stock (démo)</a>
+        </div>
+    </div>
+{% endblock %}
+

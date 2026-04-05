@@ -1,0 +1,27 @@
+{#
+  Minimal layout for AdminLTE auth pages (login/register/forgot password).
+  Those pages are standalone and do not use the full AdminLTE wrapper/sidebar.
+#}
+
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div class="hold-transition {% block admin_auth_body_class %}login-page{% endblock %}">
+        {% block admin_auth_body %}{% endblock %}
+    </div>
+{% endblock %}
+

@@ -1,0 +1,89 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="{{ path('app_admin_dashboard') }}" class="brand-link">
+        <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">Admin</span>
+    </a>
+
+    <div class="sidebar">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">{{ app.user ? app.user.userIdentifier : 'Invité' }}</a>
+            </div>
+        </div>
+
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-header">AdminLTE Pages</li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_pages_starter') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_starter' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-play"></i>
+                        <p>Starter</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_pages_widgets') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_widgets' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>Widgets</p>
+                    </a>
+                </li>
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-table"></i>
+                        <p>
+                            Tables
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ path('app_admin_pages_tables_simple') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_tables_simple' ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Simple</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_admin_pages_tables_data') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_tables_data' ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>DataTables</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_pages_calendar') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_calendar' ? 'active' : '' }}">
+                        <i class="nav-icon far fa-calendar-alt"></i>
+                        <p>Calendar</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_pages_kanban') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_kanban' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-columns"></i>
+                        <p>Kanban</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_theme_page', {page: 'widgets'}) }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_theme_page' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-palette"></i>
+                        <p>Theme Router</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_demo') }}" class="nav-link">
+                        <i class="nav-icon fas fa-vial"></i>
+                        <p>Demo</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
+

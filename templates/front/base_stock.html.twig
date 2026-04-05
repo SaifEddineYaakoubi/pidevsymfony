@@ -1,0 +1,16 @@
+{#
+  Base layout for the "Responsable Stock" area.
+  We reuse the AgriCulture theme layout, but keep a dedicated base so we can
+  change nav/menu, branding and data later without mixing concerns.
+#}
+
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block front_header %}
+    {% include 'front/partials/stock/_header.html.twig' %}
+{% endblock %}
+
+{% block front_footer %}
+    {% include 'front/partials/stock/_footer.html.twig' %}
+{% endblock %}
+

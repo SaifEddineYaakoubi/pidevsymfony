@@ -1,0 +1,65 @@
+{#
+  Base layout for the AdminLTE HTML template.
+  NOTE: the original AdminLTE static HTML sources were used only as a reference during integration
+  and can be removed once your Twig/partials are in place.
+
+  We keep Symfony's Twig blocks (title/stylesheets/javascripts/body) so your pages can extend it.
+#}
+
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {# AdminLTE css (served from public/adminlte after running app:install-theme-assets) #}
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {# AdminLTE relies on jQuery + Bootstrap bundle #}
+    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+
+    {# Keep importmap block available if the app uses it #}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        {# Navbar #}
+        {% include 'admin/partials/_navbar.html.twig' %}
+
+        {# Sidebar #}
+        {% include 'admin/partials/_sidebar.html.twig' %}
+
+        {# Content Wrapper. Contains page content #}
+        <div class="content-wrapper">
+            {% block admin_content_header %}
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1 class="m-0">{% block admin_page_title %}{% endblock %}</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                {% block admin_breadcrumbs %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+
+            <section class="content">
+                <div class="container-fluid">
+                    {% block admin_body %}{% endblock %}
+                </div>
+            </section>
+        </div>
+
+        {% include 'admin/partials/_footer.html.twig' %}
+    </div>
+    </div>
+{% endblock %}
+

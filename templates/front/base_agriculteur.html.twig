@@ -1,0 +1,56 @@
+{#
+  Base layout for the AgriCulture HTML template.
+  The original static template is under:
+    templates/front/AgriCulture/AgriCulture-1.0.0/
+
+  This Twig layout loads its CSS/JS and exposes blocks.
+#}
+
+{% extends 'base.html.twig' %}
+
+{# Served from public/agriculture after running app:install-theme-assets #}
+{% set theme = 'agriculture' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    {# Vendor CSS #}
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/vendor/aos/aos.css') }}">
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/vendor/glightbox/css/glightbox.min.css') }}">
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/vendor/swiper/swiper-bundle.min.css') }}">
+
+    {# Main template CSS #}
+    <link rel="stylesheet" href="{{ asset(theme ~ '/assets/css/main.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {# Vendor JS #}
+    <script src="{{ asset(theme ~ '/assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset(theme ~ '/assets/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset(theme ~ '/assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="{{ asset(theme ~ '/assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset(theme ~ '/assets/vendor/php-email-form/validate.js') }}"></script>
+
+    {# Main template JS #}
+    <script src="{{ asset(theme ~ '/assets/js/main.js') }}"></script>
+
+    {# Keep importmap block available if the app uses it #}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    {% block front_header %}
+        {% include 'front/partials/_header.html.twig' %}
+    {% endblock %}
+
+    <main class="main">
+        {% block agriculteur_body %}{% endblock %}
+    </main>
+
+    {% block front_footer %}
+        {% include 'front/partials/_footer.html.twig' %}
+    {% endblock %}
+{% endblock %}
+

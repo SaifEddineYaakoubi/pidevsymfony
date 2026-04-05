@@ -1,0 +1,46 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Testimonials - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Testimonials',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Testimonials' }
+        ]
+    } %}
+
+    <section class="testimonials-12 testimonials section" id="testimonials">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>TESTIMONIALS</h2>
+            <p>Necessitatibus eius consequatur</p>
+        </div>
+
+        <div class="testimonial-wrap">
+            <div class="container">
+                <div class="row">
+                    {% set items = [
+                        { img: 'testimonials-1.jpg', name: 'James Smith' },
+                        { img: 'testimonials-2.jpg', name: 'Kate Smith' },
+                        { img: 'testimonials-3.jpg', name: 'Claire Anderson' },
+                        { img: 'testimonials-4.jpg', name: 'Dan Smith' }
+                    ] %}
+
+                    {% for t in items %}
+                        <div class="col-md-6 mb-4 mb-md-4">
+                            <div class="testimonial">
+                                <img src="{{ asset('agriculture/assets/img/testimonials/' ~ t.img) }}" alt="Testimonial author">
+                                <blockquote>
+                                    <p>“Lorem ipsum dolor sit, amet consectetur adipisicing elit. Provident deleniti iusto molestias, dolore vel fugiat ab placeat ea?”</p>
+                                </blockquote>
+                                <p class="client-name">{{ t.name }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

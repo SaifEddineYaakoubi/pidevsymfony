@@ -1,0 +1,295 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Agriculteur - Accueil{% endblock %}
+
+{% block agriculteur_body %}
+    <section id="hero" class="hero section dark-background">
+        <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+            {% set slides = [
+                { img: 'hero_1.jpg', title: 'Farming is the best solution of worlds starvation', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+                { img: 'hero_2.jpg', title: 'Organic vegetables is good for health', text: 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.' },
+                { img: 'hero_3.jpg', title: 'Providing Fresh Produce Every Single Day', text: 'Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.' },
+                { img: 'hero_4.jpg', title: 'Farming as a Passione', text: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius.' },
+                { img: 'hero_5.jpg', title: 'Good Food For All', text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }
+            ] %}
+
+            {% for s in slides %}
+                <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                    <img src="{{ asset('agriculture/assets/img/' ~ s.img) }}" alt="">
+                    <div class="carousel-container">
+                        <h2>{{ s.title }}</h2>
+                        <p>{{ s.text }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
+            </a>
+            <a class="carousel-control-next" href="#hero-carousel" role="button" data-bs-slide="next">
+                <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
+            </a>
+
+            <div class="carousel-indicators">
+                {% for s in slides %}
+                    <button
+                        type="button"
+                        data-bs-target="#hero-carousel"
+                        data-bs-slide-to="{{ loop.index0 }}"
+                        class="{{ loop.first ? 'active' : '' }}"
+                        {% if loop.first %}aria-current="true"{% endif %}
+                        aria-label="Slide {{ loop.index }}"
+                    ></button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>SERVICES</h2>
+            <p>Providing Fresh Produce Every Single Day</p>
+        </div>
+
+        <div class="content">
+            <div class="container">
+                <div class="row g-0">
+                    {% set services = [
+                        { number: '01', title: 'Planting', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-seedling' },
+                        { number: '02', title: 'Mulching', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-flower1' },
+                        { number: '03', title: 'Plowing', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-truck' },
+                        { number: '04', title: 'Mowing', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-scissors' },
+                        { number: '05', title: 'Seeding', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-droplet' },
+                        { number: '06', title: 'Fresh Vegetables', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-basket' },
+                        { number: '07', title: 'Watering', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-water' },
+                        { number: '08', title: 'Vegetable selling', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-shop' }
+                    ] %}
+
+                    {% for s in services %}
+                        <div class="col-lg-3 col-md-6">
+                            <div class="service-item">
+                                <span class="number">{{ s.number }}</span>
+                                <div class="service-item-icon">
+                                    <i class="bi {{ s.icon }}" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="service-item-content">
+                                    <h3 class="service-heading">{{ s.title }}</h3>
+                                    <p>{{ s.desc }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about section">
+        <div class="content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <img src="{{ asset('agriculture/assets/img/img_long_5.jpg') }}" alt="Image" class="img-fluid img-overlap" data-aos="zoom-out">
+                    </div>
+                    <div class="col-lg-5 ml-auto" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="content-subtitle text-white opacity-50">Why Choose Us</h3>
+                        <h2 class="content-title mb-4">More than <strong>50 year experience</strong> in agriculture industry</h2>
+                        <p class="opacity-50">Reprehenderit, odio laboriosam? Blanditiis quae ullam quasi illum minima nostrum perspiciatis error consequatur sit nulla.</p>
+
+                        <div class="row my-5">
+                            <div class="col-lg-12 d-flex align-items-start mb-4">
+                                <i class="bi bi-cloud-rain me-4 display-6"></i>
+                                <div>
+                                    <h4 class="m-0 h5 text-white">Plants needs rain</h4>
+                                    <p class="text-white opacity-50">Lorem ipsum dolor sit amet.</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 d-flex align-items-start mb-4">
+                                <i class="bi bi-heart me-4 display-6"></i>
+                                <div>
+                                    <h4 class="m-0 h5 text-white">Love organic foods</h4>
+                                    <p class="text-white opacity-50">Lorem ipsum dolor sit amet.</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 d-flex align-items-start">
+                                <i class="bi bi-shop me-4 display-6"></i>
+                                <div>
+                                    <h4 class="m-0 h5 text-white">Sell vegies</h4>
+                                    <p class="text-white opacity-50">Lorem ipsum dolor sit amet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p><a href="{{ path('app_agriculteur_about') }}" class="btn-cta">Learn more</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services-2" class="services-2 section dark-background">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Services</h2>
+            <p>Necessitatibus eius consequatur</p>
+        </div>
+
+        <div class="services-carousel-wrap">
+            <div class="container">
+                <div class="swiper init-swiper">
+                    <script type="application/json" class="swiper-config">
+                        {
+                          "loop": true,
+                          "speed": 600,
+                          "autoplay": {"delay": 5000},
+                          "slidesPerView": "auto",
+                          "pagination": {"el": ".swiper-pagination", "type": "bullets", "clickable": true},
+                          "navigation": {"nextEl": ".js-custom-next", "prevEl": ".js-custom-prev"},
+                          "breakpoints": {"320": {"slidesPerView": 1, "spaceBetween": 40}, "1200": {"slidesPerView": 3, "spaceBetween": 40}}
+                        }
+                    </script>
+                    <button class="navigation-prev js-custom-prev"><i class="bi bi-arrow-left-short"></i></button>
+                    <button class="navigation-next js-custom-next"><i class="bi bi-arrow-right-short"></i></button>
+
+                    {% set slides2 = [
+                        { title: 'Planting', img: 'img_sq_1.jpg' },
+                        { title: 'Mulching', img: 'img_sq_3.jpg' },
+                        { title: 'Watering', img: 'img_sq_8.jpg' },
+                        { title: 'Fertilizing', img: 'img_sq_4.jpg' },
+                        { title: 'Harvesting', img: 'img_sq_5.jpg' },
+                        { title: 'Mowing', img: 'img_sq_6.jpg' },
+                        { title: 'Seeding Plants', img: 'img_sq_8.jpg' }
+                    ] %}
+
+                    <div class="swiper-wrapper">
+                        {% for s in slides2 %}
+                            <div class="swiper-slide">
+                                <div class="service-item">
+                                    <div class="service-item-contents">
+                                        <a href="{{ path('app_agriculteur_services') }}">
+                                            <span class="service-item-category">We do</span>
+                                            <h2 class="service-item-title">{{ s.title }}</h2>
+                                        </a>
+                                    </div>
+                                    <img src="{{ asset('agriculture/assets/img/' ~ s.img) }}" alt="Image" class="img-fluid">
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials-12 testimonials section" id="testimonials">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>TESTIMONIALS</h2>
+            <p>Necessitatibus eius consequatur</p>
+        </div>
+
+        <div class="testimonial-wrap">
+            <div class="container">
+                <div class="row">
+                    {% set items = [
+                        { img: 'testimonials-1.jpg', name: 'James Smith' },
+                        { img: 'testimonials-2.jpg', name: 'Kate Smith' },
+                        { img: 'testimonials-3.jpg', name: 'Claire Anderson' },
+                        { img: 'testimonials-4.jpg', name: 'Dan Smith' }
+                    ] %}
+                    {% for t in items %}
+                        <div class="col-md-6 mb-4 mb-md-4">
+                            <div class="testimonial">
+                                <img src="{{ asset('agriculture/assets/img/testimonials/' ~ t.img) }}" alt="Testimonial author">
+                                <blockquote>
+                                    <p>“Lorem ipsum dolor sit, amet consectetur adipisicing elit. Provident deleniti iusto molestias, dolore vel fugiat ab placeat ea?”</p>
+                                </blockquote>
+                                <p class="client-name">{{ t.name }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="recent-posts" class="recent-posts section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Recent Posts</h2>
+            <p>Necessitatibus eius consequatur</p>
+        </div>
+
+        <div class="container">
+            <div class="row gy-5">
+                {% set recent = [
+                    { img: 'blog-1.jpg', date: 'December 12', title: 'Eum ad dolor et. Autem aut fugiat debitis', author: 'Julia Parker', cat: 'Politics', slug: 'eum-ad-dolor', delay: 100 },
+                    { img: 'blog-2.jpg', date: 'July 17', title: 'Et repellendus molestiae qui est sed omnis', author: 'Mario Douglas', cat: 'Sports', slug: 'et-repellendus', delay: 200 },
+                    { img: 'blog-3.jpg', date: 'September 05', title: 'Quia assumenda est et veritati tirana ploder', author: 'Lisa Hunter', cat: 'Economics', slug: 'quia-assumenda', delay: 300 }
+                ] %}
+
+                {% for p in recent %}
+                    <div class="col-xl-4 col-md-6">
+                        <div class="post-item position-relative h-100" data-aos="fade-up" data-aos-delay="{{ p.delay }}">
+                            <div class="post-img position-relative overflow-hidden">
+                                <img src="{{ asset('agriculture/assets/img/blog/' ~ p.img) }}" class="img-fluid" alt="">
+                                <span class="post-date">{{ p.date }}</span>
+                            </div>
+
+                            <div class="post-content d-flex flex-column">
+                                <h3 class="post-title">{{ p.title }}</h3>
+                                <div class="meta d-flex align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person"></i> <span class="ps-2">{{ p.author }}</span>
+                                    </div>
+                                    <span class="px-3 text-black-50">/</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-folder2"></i> <span class="ps-2">{{ p.cat }}</span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <a href="{{ path('app_agriculteur_blog_details', {slug: p.slug}) }}" class="readmore stretched-link"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section id="call-to-action" class="call-to-action section light-background">
+        <div class="content">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h3>Subscribe To Our Newsletter</h3>
+                        <p class="opacity-50">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt, reprehenderit!</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <form action="#" class="form-subscribe php-email-form">
+                            <div class="form-group d-flex align-items-stretch">
+                                <input type="email" name="email" class="form-control h-100" placeholder="Enter your e-mail">
+                                <input type="submit" class="btn btn-secondary px-4" value="Subcribe">
+                            </div>
+                            <div class="loading">Loading</div>
+                            <div class="error-message"></div>
+                            <div class="sent-message">Your subscription request has been sent. Thank you!</div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container" data-aos="fade-up">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <p class="mt-2">
+                        <a class="btn btn-outline-primary" href="{{ path('app_agriculteur_demo') }}">Voir la page Demo</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
