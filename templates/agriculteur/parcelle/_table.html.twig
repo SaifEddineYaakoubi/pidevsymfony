@@ -1,0 +1,37 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="text-muted small">
+        {{ parcelles|length }} résultat(s)
+        {% if q %}pour "{{ q }}"{% endif %}
+    </div>
+</div>
+
+<div class="agri-table-wrapper table-responsive">
+    <table class="table agri-table table-hover align-middle" id="parcelleTable">
+        <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Superficie</th>
+            <th>Localisation</th>
+            <th>État</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in parcelles %}
+            <tr role="button" data-id="{{ p.id_parcelle }}" data-delete-token="{{ csrf_token('delete_parcelle_' ~ p.id_parcelle) }}">
+                <td>{{ p.nom }}</td>
+                <td>{{ p.superficie }}</td>
+                <td>{{ p.localisation }}</td>
+                {% set etatLabel = {
+                    'active': 'Active',
+                    'repos': 'Repos',
+                    'exploitee': 'Exploitée'
+                }[p.etat] ?? p.etat %}
+                <td><span class="agri-badge agri-badge--{{ p.etat }}">{{ etatLabel }}</span></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" class="text-muted">Aucune parcelle</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+

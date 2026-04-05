@@ -1,0 +1,173 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Cultures - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Cultures',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Cultures' }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+
+            <div class="agri-crud">
+
+            {% for label, messages in app.flashes %}
+                {% for msg in messages %}
+                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="crud-header mb-4"
+                 data-controller="crud-search"
+                 data-crud-search-url-value="{{ path('agri_culture_index') }}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-8">
+                        <form class="d-flex gap-2" method="get">
+                            <input class="form-control"
+                                   name="q"
+                                   value="{{ q }}"
+                                   placeholder="Rechercher (type, état, parcelle)"
+                                   autocomplete="off"
+                                   data-crud-search-target="input"
+                                   data-action="input->crud-search#search">
+                            <input type="hidden" name="sort" value="{{ sort|default('plantation') }}">
+                            <input type="hidden" name="dir" value="{{ dir|default('DESC') }}">
+                            <button class="btn btn-primary" type="submit">Rechercher</button>
+                            {% if q %}
+                                <a class="btn btn-outline-secondary" href="{{ path('agri_culture_index', {sort: sort|default('plantation'), dir: dir|default('DESC')}) }}">Effacer</a>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end">
+                        <a class="btn btn-success" href="{{ path('agri_culture_new') }}">Ajouter</a>
+                        <a id="btnEdit" class="btn btn-outline-primary disabled" href="#">Modifier</a>
+                        <form id="deleteForm" method="post" class="m-0">
+                            <input type="hidden" name="_token" id="deleteToken" value="">
+                            <button id="btnDelete" class="btn btn-outline-danger" type="submit" disabled>Supprimer</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                    <label class="small text-muted align-self-center">Trier par</label>
+                    <select class="form-select form-select-sm"
+                            name="sort"
+                            data-crud-search-target="sort"
+                            data-action="change->crud-search#sortChanged">
+                        <option value="plantation" {{ (sort|default('plantation')) == 'plantation' ? 'selected' : '' }}>Date plantation</option>
+                        <option value="recolte" {{ (sort|default('plantation')) == 'recolte' ? 'selected' : '' }}>Date récolte</option>
+                        <option value="type" {{ (sort|default('plantation')) == 'type' ? 'selected' : '' }}>Type culture</option>
+                        <option value="etat" {{ (sort|default('plantation')) == 'etat' ? 'selected' : '' }}>État</option>
+                        <option value="parcelle" {{ (sort|default('plantation')) == 'parcelle' ? 'selected' : '' }}>Parcelle</option>
+                    </select>
+                    <select class="form-select form-select-sm"
+                            name="dir"
+                            data-crud-search-target="dir"
+                            data-action="change->crud-search#sortChanged">
+                        <option value="ASC" {{ (dir|default('DESC')) == 'ASC' ? 'selected' : '' }}>↑</option>
+                        <option value="DESC" {{ (dir|default('DESC')) == 'DESC' ? 'selected' : '' }}>↓</option>
+                    </select>
+                </div>
+            </div>
+
+            {# Stats moved into results partial so AJAX updates them too #}
+
+            <div class="agri-crud-results" data-crud-search-target="results">
+                <div class="agri-crud-loader" aria-hidden="true">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status" aria-label="Chargement"></div>
+                        <div class="small text-muted mt-2">Chargement...</div>
+                    </div>
+                </div>
+                {% include 'agriculteur/culture/_results.html.twig' %}
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        (function() {
+            const btnEdit = document.getElementById('btnEdit');
+            const btnDelete = document.getElementById('btnDelete');
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteToken = document.getElementById('deleteToken');
+            const results = document.querySelector('[data-crud-search-target="results"]');
+
+            function clearSelection() {
+                const table = document.getElementById('cultureTable');
+                if (!table) return;
+                table.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('is-selected'));
+            }
+
+            function setSelected(row) {
+                clearSelection();
+                row.classList.add('is-selected');
+                const selectedId = row.dataset.id;
+
+                btnEdit.classList.remove('disabled');
+                btnEdit.href = '{{ path('agri_culture_edit', {'id': '0'}) }}'.replace('/0', '/' + selectedId);
+
+                btnDelete.disabled = false;
+                deleteForm.action = '{{ path('agri_culture_delete', {'id': '0'}) }}'.replace('/0/delete', '/' + selectedId + '/delete');
+                deleteToken.value = row.dataset.deleteToken;
+            }
+
+            results.addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-id]');
+                if (!row) return;
+                setSelected(row);
+            });
+
+            document.addEventListener('crud:results-updated', () => {
+                btnEdit.classList.add('disabled');
+                btnEdit.href = '#';
+                btnDelete.disabled = true;
+                deleteToken.value = '';
+                deleteForm.action = '';
+            });
+        })();
+    </script>
+
+    {# Fallback: if Stimulus is not running for some reason, still do live search #}
+    <script>
+        (function() {
+            const wrapper = document.querySelector('[data-controller="crud-search"]');
+            const input = document.querySelector('[data-crud-search-target="input"]');
+            const sort = document.querySelector('[data-crud-search-target="sort"]');
+            const dir = document.querySelector('[data-crud-search-target="dir"]');
+            const results = document.querySelector('[data-crud-search-target="results"]');
+            if (!wrapper || !input || !results) return;
+
+            let timer = null;
+            async function doSearch() {
+                const q = input.value || '';
+                const url = new URL(wrapper.getAttribute('data-crud-search-url-value'), window.location.origin);
+                url.searchParams.set('q', q);
+                if (sort) url.searchParams.set('sort', sort.value);
+                if (dir) url.searchParams.set('dir', dir.value);
+                const loader = results.querySelector('.agri-crud-loader');
+                results.classList.add('is-loading');
+                const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) return;
+                results.innerHTML = await res.text();
+                if (loader) results.prepend(loader);
+                results.classList.remove('is-loading');
+                document.dispatchEvent(new CustomEvent('crud:results-updated'));
+            }
+
+            input.addEventListener('input', () => {
+                window.clearTimeout(timer);
+                timer = window.setTimeout(doSearch, 250);
+            });
+
+            if (sort) sort.addEventListener('change', doSearch);
+            if (dir) dir.addEventListener('change', doSearch);
+        })();
+    </script>
+{% endblock %}
+
