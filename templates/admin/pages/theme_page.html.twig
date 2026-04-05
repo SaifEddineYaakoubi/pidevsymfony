@@ -1,0 +1,22 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Admin - Theme: {{ page }}{% endblock %}
+{% block admin_page_title %}{{ page|replace({'/': ' / '})|title }}{% endblock %}
+
+{% block admin_body %}
+    {% include adminlte_partial ignore missing %}
+
+    {% if not (include(adminlte_partial, ignore_missing=true) is not empty) %}
+        <div class="callout callout-danger">
+            <h5>Page thème introuvable</h5>
+            <p>
+                Partial attendu : <code>{{ adminlte_partial }}</code>
+            </p>
+            <p class="mb-0">
+                Lance l’extraction avec <code>python bin/extract_adminlte_page.py {{ page }}.html</code>
+                (ou exécute la boucle PowerShell pour tout générer).
+            </p>
+        </div>
+    {% endif %}
+{% endblock %}
+

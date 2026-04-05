@@ -1,0 +1,39 @@
+{#
+  Parameters:
+    - title: string
+    - breadcrumbs: array of { label: string, route?: string, url?: string }
+      last item is usually current page (no route/url).
+#}
+
+<div class="page-title dark-background" data-aos="fade" style="background-image: url({{ asset('agriculture/assets/img/page-title-bg.webp') }});">
+    <div class="container position-relative">
+        <h1>{{ title }}</h1>
+
+        {% if breadcrumbs is defined and breadcrumbs|length %}
+            <p>
+                {%- for crumb in breadcrumbs -%}
+                    {{ crumb.label }}{% if not loop.last %} / {% endif %}
+                {%- endfor -%}
+            </p>
+
+            <nav class="breadcrumbs">
+                <ol>
+                    {% for crumb in breadcrumbs %}
+                        {% if not loop.last and (crumb.route is defined or crumb.url is defined) %}
+                            <li>
+                                {% if crumb.route is defined %}
+                                    <a href="{{ path(crumb.route) }}">{{ crumb.label }}</a>
+                                {% else %}
+                                    <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+                                {% endif %}
+                            </li>
+                        {% else %}
+                            <li class="current">{{ crumb.label }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+

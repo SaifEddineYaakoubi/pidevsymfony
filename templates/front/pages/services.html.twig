@@ -1,0 +1,53 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Services - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Services',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Services' }
+        ]
+    } %}
+
+    <section id="services" class="services section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>SERVICES</h2>
+            <p>Providing Fresh Produce Every Single Day</p>
+        </div>
+
+        <div class="content">
+            <div class="container">
+                <div class="row g-0">
+                    {% set services = [
+                        { number: '01', title: 'Planting', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-seedling' },
+                        { number: '02', title: 'Mulching', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-flower1' },
+                        { number: '03', title: 'Plowing', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-truck' },
+                        { number: '04', title: 'Mowing', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-scissors' },
+                        { number: '05', title: 'Seeding', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-droplet' },
+                        { number: '06', title: 'Fresh Vegetables', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-basket' },
+                        { number: '07', title: 'Watering', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-water' },
+                        { number: '08', title: 'Harvest', desc: 'Gravida sodales condimentum pellen tesq accumsan orci quam sagittis sapie', icon: 'bi-bag-heart' }
+                    ] %}
+
+                    {% for s in services %}
+                        <div class="col-lg-3 col-md-6">
+                            <div class="service-item">
+                                <span class="number">{{ s.number }}</span>
+                                <div class="service-item-icon">
+                                    <i class="bi {{ s.icon }}" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="service-item-content">
+                                    <h3 class="service-heading">{{ s.title }}</h3>
+                                    <p>{{ s.desc }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

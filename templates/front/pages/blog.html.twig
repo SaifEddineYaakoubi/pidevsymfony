@@ -1,0 +1,55 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Blog - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Blog',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Blog' }
+        ]
+    } %}
+
+    <section id="blog-posts-2" class="blog-posts-2 section">
+        <div class="container">
+            <div class="row gy-4">
+                {% set posts = [
+                    { img: 'blog-1.jpg', day: '12', month: 'December', author: 'John Doe', category: 'Politics', title: 'Dolorum optio tempore voluptas dignissimos', slug: 'dolorum-optio' },
+                    { img: 'blog-2.jpg', day: '19', month: 'March', author: 'Julia Parker', category: 'Economics', title: 'Nisi magni odit consequatur autem nulla dolorem', slug: 'nisi-magni' },
+                    { img: 'blog-3.jpg', day: '24', month: 'June', author: 'Maria Doe', category: 'Sports', title: 'Possimus soluta ut id suscipit ea ut. In quo quia et soluta libero sit sint.', slug: 'possimos-soluta' },
+                    { img: 'blog-4.jpg', day: '05', month: 'August', author: 'Maria Doe', category: 'Sports', title: 'Non rem rerum nam cum quo minus explicabo eius exercitationem.', slug: 'non-rem-rerum' },
+                    { img: 'blog-5.jpg', day: '17', month: 'September', author: 'John Parker', category: 'Politics', title: 'Accusamus quaerat aliquam qui debitis facilis consequatur', slug: 'accusamus-quaerat' },
+                    { img: 'blog-6.jpg', day: '07', month: 'December', author: 'Julia White', category: 'Economics', title: 'Distinctio provident quibusdam numquam aperiam aut', slug: 'distinctio-provident' }
+                ] %}
+
+                {% for p in posts %}
+                    <div class="col-lg-4">
+                        <article class="position-relative h-100">
+                            <div class="post-img position-relative overflow-hidden">
+                                <img src="{{ asset('agriculture/assets/img/blog/' ~ p.img) }}" class="img-fluid" alt="">
+                            </div>
+
+                            <div class="meta d-flex align-items-end">
+                                <span class="post-date"><span>{{ p.day }}</span>{{ p.month }}</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person"></i> <span class="ps-2">{{ p.author }}</span>
+                                </div>
+                                <span class="px-3 text-black-50">/</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-folder2"></i> <span class="ps-2">{{ p.category }}</span>
+                                </div>
+                            </div>
+
+                            <div class="post-content d-flex flex-column">
+                                <h3 class="post-title">{{ p.title }}</h3>
+                                <a href="{{ path('app_agriculteur_blog_details', {slug: p.slug}) }}" class="readmore stretched-link"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

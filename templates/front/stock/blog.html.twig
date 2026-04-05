@@ -1,0 +1,52 @@
+{% extends 'front/base_stock.html.twig' %}
+
+{% block title %}Responsable Stock - Blog{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Blog (Stock)',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_stock_home' },
+            { label: 'Blog' }
+        ]
+    } %}
+
+    <section id="blog-posts-2" class="blog-posts-2 section">
+        <div class="container">
+            <div class="row gy-4">
+                {% set posts = [
+                    { img: 'blog-1.jpg', day: '12', month: 'December', author: 'Stock Team', category: 'Stock', title: 'Bonnes pratiques de stockage', slug: 'bonnes-pratiques' },
+                    { img: 'blog-2.jpg', day: '19', month: 'March', author: 'Stock Team', category: 'Inventaire', title: 'Inventaire : méthodes rapides', slug: 'inventaire-methodes' },
+                    { img: 'blog-3.jpg', day: '24', month: 'June', author: 'Stock Team', category: 'Traçabilité', title: 'Traçabilité et lots', slug: 'tracabilite-lots' }
+                ] %}
+
+                {% for p in posts %}
+                    <div class="col-lg-4">
+                        <article class="position-relative h-100">
+                            <div class="post-img position-relative overflow-hidden">
+                                <img src="{{ asset('agriculture/assets/img/blog/' ~ p.img) }}" class="img-fluid" alt="">
+                            </div>
+
+                            <div class="meta d-flex align-items-end">
+                                <span class="post-date"><span>{{ p.day }}</span>{{ p.month }}</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person"></i> <span class="ps-2">{{ p.author }}</span>
+                                </div>
+                                <span class="px-3 text-black-50">/</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-folder2"></i> <span class="ps-2">{{ p.category }}</span>
+                                </div>
+                            </div>
+
+                            <div class="post-content d-flex flex-column">
+                                <h3 class="post-title">{{ p.title }}</h3>
+                                <a href="{{ path('app_stock_blog_details', {slug: p.slug}) }}" class="readmore stretched-link"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

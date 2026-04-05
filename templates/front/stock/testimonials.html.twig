@@ -1,0 +1,46 @@
+{% extends 'front/base_stock.html.twig' %}
+
+{% block title %}Responsable Stock - Testimonials{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Testimonials (Stock)',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_stock_home' },
+            { label: 'Testimonials' }
+        ]
+    } %}
+
+    <section class="testimonials-12 testimonials section" id="testimonials">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>TESTIMONIALS</h2>
+            <p>Avis sur la gestion de stock</p>
+        </div>
+
+        <div class="testimonial-wrap">
+            <div class="container">
+                <div class="row">
+                    {% set items = [
+                        { img: 'testimonials-1.jpg', name: 'Stock Manager' },
+                        { img: 'testimonials-2.jpg', name: 'Warehouse Operator' },
+                        { img: 'testimonials-3.jpg', name: 'Quality Control' },
+                        { img: 'testimonials-4.jpg', name: 'Logistics' }
+                    ] %}
+
+                    {% for t in items %}
+                        <div class="col-md-6 mb-4 mb-md-4">
+                            <div class="testimonial">
+                                <img src="{{ asset('agriculture/assets/img/testimonials/' ~ t.img) }}" alt="Testimonial author">
+                                <blockquote>
+                                    <p>“Interface stock claire et rapide. À brancher sur les vraies données.”</p>
+                                </blockquote>
+                                <p class="client-name">{{ t.name }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
