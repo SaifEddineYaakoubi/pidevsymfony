@@ -1,0 +1,27 @@
+{# Partial returned for AJAX: stats + table #}
+
+
+<div class="crud-header">
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+        <span class="agri-badge"><strong>Total (DB):</strong> {{ stats.total_all }}</span>
+        <span class="agri-badge"><strong>Affichés:</strong> {{ stats.total_filtered }}</span>
+
+        {% set etats = ['germination','croissance','floraison','maturite'] %}
+        {% set etatLabels = {
+            'germination': 'Germination',
+            'croissance': 'Croissance',
+            'floraison': 'Floraison',
+            'maturite': 'Mature'
+        } %}
+        {% for e in etats %}
+            <span class="agri-badge agri-badge--{{ e }}">
+                {{ etatLabels[e] ?? e }}: {{ stats.counts_by_etat[e] ?? 0 }}
+            </span>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="mt-3">
+    {% include 'agriculteur/culture/_table.html.twig' %}
+</div>
+
