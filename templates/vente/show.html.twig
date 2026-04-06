@@ -1,0 +1,58 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détails Vente - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="mb-4">Détails de la Vente</h1>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th>ID Vente</th>
+                                    <td>{{ vente.id_vente }}</td>
+                                </tr>
+                                {% if vente.id_client is not null %}
+                                    <tr>
+                                        <th>Client</th>
+                                        <td>
+                                            <strong>{{ vente.id_client|safe_client_name }}</strong><br/>
+                                            <small class="text-muted">Contact: {{ vente.id_client|safe_client_contact }}</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Adresse Client</th>
+                                        <td>{{ vente.id_client|safe_client_adresse }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <th>Client</th>
+                                        <td><span class="text-muted">Client supprimé</span></td>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Date de Vente</th>
+                                    <td>{{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Montant Total</th>
+                                    <td><strong class="text-success">{{ vente.montant_total|number_format(2, ',', ' ') }} €</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ path('app_vente_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                    <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}" class="btn btn-warning">Éditer</a>
+                    {{ include('vente/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
