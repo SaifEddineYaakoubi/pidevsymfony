@@ -12,6 +12,7 @@ class Client
 {
 
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_client;
 
@@ -24,8 +25,9 @@ class Client
     #[ORM\Column(type: "string", length: 150)]
     private string $adresse;
 
-    #[ORM\Column(type: "integer")]
-    private int $id_user;
+
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $id_user = null;
 
     public function getId_client()
     {
@@ -76,6 +78,7 @@ class Client
     {
         $this->id_user = $value;
     }
+
 
     #[ORM\OneToMany(mappedBy: "id_client", targetEntity: Vente::class)]
     private Collection $ventes;

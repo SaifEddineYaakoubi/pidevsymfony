@@ -1,0 +1,17 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Nouveau Client - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="mb-4">Ajouter un Nouveau Client</h1>
+
+                {{ include('client/_form.html.twig') }}
+
+                <a href="{{ path('app_client_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
