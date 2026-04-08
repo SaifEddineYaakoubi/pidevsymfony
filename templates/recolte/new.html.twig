@@ -1,0 +1,43 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Ajouter une Récolte{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>🌱 Ajouter une Nouvelle Récolte</h1>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="form-group">
+        <label>Quantité (kg) *</label>
+        {{ form_widget(form.quantite, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="form-group">
+        <label>Date de Récolte *</label>
+        {{ form_widget(form.date_recolte, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="form-group">
+        <label>Qualité *</label>
+        {{ form_widget(form.qualite, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="form-group">
+        <label>Type de Culture *</label>
+        {{ form_widget(form.type_culture, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="form-group">
+        <label>Localisation *</label>
+        {{ form_widget(form.localisation, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <button type="submit" class="btn" style="background: #4A7C2F;">Ajouter la Récolte</button>
+        <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+
+{{ form_end(form) }}
+
+{% endblock %}

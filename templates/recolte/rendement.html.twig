@@ -1,0 +1,46 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Calcul du Rendement - Récolte #{{ recolte.id_recolte }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📊 Calcul du Rendement - Récolte #{{ recolte.id_recolte }}</h1>
+
+<div style="background: #f9f9f9; padding: 1rem; margin-bottom: 2rem;">
+    <h3>Informations de la Récolte</h3>
+    <p><strong>Type de Culture:</strong> {{ recolte.type_culture }}</p>
+    <p><strong>Localisation:</strong> {{ recolte.localisation }}</p>
+    <p><strong>Date de Récolte:</strong> {{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : 'Non définie' }}</p>
+    <p><strong>Qualité:</strong> {{ recolte.qualite }}</p>
+</div>
+
+{% if calculation %}
+    <div style="background: #e8f5e8; padding: 1rem; margin-bottom: 2rem;">
+        <h3>Calcul du Rendement</h3>
+        <p><strong>Formule:</strong> Productivité = Quantité ÷ Surface</p>
+        <p><strong>Quantité Totale:</strong> {{ calculation.quantite }} kg</p>
+        <p><strong>Surface Exploitée:</strong> {{ calculation.surface }} m²</p>
+        <p><strong>Productivité:</strong> <span style="font-size: 1.2em; color: green;">{{ calculation.productivite_formatted }} kg/m²</span></p>
+    </div>
+
+    {% if rendement %}
+        <div style="background: #fff3cd; padding: 1rem; margin-bottom: 2rem;">
+            <h3>Rendement Enregistré</h3>
+            <p><strong>ID Rendement:</strong> #{{ rendement.id_rendement }}</p>
+            <p><strong>Surface Exploitée:</strong> {{ rendement.surface_exploitee }} m²</p>
+            <p><strong>Quantité Totale:</strong> {{ rendement.quantite_totale }} kg</p>
+            <p><strong>Productivité:</strong> {{ rendement.productivite|number_format(2, '.', '') }} kg/m²</p>
+        </div>
+    {% endif %}
+{% else %}
+    <div style="background: #f8d7da; padding: 1rem; margin-bottom: 2rem;">
+        <p>Impossible de calculer le rendement. Vérifiez que la récolte a une culture associée et que la parcelle existe.</p>
+    </div>
+{% endif %}
+
+<div style="margin-top: 2rem;">
+    <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-secondary">← Retour à la récolte</a>
+    <a href="{{ path('app_recolte_index') }}" class="btn">Retour à la liste</a>
+</div>
+
+{% endblock %}

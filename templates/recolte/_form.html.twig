@@ -1,0 +1,23 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    {{ form_widget(form) }}
+    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const fields = form.querySelectorAll('input, select, textarea');
+
+    fields.forEach(field => {
+        field.addEventListener('blur', function() {
+            // Simple validation example
+            if (field.value.trim() === '') {
+                field.style.borderColor = 'red';
+                alert('Ce champ est requis.');
+            } else {
+                field.style.borderColor = 'green';
+            }
+        });
+    });
+});
+</script>
