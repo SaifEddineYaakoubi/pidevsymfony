@@ -66,6 +66,12 @@
                         <div class="mt-4 d-flex gap-2">
                             <a class="btn btn-outline-secondary" href="{{ path('agri_parcelle_index') }}">Retour</a>
                             <a class="btn btn-outline-primary" href="{{ path('agri_parcelle_edit', {id: parcelle.id_parcelle}) }}">Modifier</a>
+                            <form method="post"
+                                  action="{{ path('agri_parcelle_delete', {id: parcelle.id_parcelle}) }}"
+                                  class="m-0">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_parcelle_' ~ parcelle.id_parcelle) }}">
+                                <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                            </form>
                         </div>
                     </div>
                 </div>
