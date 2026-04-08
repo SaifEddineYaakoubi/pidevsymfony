@@ -16,6 +16,54 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/recolte')]
 class RecolteController extends AbstractController
 {
+    #[Route('/statistiques', name: 'app_recolte_statistiques', methods: ['GET'])]
+    public function statistiques(EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer toutes les récoltes avec leurs dates
+        $recoltes = $entityManager->getRepository(Recolte::class)->findBy([], ['date_recolte' => 'DESC']);
+
+        // Traiter les statistiques par mois en PHP
+        $statsParMois = [];
+        foreach ($recoltes as $recolte) {
+            if ($recolte->getDateRecolte()) {
+                $mois = (int)$recolte->getDateRecolte()->format('m'); // Extraire le mois (01-12)
+                if (!isset($statsParMois[$mois])) {
+                    $statsParMois[$mois] = 0;
+                }
+                $statsParMois[$mois]++;
+            }
+        }
+
+        // Trier par nombre décroissant
+        arsort($statsParMois);
+
+        // Transformer les données pour le graphique
+        $labels = [];
+        $data = [];
+        $statistiques = [];
+        $moisNoms = [
+            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+        ];
+
+        foreach ($statsParMois as $mois => $nombre) {
+            $labels[] = $moisNoms[$mois] ?? 'Mois ' . $mois;
+            $data[] = $nombre;
+            $statistiques[] = [
+                'mois' => $mois,
+                'nombre_recoltes' => $nombre
+            ];
+        }
+
+        return $this->render('recolte/statistiques.html.twig', [
+            'labels' => json_encode($labels),
+            'data' => json_encode($data),
+            'statistiques' => $statistiques,
+            'moisNoms' => $moisNoms,
+        ]);
+    }
+
     #[Route('/', name: 'app_recolte_index', methods: ['GET'])]
     public function index(RecolteRepository $recolteRepository, EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -94,8 +142,14 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}', name: 'app_recolte_show', methods: ['GET'])]
-    public function show(Recolte $recolte, EntityManagerInterface $entityManager): Response
+    public function show(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
+        $recolte = $recolteRepository->find($id_recolte);
+
+        if (!$recolte) {
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
         $rendement = $entityManager->getRepository(Rendement::class)->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
         return $this->render('recolte/show.html.twig', [
             'recolte' => $recolte,
@@ -104,8 +158,14 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}/edit', name: 'app_recolte_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Recolte $recolte, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
+        $recolte = $recolteRepository->find($id_recolte);
+
+        if (!$recolte) {
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
         $form = $this->createForm(RecolteType::class, $recolte);
         $form->handleRequest($request);
 
@@ -125,8 +185,14 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}', name: 'app_recolte_delete', methods: ['POST'])]
-    public function delete(Request $request, Recolte $recolte, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
+        $recolte = $recolteRepository->find($id_recolte);
+
+        if (!$recolte) {
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$recolte->getId_recolte(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($recolte);
             $entityManager->flush();
@@ -136,8 +202,14 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}/rendement', name: 'app_recolte_rendement', methods: ['GET'])]
-    public function showRendement(Recolte $recolte, EntityManagerInterface $entityManager): Response
+    public function showRendement(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
+        $recolte = $recolteRepository->find($id_recolte);
+
+        if (!$recolte) {
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
         $culture = $recolte->getId_culture();
         $rendement = null;
         $calculation = null;
@@ -172,8 +244,14 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}/delete-confirm', name: 'app_recolte_delete_confirm', methods: ['GET', 'POST'])]
-    public function deleteConfirm(Request $request, Recolte $recolte, EntityManagerInterface $entityManager): Response
+    public function deleteConfirm(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
+        $recolte = $recolteRepository->find($id_recolte);
+
+        if (!$recolte) {
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
         if ($request->isMethod('POST')) {
             $cause = $request->request->get('cause_suppression');
 
@@ -209,6 +287,7 @@ class RecolteController extends AbstractController
             'recolte' => $recolte,
         ]);
     }
+
 
     private function calculateRendement(Recolte $recolte, EntityManagerInterface $entityManager): void
     {
