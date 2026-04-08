@@ -6,6 +6,7 @@ use App\Entity\Parcelle;
 use App\Form\ParcelleType;
 use App\Repository\ParcelleRepository;
 use App\Service\Validation\SymfonyEntityValidator;
+use App\Service\Pdf\PdfExporter;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +17,45 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/agriculteur/parcelles', name: 'agri_parcelle_')]
 final class ParcelleCrudController extends AbstractController
 {
+    #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
+    public function exportPdf(Request $request, ParcelleRepository $repo, PdfExporter $pdfExporter): Response
+    {
+        $q = $request->query->getString('q');
+        $sort = $request->query->getString('sort') ?: 'nom';
+        $dir = $request->query->getString('dir') ?: 'ASC';
+
+        $parcelles = $repo->searchByQuery($q, $sort, $dir);
+
+        $html = $this->renderView('agriculteur/parcelle/export_pdf.html.twig', [
+            'parcelles' => $parcelles,
+            'q' => $q,
+            'sort' => $sort,
+            'dir' => $dir,
+            'exportedAt' => new \DateTimeImmutable(),
+        ]);
+
+        $pdf = $pdfExporter->renderHtmlToPdf($html, 'A4', 'portrait');
+
+        $filename = 'parcelles_' . (new \DateTimeImmutable())->format('Ymd_His') . '.pdf';
+        return new Response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    #[Route('/{id}/show', name: 'show', requirements: ['id' => '\\d+'], methods: ['GET'])]
+    public function show(int $id, ParcelleRepository $repo): Response
+    {
+        $parcelle = $repo->find($id);
+        if (!$parcelle) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('agriculteur/parcelle/show.html.twig', [
+            'parcelle' => $parcelle,
+        ]);
+    }
+
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request, ParcelleRepository $repo): Response
     {
@@ -98,9 +138,14 @@ final class ParcelleCrudController extends AbstractController
         if ($form->isSubmitted()) {
             $errors = $validator->validate($parcelle);
             if ($form->isValid() && $errors === []) {
+                // Safety: never flush if required fields are missing (prevents SQL NOT NULL violations)
+                if ($parcelle->getNom() === '' || $parcelle->getSuperficie() === null || $parcelle->getLocalisation() === '' || $parcelle->getEtat() === '') {
+                    $this->addFlash('error', 'Certains champs obligatoires sont manquants.');
+                } else {
                 $em->flush();
                 $this->addFlash('success', 'Parcelle modifiée avec succès.');
                 return $this->redirectToRoute('agri_parcelle_index');
+                }
             }
 
             return $this->render('agriculteur/parcelle/form_symfony.html.twig', [

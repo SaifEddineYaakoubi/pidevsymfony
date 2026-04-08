@@ -25,7 +25,124 @@
   border-radius: 14px;
   padding: 14px;
   box-shadow: 0 8px 26px rgba(0,0,0,0.06);
+  position: relative;
 }
+
+.agri-crud .crud-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--agri-green), rgba(27, 127, 58, 0.38), rgba(107, 79, 42, 0.28));
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+/* Stats layout helpers (used in _results partials) */
+.agri-crud .crud-header .agri-stats-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agri-crud .crud-header .agri-stats-title {
+  font-size: 0.85rem;
+  color: rgba(31, 41, 55, 0.62);
+  letter-spacing: 0.2px;
+}
+
+.agri-crud .crud-header .agri-stats-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Premium KPI cards (stats) */
+.agri-kpis {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.agri-kpi {
+  grid-column: span 3;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--agri-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.86));
+  box-shadow: 0 10px 26px rgba(0,0,0,0.06);
+}
+
+@media (max-width: 1200px) {
+  .agri-kpi { grid-column: span 4; }
+}
+
+@media (max-width: 768px) {
+  .agri-kpi { grid-column: span 6; }
+}
+
+@media (max-width: 480px) {
+  .agri-kpi { grid-column: span 12; }
+}
+
+.agri-kpi__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 127, 58, 0.10);
+  color: var(--agri-green);
+  flex: 0 0 auto;
+}
+
+.agri-kpi__icon .bi {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.agri-kpi__label {
+  font-size: 0.78rem;
+  color: rgba(31, 41, 55, 0.62);
+  letter-spacing: 0.2px;
+}
+
+.agri-kpi__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--agri-text);
+  line-height: 1.1;
+}
+
+.agri-kpi__value--text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  max-width: 20ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* KPI variants */
+.agri-kpi--active .agri-kpi__icon { background: rgba(27, 127, 58, 0.10); color: var(--agri-green); }
+.agri-kpi--repos .agri-kpi__icon { background: rgba(107, 79, 42, 0.10); color: var(--agri-brown); }
+.agri-kpi--exploitee .agri-kpi__icon { background: rgba(13, 110, 253, 0.10); color: #0d6efd; }
+.agri-kpi--warning .agri-kpi__icon { background: rgba(253, 126, 20, 0.12); color: #b45309; }
+
+.agri-kpi--germination .agri-kpi__icon { background: rgba(111, 66, 193, 0.10); color: #6f42c1; }
+.agri-kpi--croissance .agri-kpi__icon { background: rgba(27, 127, 58, 0.10); color: var(--agri-green); }
+.agri-kpi--floraison .agri-kpi__icon { background: rgba(253, 126, 20, 0.12); color: #fd7e14; }
+.agri-kpi--maturite .agri-kpi__icon { background: rgba(220, 53, 69, 0.10); color: #dc3545; }
 
 .agri-crud .crud-header .form-control {
   border-radius: 12px;
@@ -122,7 +239,63 @@
   font-size: 0.85rem;
   border: 1px solid var(--agri-border);
   color: var(--agri-brown);
-  background: #fff;
+  background: linear-gradient(180deg, #fff, rgba(255,255,255,0.86));
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.agri-badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: rgba(27, 127, 58, 0.08);
+  color: var(--agri-green);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.agri-badge__icon .bi {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.agri-progress {
+  height: 10px;
+  width: 100%;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--agri-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+  box-shadow: 0 8px 26px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.agri-progress__seg {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 0;
+}
+
+/* Parcelles segments */
+.agri-progress__seg--active { background: rgba(27, 127, 58, 0.65); }
+.agri-progress__seg--repos { background: rgba(107, 79, 42, 0.55); }
+.agri-progress__seg--exploitee { background: rgba(13, 110, 253, 0.55); }
+
+/* Cultures segments */
+.agri-progress__seg--germination { background: rgba(111, 66, 193, 0.55); }
+.agri-progress__seg--croissance { background: rgba(27, 127, 58, 0.65); }
+.agri-progress__seg--floraison { background: rgba(253, 126, 20, 0.65); }
+.agri-progress__seg--maturite { background: rgba(220, 53, 69, 0.60); }
+
+/* Generic warning badge (for alerts counter) */
+.agri-badge--warning {
+  border-color: rgba(253, 126, 20, 0.30);
+  background: rgba(253, 126, 20, 0.10);
+  color: #b45309;
 }
 
 .agri-badge--green {
