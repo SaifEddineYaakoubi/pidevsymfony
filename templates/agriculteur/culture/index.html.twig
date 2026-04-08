@@ -37,13 +37,14 @@
                                    data-action="input->crud-search#search">
                             <input type="hidden" name="sort" value="{{ sort|default('plantation') }}">
                             <input type="hidden" name="dir" value="{{ dir|default('DESC') }}">
-                            <button class="btn btn-primary" type="submit">Rechercher</button>
+
                             {% if q %}
                                 <a class="btn btn-outline-secondary" href="{{ path('agri_culture_index', {sort: sort|default('plantation'), dir: dir|default('DESC')}) }}">Effacer</a>
                             {% endif %}
                         </form>
                     </div>
                     <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end">
+                        <a id="btnExportPdf" class="btn btn-outline-success" href="{{ path('agri_culture_export_pdf') }}">Exporter PDF</a>
                         <a class="btn btn-success" href="{{ path('agri_culture_new') }}">Ajouter</a>
                         <a id="btnEdit" class="btn btn-outline-primary disabled" href="#">Modifier</a>
                         <form id="deleteForm" method="post" class="m-0">
@@ -92,11 +93,30 @@
 
     <script>
         (function() {
+            const btnExportPdf = document.getElementById('btnExportPdf');
             const btnEdit = document.getElementById('btnEdit');
             const btnDelete = document.getElementById('btnDelete');
             const deleteForm = document.getElementById('deleteForm');
             const deleteToken = document.getElementById('deleteToken');
             const results = document.querySelector('[data-crud-search-target="results"]');
+
+            // Build export URL from current UI state (works with AJAX search/sort)
+            if (btnExportPdf) {
+                btnExportPdf.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    const qEl = document.querySelector('[data-crud-search-target="input"]');
+                    const sortEl = document.querySelector('[data-crud-search-target="sort"]');
+                    const dirEl = document.querySelector('[data-crud-search-target="dir"]');
+
+                    const url = new URL(btnExportPdf.getAttribute('href'), window.location.origin);
+                    if (qEl && qEl.value.trim() !== '') url.searchParams.set('q', qEl.value.trim());
+                    if (sortEl && sortEl.value) url.searchParams.set('sort', sortEl.value);
+                    if (dirEl && dirEl.value) url.searchParams.set('dir', dirEl.value);
+
+                    window.location.href = url.toString();
+                });
+            }
 
             function clearSelection() {
                 const table = document.getElementById('cultureTable');
@@ -121,6 +141,14 @@
                 const row = e.target.closest('tr[data-id]');
                 if (!row) return;
                 setSelected(row);
+            });
+
+            // Open details on double click on the row
+            results.addEventListener('dblclick', (e) => {
+                const row = e.target.closest('tr[data-id][data-href]');
+                if (!row) return;
+                const href = row.dataset.href;
+                if (href) window.location.href = href;
             });
 
             document.addEventListener('crud:results-updated', () => {

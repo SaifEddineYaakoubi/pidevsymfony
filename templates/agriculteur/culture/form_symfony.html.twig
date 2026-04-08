@@ -15,7 +15,7 @@
 <section class="section">
 <div class="container">
 
-    {{ form_start(form) }}
+    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
 
     {% if extraErrors is defined and extraErrors['_global'] is defined %}
         <div class="alert alert-danger">{{ extraErrors['_global'] }}</div>

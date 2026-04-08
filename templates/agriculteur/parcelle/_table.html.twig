@@ -17,8 +17,13 @@
         </thead>
         <tbody>
         {% for p in parcelles %}
-            <tr role="button" data-id="{{ p.id_parcelle }}" data-delete-token="{{ csrf_token('delete_parcelle_' ~ p.id_parcelle) }}">
-                <td>{{ p.nom }}</td>
+            <tr role="button"
+                data-id="{{ p.id_parcelle }}"
+                data-href="{{ path('agri_parcelle_show', {id: p.id_parcelle}) }}"
+                data-delete-token="{{ csrf_token('delete_parcelle_' ~ p.id_parcelle) }}">
+                <td>
+                    <a class="text-decoration-none" href="{{ path('agri_parcelle_show', {id: p.id_parcelle}) }}">{{ p.nom }}</a>
+                </td>
                 <td>{{ p.superficie }}</td>
                 <td>{{ p.localisation }}</td>
                 {% set etatLabel = {

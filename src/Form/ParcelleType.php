@@ -19,6 +19,7 @@ final class ParcelleType extends AbstractType
             ->add('superficie', NumberType::class, [
                 'scale' => 2,
                 'html5' => true,
+                'required' => true,
             ])
             ->add('localisation', TextType::class)
             ->add('etat', ChoiceType::class, [

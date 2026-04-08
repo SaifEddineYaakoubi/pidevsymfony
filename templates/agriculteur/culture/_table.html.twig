@@ -18,9 +18,14 @@
         </thead>
         <tbody>
         {% for c in cultures %}
-            <tr role="button" data-id="{{ c.id_culture }}" data-delete-token="{{ csrf_token('delete_culture_' ~ c.id_culture) }}">
+            <tr role="button"
+                data-id="{{ c.id_culture }}"
+                data-href="{{ path('agri_culture_show', {id: c.id_culture}) }}"
+                data-delete-token="{{ csrf_token('delete_culture_' ~ c.id_culture) }}">
                 <td>{{ c.parcelle ? c.parcelle.nom : '-' }}</td>
-                <td>{{ c.type_culture }}</td>
+                <td>
+                    <a class="text-decoration-none" href="{{ path('agri_culture_show', {id: c.id_culture}) }}">{{ c.type_culture }}</a>
+                </td>
                 <td>{{ c.date_plantation|date('Y-m-d') }}</td>
                 <td>{{ c.date_recolte_prevue|date('Y-m-d') }}</td>
                 {% set etatLabel = {

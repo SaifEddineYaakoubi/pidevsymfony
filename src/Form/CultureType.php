@@ -36,13 +36,16 @@ final class CultureType extends AbstractType
             ->add('datePlantation', DateType::class, [
                 'property_path' => 'date_plantation',
                 'widget' => 'single_text',
+                'required' => true,
             ])
             ->add('dateRecoltePrevue', DateType::class, [
                 'property_path' => 'date_recolte_prevue',
                 'widget' => 'single_text',
+                'required' => true,
             ])
             ->add('etatCroissance', ChoiceType::class, [
                 'property_path' => 'etat_croissance',
+                'placeholder' => '-- Choisir --',
                 'choices' => [
                     'Germination' => 'germination',
                     'Croissance' => 'croissance',
