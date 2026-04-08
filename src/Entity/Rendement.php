@@ -4,12 +4,15 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use App\Entity\Recolte;
+
 
 #[ORM\Entity]
 class Rendement
 {
 
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_rendement;
 
@@ -22,8 +25,9 @@ class Rendement
     #[ORM\Column(type: "float")]
     private float $productivite;
 
-    #[ORM\Column(type: "integer")]
-    private int $id_recolte;
+    #[ORM\ManyToOne(targetEntity: Recolte::class)]
+    #[ORM\JoinColumn(name: 'id_recolte', referencedColumnName: 'id_recolte')]
+    private ?Recolte $id_recolte = null;
 
     public function getId_rendement()
     {
@@ -65,13 +69,53 @@ class Rendement
         $this->productivite = $value;
     }
 
-    public function getId_recolte()
+    public function getId_recolte(): ?Recolte
     {
         return $this->id_recolte;
     }
 
-    public function setId_recolte($value)
+    public function setId_recolte(?Recolte $value): void
     {
         $this->id_recolte = $value;
+    }
+
+    public function getIdRecolte()
+    {
+        return $this->getId_recolte();
+    }
+
+    public function setIdRecolte($value)
+    {
+        return $this->setId_recolte($value);
+    }
+
+    public function getSurfaceExploitee()
+    {
+        return $this->getSurface_exploitee();
+    }
+
+    public function setSurfaceExploitee($value)
+    {
+        return $this->setSurface_exploitee($value);
+    }
+
+    public function getQuantiteTotale()
+    {
+        return $this->getQuantite_totale();
+    }
+
+    public function setQuantiteTotale($value)
+    {
+        return $this->setQuantite_totale($value);
+    }
+
+    public function getIdRendement()
+    {
+        return $this->getId_rendement();
+    }
+
+    public function setIdRendement($value)
+    {
+        return $this->setId_rendement($value);
     }
 }

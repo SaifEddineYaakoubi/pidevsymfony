@@ -1,0 +1,63 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détail de l'Archive #{{ archive.id_archive }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📋 Détail de l'Archive #{{ archive.id_archive }}</h1>
+
+<div style="background: #f8f9fa; padding: 1rem; margin-bottom: 2rem; border-left: 4px solid #6c757d;">
+    <h4>ℹ️ Informations sur la Récolte Archivée</h4>
+</div>
+
+<table class="table">
+    <tbody>
+        <tr>
+            <th>ID Archive</th>
+            <td>{{ archive.id_archive }}</td>
+        </tr>
+        <tr>
+            <th>ID Récolte Original</th>
+            <td>{{ archive.id_recolte_original }}</td>
+        </tr>
+        <tr>
+            <th>Quantité</th>
+            <td>{{ archive.quantite }} kg</td>
+        </tr>
+        <tr>
+            <th>Date de Récolte</th>
+            <td>{{ archive.date_recolte ? archive.date_recolte|date('d/m/Y') : 'Non définie' }}</td>
+        </tr>
+        <tr>
+            <th>Qualité</th>
+            <td>{{ archive.qualite }}</td>
+        </tr>
+        <tr>
+            <th>Type de Culture</th>
+            <td>{{ archive.type_culture }}</td>
+        </tr>
+        <tr>
+            <th>Localisation</th>
+            <td>{{ archive.localisation }}</td>
+        </tr>
+        <tr>
+            <th>Agriculteur (ID)</th>
+            <td>#{{ archive.id_user }}</td>
+        </tr>
+        <tr style="background: #fff3cd;">
+            <th>Cause de Suppression</th>
+            <td><strong>{{ archive.cause_supression }}</strong></td>
+        </tr>
+        <tr style="background: #e9ecef;">
+            <th>Date d'Archivage</th>
+            <td>{{ archive.date_archivage ? archive.date_archivage|date('d/m/Y H:i:s') : '-' }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="margin-top: 2rem;">
+    <a href="{{ path('app_archive_index') }}" class="btn btn-secondary">← Retour aux Archives</a>
+    <a href="{{ path('app_recolte_index') }}" class="btn" style="background: #4A7C2F;">📋 Voir les Récoltes Actives</a>
+</div>
+
+{% endblock %}

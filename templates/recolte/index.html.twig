@@ -1,0 +1,149 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Gestion des Récoltes{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>🌱 Gestion des Récoltes</h1>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('app_recolte_new') }}" class="btn" style="background: #4A7C2F;">+ Ajouter Récolte</a>
+    <a href="{{ path('app_rendement_index') }}" class="btn" style="background: #8B6F47; margin-left: 1rem;">📊 Gérer les Rendements</a>
+    <a href="{{ path('app_archive_index') }}" class="btn" style="background: #6B5636; margin-left: 1rem;">📁 Voir les Archives</a>
+</div>
+
+<!-- Barre de recherche et tri -->
+<div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+    <form method="GET" action="{{ path('app_recolte_index') }}" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <!-- Recherche -->
+        <div style="flex: 1; min-width: 250px;">
+            <label for="search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">🔍 Rechercher</label>
+            <input type="text" id="search" name="search" value="{{ search }}" placeholder="Type de culture ou localisation..."
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+        </div>
+
+        <!-- Tri -->
+        <div style="min-width: 200px;">
+            <label for="sort" style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333;">📅 Trier par</label>
+            <select id="sort" name="sort" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; transition: all 0.3s ease;">
+                <option value="date_desc" {{ sort == 'date_desc' ? 'selected' : '' }}>📅 Date (Plus récent → Plus ancien)</option>
+                <option value="date_asc" {{ sort == 'date_asc' ? 'selected' : '' }}>📅 Date (Plus ancien → Plus récent)</option>
+                <option value="type_asc" {{ sort == 'type_asc' ? 'selected' : '' }}>🌱 Type (A → Z)</option>
+                <option value="type_desc" {{ sort == 'type_desc' ? 'selected' : '' }}>🌱 Type (Z → A)</option>
+            </select>
+        </div>
+
+        <!-- Boutons -->
+        <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+            <button type="submit" class="btn" style="background: #4A7C2F;">🔍 Rechercher</button>
+            <a href="{{ path('app_recolte_index') }}" class="btn" style="background: #8B6F47;">🔄 Réinitialiser</a>
+        </div>
+    </form>
+</div>
+
+<!-- Résultats -->
+{% if search %}
+    <div style="background: #e8f5e8; padding: 1rem; border-left: 4px solid #16a34a; border-radius: 4px; margin-bottom: 1rem;">
+        <strong>Résultats pour :</strong> "{{ search }}"
+        <span style="color: #666;">({{ recoltes|length }} résultat{{ recoltes|length > 1 ? 's' : '' }})</span>
+    </div>
+{% endif %}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Quantité (kg)</th>
+            <th>Date</th>
+            <th>Qualité</th>
+            <th>Type</th>
+            <th>Localisation</th>
+            <th>Rendement</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for recolte in recoltes %}
+        <tr>
+            <td>{{ recolte.id_recolte }}</td>
+            <td>{{ recolte.quantite }}</td>
+            <td>{{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : '-' }}</td>
+            <td>
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background:
+                    {% if recolte.qualite == 'excellente' %}#10b981
+                    {% elseif recolte.qualite == 'bonne' %}#3b82f6
+                    {% elseif recolte.qualite == 'moyenne' %}#f59e0b
+                    {% else %}#ef4444
+                    {% endif %};
+                    color: white; font-size: 12px;">
+                    {{ recolte.qualite }}
+                </span>
+            </td>
+            <td>{{ recolte.type_culture }}</td>
+            <td>{{ recolte.localisation }}</td>
+            <td>
+                {% if rendements[recolte.id_recolte] %}
+                    <strong>{{ rendements[recolte.id_recolte]|number_format(2, '.', '') }} kg/m²</strong>
+                {% else %}
+                    <span style="color: #999;">-</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn">Voir</a>
+                <a href="{{ path('app_recolte_edit', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-secondary">Modifier</a>
+                <a href="{{ path('app_recolte_delete_confirm', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette récolte ? Vous devrez indiquer une cause.');">Supprimer</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="8" style="text-align: center;">Aucune récolte trouvée.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script>
+// Recherche en temps réel (optionnel - amélioration UX)
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sort');
+    const form = document.querySelector('form');
+
+    // Auto-submit après un délai pour la recherche
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            form.submit();
+        }, 800); // Délai de 800ms pour éviter trop de requêtes
+    });
+
+    // Auto-submit immédiat pour le tri
+    sortSelect.addEventListener('change', function() {
+        form.submit();
+    });
+
+    // Animation pour les résultats
+    const resultsDiv = document.querySelector('[style*="e8f5e8"]');
+    if (resultsDiv) {
+        resultsDiv.style.animation = 'fadeIn 0.5s ease-in';
+    }
+});
+
+// Animation CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .table tr:hover {
+        transform: scale(1.01);
+        transition: transform 0.2s ease;
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+{% endblock %}
