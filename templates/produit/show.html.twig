@@ -1,0 +1,40 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détail du Produit{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm rounded-4">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="mb-0"><i class="bi bi-box-seam me-2"></i>{{ produit.nom }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">ID produit</dt>
+                            <dd class="col-sm-8">{{ produit.idProduit }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Type</dt>
+                            <dd class="col-sm-8">{{ produit.type }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Unité</dt>
+                            <dd class="col-sm-8">{{ produit.unite }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Prix unitaire</dt>
+                            <dd class="col-sm-8">{{ produit.prixUnitaire }} DT</dd>
+
+                            <dt class="col-sm-4 text-muted">Utilisateur</dt>
+                            <dd class="col-sm-8">{{ produit.idUser }}</dd>
+                        </dl>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{{ path('produit_index') }}" class="btn btn-outline-secondary">Retour</a>
+                            <a href="{{ path('produit_edit', {'id_produit': produit.idProduit}) }}" class="btn btn-warning">Modifier</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

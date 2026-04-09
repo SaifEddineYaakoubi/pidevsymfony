@@ -1,0 +1,59 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Modifier le Produit{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm rounded-4 border-0 overflow-hidden">
+                    <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                        <h3 class="mb-0 text-dark fw-bold"><i class="bi bi-pencil-square me-2"></i>Modifier le Produit</h3>
+                    </div>
+                    <div class="card-body p-5">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                {{ form_label(form.nom, 'Nom du produit', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: Tomate rouge'}}) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-lg rounded-3'}}) }}
+                                {{ form_errors(form.type) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.unite, 'Unité de mesure', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.unite, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: kg, l, pièce'}}) }}
+                                {{ form_errors(form.unite) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.prix_unitaire, 'Prix unitaire (DT)', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.prix_unitaire, {'attr': {'class': 'form-control form-control-lg rounded-3', 'step': '0.01', 'placeholder': '0.00'}}) }}
+                                {{ form_errors(form.prix_unitaire) }}
+                            </div>
+                            <div class="col-12">
+                                {{ form_label(form.id_user, 'ID utilisateur', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.id_user, {'attr': {'class': 'form-control form-control-lg rounded-3'}}) }}
+                                {{ form_errors(form.id_user) }}
+                            </div>
+                        </div>
+
+                        <div class="mt-5 d-flex justify-content-between gap-3">
+                            <a href="{{ path('produit_index') }}" class="btn btn-outline-secondary btn-lg rounded-3">
+                                <i class="bi bi-arrow-left me-2"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg rounded-3 shadow-sm">
+                                <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
