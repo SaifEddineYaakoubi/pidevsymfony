@@ -2,6 +2,12 @@
 
 namespace App\Controller;
 
+use App\Repository\ClientRepository;
+use App\Repository\CultureRepository;
+use App\Repository\ParcelleRepository;
+use App\Repository\RecolteRepository;
+use App\Repository\RendementRepository;
+use App\Repository\VenteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -9,9 +15,25 @@ use Symfony\Component\Routing\Annotation\Route;
 final class FrontController extends AbstractController
 {
     #[Route('/agriculteur', name: 'app_agriculteur_home')]
-    public function home(): Response
+    public function home(
+        ParcelleRepository $parcelleRepository,
+        CultureRepository $cultureRepository,
+        VenteRepository $venteRepository,
+        ClientRepository $clientRepository,
+        RecolteRepository $recolteRepository,
+        RendementRepository $rendementRepository,
+    ): Response
     {
-        return $this->render('agriculteur/pages/home.html.twig');
+        return $this->render('agriculteur/pages/home.html.twig', [
+            'counts' => [
+                'parcelles' => $parcelleRepository->count([]),
+                'cultures' => $cultureRepository->count([]),
+                'ventes' => $venteRepository->count([]),
+                'clients' => $clientRepository->count([]),
+                'recoltes' => $recolteRepository->count([]),
+                'rendements' => $rendementRepository->count([]),
+            ],
+        ]);
     }
 
     #[Route('/about', name: 'app_agriculteur_about')]
