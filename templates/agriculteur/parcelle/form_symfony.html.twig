@@ -1,0 +1,64 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}{{ mode == 'new' ? 'Ajouter parcelle' : 'Modifier parcelle' }}{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: (mode == 'new' ? 'Ajouter parcelle' : 'Modifier parcelle'),
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Parcelles', route: 'agri_parcelle_index' },
+            { label: (mode == 'new' ? 'Ajouter' : 'Modifier') }
+        ]
+    } %}
+
+<section class="section">
+<div class="container">
+
+    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+    {% if extraErrors is defined and extraErrors['_global'] is defined %}
+        <div class="alert alert-danger">{{ extraErrors['_global'] }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.nom) }}</div>
+            {% if extraErrors.nom is defined %}<div class="text-danger small">{{ extraErrors.nom }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.superficie) }}
+            {{ form_widget(form.superficie, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.superficie) }}</div>
+            {% if extraErrors.superficie is defined %}<div class="text-danger small">{{ extraErrors.superficie }}</div>{% endif %}
+            <div class="form-text">Max: {{ constant('App\\Entity\\Parcelle::MAX_SUPERFICIE') }}</div>
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.localisation) }}
+            {{ form_widget(form.localisation, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.localisation) }}</div>
+            {% if extraErrors.localisation is defined %}<div class="text-danger small">{{ extraErrors.localisation }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.etat) }}
+            {{ form_widget(form.etat, {attr: {class: 'form-select'}}) }}
+            <div class="text-danger small">{{ form_errors(form.etat) }}</div>
+            {% if extraErrors.etat is defined %}<div class="text-danger small">{{ extraErrors.etat }}</div>{% endif %}
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-success" type="submit">Enregistrer</button>
+            <a class="btn btn-secondary" href="{{ path('agri_parcelle_index') }}">Retour</a>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+</section>
+{% endblock %}
+

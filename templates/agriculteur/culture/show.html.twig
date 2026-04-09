@@ -1,0 +1,95 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détails culture - {{ culture.typeCulture }}{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Détails culture',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Cultures', route: 'agri_culture_index' },
+            { label: culture.typeCulture }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+            <div class="agri-crud">
+
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+                            <div>
+                                <h4 class="mb-1">{{ culture.typeCulture }}</h4>
+                                <div class="text-muted small">
+                                    Parcelle :
+                                    {% if culture.parcelle %}
+                                        <a href="{{ path('agri_parcelle_show', {id: culture.parcelle.id_parcelle}) }}" class="text-decoration-none">
+                                            {{ culture.parcelle.nom }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">(non définie)</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                {% set etat = culture.etatCroissance %}
+                                {% set badge = etat == 'germination' ? 'info'
+                                    : (etat == 'croissance' ? 'primary'
+                                    : (etat == 'floraison' ? 'warning'
+                                    : 'success')) %}
+                                {% set labelEtat = {
+                                    'germination': 'Germination',
+                                    'croissance': 'Croissance',
+                                    'floraison': 'Floraison',
+                                    'maturite': 'Mature'
+                                }[etat] ?? (etat|capitalize) %}
+                                <span class="badge bg-{{ badge }} text-uppercase">{{ labelEtat }}</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded bg-light">
+                                    <div class="text-muted small">Date plantation</div>
+                                    <div class="fs-6 fw-semibold">
+                                        {{ culture.datePlantation ? culture.datePlantation|date('d/m/Y') : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded bg-light">
+                                    <div class="text-muted small">Date récolte prévue</div>
+                                    <div class="fs-6 fw-semibold">
+                                        {{ culture.dateRecoltePrevue ? culture.dateRecoltePrevue|date('d/m/Y') : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            <a class="btn btn-outline-secondary" href="{{ path('agri_culture_index') }}">Retour</a>
+                            <a class="btn btn-outline-primary" href="{{ path('agri_culture_edit', {id: culture.id_culture}) }}">Modifier</a>
+                            <form method="post"
+                                  action="{{ path('agri_culture_delete', {id: culture.id_culture}) }}"
+                                  class="m-0">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_culture_' ~ culture.id_culture) }}">
+                                <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

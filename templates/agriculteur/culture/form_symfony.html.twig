@@ -1,0 +1,70 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}{{ mode == 'new' ? 'Ajouter culture' : 'Modifier culture' }}{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: (mode == 'new' ? 'Ajouter culture' : 'Modifier culture'),
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Cultures', route: 'agri_culture_index' },
+            { label: (mode == 'new' ? 'Ajouter' : 'Modifier') }
+        ]
+    } %}
+
+<section class="section">
+<div class="container">
+
+    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+    {% if extraErrors is defined and extraErrors['_global'] is defined %}
+        <div class="alert alert-danger">{{ extraErrors['_global'] }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            {{ form_label(form.parcelle) }}
+            {{ form_widget(form.parcelle, {attr: {class: 'form-select'}}) }}
+            <div class="text-danger small">{{ form_errors(form.parcelle) }}</div>
+            {% if extraErrors.parcelle is defined %}<div class="text-danger small">{{ extraErrors.parcelle }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.typeCulture) }}
+            {{ form_widget(form.typeCulture, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.typeCulture) }}</div>
+            {% if extraErrors.type_culture is defined %}<div class="text-danger small">{{ extraErrors.type_culture }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.datePlantation) }}
+            {{ form_widget(form.datePlantation, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.datePlantation) }}</div>
+            {% if extraErrors.date_plantation is defined %}<div class="text-danger small">{{ extraErrors.date_plantation }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.dateRecoltePrevue) }}
+            {{ form_widget(form.dateRecoltePrevue, {attr: {class: 'form-control'}}) }}
+            <div class="text-danger small">{{ form_errors(form.dateRecoltePrevue) }}</div>
+            {% if extraErrors.date_recolte_prevue is defined %}<div class="text-danger small">{{ extraErrors.date_recolte_prevue }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+            {{ form_label(form.etatCroissance) }}
+            {{ form_widget(form.etatCroissance, {attr: {class: 'form-select'}}) }}
+            <div class="text-danger small">{{ form_errors(form.etatCroissance) }}</div>
+            {% if extraErrors.etat_croissance is defined %}<div class="text-danger small">{{ extraErrors.etat_croissance }}</div>{% endif %}
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-success" type="submit">Enregistrer</button>
+            <a class="btn btn-secondary" href="{{ path('agri_culture_index') }}">Retour</a>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+</section>
+{% endblock %}
+

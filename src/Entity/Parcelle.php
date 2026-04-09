@@ -5,93 +5,125 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 use App\Entity\Utilisateur;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Entity\Culture;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 class Parcelle
 {
+    public const MAX_SUPERFICIE = 1000000.0;
+    /**
+     * Stored values (slugs) for parcelle state.
+     * Display labels are handled in Twig/Form.
+     */
+    public const ETATS = ['active', 'repos', 'exploitee'];
 
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id_parcelle;
+    private ?int $id_parcelle = null;
 
     #[ORM\Column(type: "string", length: 100)]
-    private string $nom;
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    private ?string $nom = null;
 
     #[ORM\Column(type: "float")]
-    private float $superficie;
+    #[Assert\NotNull(message: 'La superficie est obligatoire.')]
+    #[Assert\PositiveOrZero(message: 'La superficie ne peut pas être négative.')]
+    #[Assert\LessThanOrEqual(value: self::MAX_SUPERFICIE, message: 'La superficie dépasse la borne maximale.')]
+    private ?float $superficie = null;
 
     #[ORM\Column(type: "string", length: 150)]
-    private string $localisation;
+    #[Assert\NotBlank(message: 'La localisation est obligatoire.')]
+    private ?string $localisation = null;
 
     #[ORM\Column(type: "string", length: 50)]
-    private string $etat;
+    #[Assert\NotBlank(message: 'L\'état est obligatoire.')]
+    #[Assert\Choice(choices: self::ETATS, message: 'État de parcelle invalide.')]
+    private ?string $etat = null;
 
-        #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "parcelles")]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', onDelete: 'CASCADE')]
-    private Utilisateur $id_user;
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "parcelles")]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
+    private ?Utilisateur $id_user = null;
 
-    public function getId_parcelle()
+    #[ORM\OneToMany(mappedBy: "id_parcelle", targetEntity: Culture::class)]
+    private Collection $cultures;
+
+    public function __construct()
+    {
+        $this->cultures = new ArrayCollection();
+    }
+
+    public function getId_parcelle(): ?int
     {
         return $this->id_parcelle;
     }
 
-    public function setId_parcelle($value)
-    {
-        $this->id_parcelle = $value;
-    }
-
-    public function getNom()
+    public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom($value)
+    public function setNom(?string $value): self
     {
         $this->nom = $value;
+
+        return $this;
     }
 
-    public function getSuperficie()
+    public function getSuperficie(): ?float
     {
         return $this->superficie;
     }
 
-    public function setSuperficie($value)
+    public function setSuperficie(?float $value): self
     {
         $this->superficie = $value;
+
+        return $this;
     }
 
-    public function getLocalisation()
+    public function getLocalisation(): ?string
     {
         return $this->localisation;
     }
 
-    public function setLocalisation($value)
+    public function setLocalisation(?string $value): self
     {
         $this->localisation = $value;
+
+        return $this;
     }
 
-    public function getEtat()
+    public function getEtat(): ?string
     {
         return $this->etat;
     }
 
-    public function setEtat($value)
+    public function setEtat(?string $value): self
     {
         $this->etat = $value;
+
+        return $this;
     }
 
-    public function getId_user()
+    public function getId_user(): ?Utilisateur
     {
         return $this->id_user;
     }
 
-    public function setId_user($value)
+    public function setId_user(?Utilisateur $value): self
     {
         $this->id_user = $value;
+
+        return $this;
     }
 
-    #[ORM\OneToMany(mappedBy: "id_parcelle", targetEntity: Culture::class)]
-    private Collection $cultures;
+    /** @return Collection<int, Culture> */
+    public function getCultures(): Collection
+    {
+        return $this->cultures;
+    }
 }

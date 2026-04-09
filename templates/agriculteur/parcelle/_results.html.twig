@@ -1,0 +1,60 @@
+{# Partial returned for AJAX: stats + table #}
+
+
+<div class="crud-header">
+    {% set total = stats.total_filtered ?? parcelles|length %}
+    {% set counts = stats.counts_by_etat ?? {} %}
+    {% set activeCount = counts.active ?? 0 %}
+    {% set reposCount = counts.repos ?? 0 %}
+    {% set exploiteeCount = counts.exploitee ?? 0 %}
+
+    <div class="agri-kpis">
+        <div class="agri-kpi">
+            <div class="agri-kpi__icon"><i class="bi bi-collection"></i></div>
+            <div class="agri-kpi__body">
+                <div class="agri-kpi__label">Affichés</div>
+                <div class="agri-kpi__value">{{ total }}</div>
+            </div>
+        </div>
+
+
+
+        <div class="agri-kpi agri-kpi--active">
+            <div class="agri-kpi__icon"><i class="bi bi-check-circle"></i></div>
+            <div class="agri-kpi__body">
+                <div class="agri-kpi__label">Active</div>
+                <div class="agri-kpi__value">{{ activeCount }}</div>
+            </div>
+        </div>
+
+        <div class="agri-kpi agri-kpi--repos">
+            <div class="agri-kpi__icon"><i class="bi bi-pause-circle"></i></div>
+            <div class="agri-kpi__body">
+                <div class="agri-kpi__label">Repos</div>
+                <div class="agri-kpi__value">{{ reposCount }}</div>
+            </div>
+        </div>
+
+        <div class="agri-kpi agri-kpi--exploitee">
+            <div class="agri-kpi__icon"><i class="bi bi-geo-alt"></i></div>
+            <div class="agri-kpi__body">
+                <div class="agri-kpi__label">Exploitée</div>
+                <div class="agri-kpi__value">{{ exploiteeCount }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="agri-progress mt-3" aria-hidden="true" title="Répartition">
+        {% set etats = ['active','repos','exploitee'] %}
+        {% for e in etats %}
+            {% set count = stats.counts_by_etat[e] ?? 0 %}
+            {% set percent = (total > 0 ? ((count / total) * 100) : 0) %}
+            <div class="agri-progress__seg agri-progress__seg--{{ e }}" style="width: {{ percent }}%"></div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="mt-3">
+    {% include 'agriculteur/parcelle/_table.html.twig' %}
+</div>
+

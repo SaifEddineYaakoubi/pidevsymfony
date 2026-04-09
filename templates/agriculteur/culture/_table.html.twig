@@ -1,0 +1,45 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="text-muted small">
+        {{ cultures|length }} résultat(s)
+        {% if q %}pour "{{ q }}"{% endif %}
+    </div>
+</div>
+
+<div class="agri-table-wrapper table-responsive">
+    <table class="table agri-table table-hover align-middle" id="cultureTable">
+        <thead>
+        <tr>
+            <th>Parcelle</th>
+            <th>Type</th>
+            <th>Plantation</th>
+            <th>Récolte prévue</th>
+            <th>État</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for c in cultures %}
+            <tr role="button"
+                data-id="{{ c.id_culture }}"
+                data-href="{{ path('agri_culture_show', {id: c.id_culture}) }}"
+                data-delete-token="{{ csrf_token('delete_culture_' ~ c.id_culture) }}">
+                <td>{{ c.parcelle ? c.parcelle.nom : '-' }}</td>
+                <td>
+                    <a class="text-decoration-none" href="{{ path('agri_culture_show', {id: c.id_culture}) }}">{{ c.type_culture }}</a>
+                </td>
+                <td>{{ c.date_plantation|date('Y-m-d') }}</td>
+                <td>{{ c.date_recolte_prevue|date('Y-m-d') }}</td>
+                {% set etatLabel = {
+                    'germination': 'Germination',
+                    'croissance': 'Croissance',
+                    'floraison': 'Floraison',
+                    'maturite': 'Mature'
+                }[c.etat_croissance] ?? c.etat_croissance %}
+                <td><span class="agri-badge agri-badge--{{ c.etat_croissance }}">{{ etatLabel }}</span></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-muted">Aucune culture</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+

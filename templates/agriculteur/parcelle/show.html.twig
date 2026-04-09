@@ -1,0 +1,83 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détails parcelle - {{ parcelle.nom }}{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Détails parcelle',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Parcelles', route: 'agri_parcelle_index' },
+            { label: parcelle.nom }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+            <div class="agri-crud">
+
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+                            <div>
+                                <h4 class="mb-1">{{ parcelle.nom }}</h4>
+                                <div class="text-muted small">Localisation : {{ parcelle.localisation }}</div>
+                            </div>
+                            <div class="text-end">
+                                {% set etat = parcelle.etat %}
+                                {% set badge = etat == 'active' ? 'success' : (etat == 'repos' ? 'secondary' : 'warning') %}
+                                <span class="badge bg-{{ badge }} text-uppercase">{{ etat == 'exploitee' ? 'Exploitée' : (etat|capitalize) }}</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded bg-light">
+                                    <div class="text-muted small">Superficie</div>
+                                    <div class="fs-5 fw-semibold">{{ parcelle.superficie }} ha</div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="p-3 border rounded">
+                                    <div class="text-muted small mb-2">Cultures associées</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% if parcelle.cultures is defined and parcelle.cultures|length > 0 %}
+                                            {% for c in parcelle.cultures %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                    {{ c.typeCulture ?? c.type_culture ?? 'Culture' }}
+                                                </span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">Aucune culture.</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            <a class="btn btn-outline-secondary" href="{{ path('agri_parcelle_index') }}">Retour</a>
+                            <a class="btn btn-outline-primary" href="{{ path('agri_parcelle_edit', {id: parcelle.id_parcelle}) }}">Modifier</a>
+                            <form method="post"
+                                  action="{{ path('agri_parcelle_delete', {id: parcelle.id_parcelle}) }}"
+                                  class="m-0">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_parcelle_' ~ parcelle.id_parcelle) }}">
+                                <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
