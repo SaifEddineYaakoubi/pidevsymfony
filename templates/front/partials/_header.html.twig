@@ -11,22 +11,18 @@
                 <li><a href="{{ path('app_agriculteur_home') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_home' ? 'active' : '' }}">Home</a></li>
                 <li><a href="{{ path('app_agriculteur_about') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_about' ? 'active' : '' }}">About Us</a></li>
                 <li><a href="{{ path('app_agriculteur_services') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_services' ? 'active' : '' }}">Our Services</a></li>
-<<<<<<< HEAD
                 {# Parcelles / Cultures (CRUD) #}
                 <li><a href="{{ path('agri_parcelle_index') }}" class="{{ app.request.attributes.get('_route') starts with 'agri_parcelle_' ? 'active' : '' }}">Parcelles</a></li>
                 <li><a href="{{ path('agri_culture_index') }}" class="{{ app.request.attributes.get('_route') starts with 'agri_culture_' ? 'active' : '' }}">Cultures</a></li>
 
+                {# Recoltes / Rendements / Archives (CRUD) #}
+                <li><a href="{{ path('app_recolte_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_recolte_' ? 'active' : '' }}">Recoltes</a></li>
+                <li><a href="{{ path('app_rendement_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_rendement_' ? 'active' : '' }}">Rendements</a></li>
+                <li><a href="{{ path('app_archive_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_archive_' ? 'active' : '' }}">Archives</a></li>
+
                 {# Vente / Client (CRUD) #}
                 <li><a href="{{ path('app_vente_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_vente_' ? 'active' : '' }}">Ventes</a></li>
                 <li><a href="{{ path('app_client_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_client_' ? 'active' : '' }}">Clients</a></li>
-
-=======
-                <li><a href="{{ path('app_recolte_index') }}" class="{{ app.request.attributes.get('_route') == 'app_recolte_index' ? 'active' : '' }}">Recoltes</a></li>
-                <li><a href="{{ path('app_rendement_index') }}" class="{{ app.request.attributes.get('_route') == 'app_rendement_index' ? 'active' : '' }}">Rendements</a></li>
-                <li><a href="{{ path('app_archive_index') }}" class="{{ app.request.attributes.get('_route') == 'app_archive_index' ? 'active' : '' }}">Archives</a></li>
-                <li><a href="{{ path('app_agriculteur_testimonials') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_testimonials' ? 'active' : '' }}">Testimonials</a></li>
-                <li><a href="{{ path('app_agriculteur_blog') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_blog' ? 'active' : '' }}">Blog</a></li>
->>>>>>> origin/maramdh
                 <li><a href="{{ path('app_agriculteur_contact') }}" class="{{ app.request.attributes.get('_route') == 'app_agriculteur_contact' ? 'active' : '' }}">Contact</a></li>
                 <li><a href="{{ path('app_agriculteur_demo') }}">Demo</a></li>
             </ul>
