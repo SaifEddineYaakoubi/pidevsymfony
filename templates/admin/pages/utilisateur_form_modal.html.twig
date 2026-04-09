@@ -1,0 +1,121 @@
+{# templates/admin/pages/utilisateur_form_modal.html.twig #}
+{{ form_start(form, {'action': form_action|default(app.request.uri), 'attr': {'class': 'form-horizontal', 'onsubmit': 'return submitForm(this);', 'id': 'userForm', 'novalidate': 'novalidate'}}) }}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le nom'}}) }}
+            {{ form_errors(form.nom) }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le prénom'}}) }}
+            {{ form_errors(form.prenom) }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            {{ form_label(form.email, 'Email', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'exemple@email.com'}}) }}
+            {{ form_errors(form.email) }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            {{ form_label(form.role, 'Rôle', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.role, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.role) }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.mot_de_passe.first, 'Mot de passe', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.mot_de_passe.first, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le mot de passe'}}) }}
+            {{ form_errors(form.mot_de_passe.first) }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.mot_de_passe.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.mot_de_passe.second, {'attr': {'class': 'form-control', 'placeholder': 'Confirmez le mot de passe'}}) }}
+            {{ form_errors(form.mot_de_passe.second) }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-check">
+            {{ form_widget(form.statut, {'attr': {'class': 'form-check-input'}}) }}
+            {{ form_label(form.statut, 'Actif', {'label_attr': {'class': 'form-check-label'}}) }}
+            {{ form_errors(form.statut) }}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12 text-right">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times"></i> Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+</div>
+
+{{ form_end(form) }}
+
+<script>
+function submitForm(form) {
+    // Désactiver la validation HTML5
+    form.setAttribute('novalidate', true);
+
+    var formData = new FormData(form);
+    $.ajax({
+        url: form.action,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast(response.message, 'success');
+                $('#userModal').modal('hide');
+                setTimeout(() => location.reload(), 1500);
+            } else if (response.html) {
+                $('#modalBody').html(response.html);
+            } else {
+                showToast('Erreur lors de l\'envoi', 'error');
+            }
+        },
+        error: function(xhr) {
+            if (xhr.responseJSON && xhr.responseJSON.html) {
+                $('#modalBody').html(xhr.responseJSON.html);
+            } else {
+                showToast('Erreur lors de l\'envoi', 'error');
+            }
+        }
+    });
+    return false;
+}
+
+$(document).ready(function() {
+    $('.btn-secondary').off('click').on('click', function(e) {
+        e.preventDefault();
+        $('#userModal').modal('hide');
+    });
+});
+</script>
