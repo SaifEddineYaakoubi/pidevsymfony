@@ -1,0 +1,374 @@
+{# templates/admin/pages/utilisateur_index.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block admin_page_title %}Gestion des utilisateurs{% endblock %}
+
+{% block admin_body %}
+{# Statistiques - Gardez le même code #}
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Total utilisateurs</h6>
+                    <h3 class="mb-0">{{ utilisateurs|length }}</h3>
+                </div>
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Utilisateurs actifs</h6>
+                    <h3 class="mb-0">{{ utilisateurs|filter(u => u.statut == true)|length }}</h3>
+                </div>
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Administrateurs</h6>
+                    <h3 class="mb-0">{{ utilisateurs|filter(u => u.role == 'admin')|length }}</h3>
+                </div>
+                <i class="fas fa-user-shield"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Agriculteurs</h6>
+                    <h3 class="mb-0">{{ utilisateurs|filter(u => u.role == 'agriculteur')|length }}</h3>
+                </div>
+                <i class="fas fa-tractor"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    {# Dans le bloc card-header de utilisateur_index.html.twig #}
+  {# Dans le bloc card-header - Version simplifiée avec un seul bouton #}
+  <div class="card-header">
+      <h3 class="card-title">
+          <i class="fas fa-list"></i> Liste des utilisateurs
+      </h3>
+      <div class="card-tools">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openCreateModal()">
+              <i class="fas fa-plus"></i> Nouvel utilisateur
+          </button>
+      </div>
+  </div>
+    <div class="card-body">
+        <table class="table table-hover" id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom complet</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Date création</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for utilisateur in utilisateurs %}
+                <tr>
+                    <td>{{ utilisateur.getIdUser() }}</td>
+                    <td>{{ utilisateur.nom }} {{ utilisateur.prenom }}</td>
+                    <td>{{ utilisateur.email }}</td>
+                    <td>
+                        {% if utilisateur.role == 'admin' %}
+                            <span class="badge badge-danger"><i class="fas fa-crown"></i> Administrateur</span>
+                        {% elseif utilisateur.role == 'responsable_stock' %}
+                            <span class="badge badge-warning"><i class="fas fa-boxes"></i> Responsable Stock</span>
+                        {% elseif utilisateur.role == 'agriculteur' %}
+                            <span class="badge badge-success"><i class="fas fa-tractor"></i> Agriculteur</span>
+                        {% else %}
+                            <span class="badge badge-info"><i class="fas fa-user"></i> Utilisateur</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if utilisateur.statut %}
+                            <span class="badge badge-success">Actif</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ utilisateur.getDateCreation() ? utilisateur.getDateCreation()|date('d/m/Y') : '' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewUser({{ utilisateur.getIdUser() }})" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="editUser({{ utilisateur.getIdUser() }})" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" data-token="{{ csrf_token('delete' ~ utilisateur.getIdUser()) }}" onclick="deleteUser({{ utilisateur.getIdUser() }}, '{{ utilisateur.nom }} {{ utilisateur.prenom }}', this)" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">Aucun utilisateur trouvé</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modale pour formulaire -->
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Ajouter un utilisateur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale pour visualisation -->
+<div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails de l'utilisateur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="viewBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Initialiser DataTable
+    $('#usersTable').DataTable({
+        language: {
+            "sProcessing": "Traitement en cours...",
+            "sSearch": "Rechercher :",
+            "sLengthMenu": "Afficher _MENU_ éléments",
+            "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+            "sInfoFiltered": "(filtré de _MAX_ éléments au total)",
+            "sZeroRecords": "Aucun élément à afficher",
+            "oPaginate": {
+                "sFirst": "Premier",
+                "sPrevious": "Précédent",
+                "sNext": "Suivant",
+                "sLast": "Dernier"
+            }
+        },
+        pageLength: 10,
+        order: [[0, 'desc']]
+    });
+
+    // Initialiser les modales manuellement
+    $('#userModal, #viewModal').modal({
+        show: false,
+        backdrop: 'static',
+        keyboard: true
+    });
+
+    // Forcer la fermeture des modales avec les boutons
+    $(document).on('click', '[data-dismiss="modal"]', function() {
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            modal.modal('hide');
+        }
+    });
+});
+
+function showToast(message, type) {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: type,
+        title: message,
+        showConfirmButton: false,
+        timer: 3000
+    });
+}
+
+function openCreateModal() {
+    $('#modalTitle').text('Ajouter un utilisateur');
+    $('#modalBody').html('<div class="text-center p-5"><div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div><p class="mt-3">Chargement...</p></div>');
+    $('#userModal').modal('show');
+
+    $.ajax({
+        url: '{{ path('app_admin_utilisateur_new') }}',
+        type: 'GET',
+        data: { ajax: true },
+        success: function(response) {
+            if (response.html) {
+                $('#modalBody').html(response.html);
+            } else {
+                $('#modalBody').html(response);
+            }
+        },
+        error: function() {
+            $('#modalBody').html('<div class="alert alert-danger m-3">Erreur de chargement du formulaire</div>');
+        }
+    });
+}
+
+function editUser(id) {
+    $('#modalTitle').text('Modifier l\'utilisateur');
+    $('#modalBody').html('<div class="text-center p-5"><div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div><p class="mt-3">Chargement...</p></div>');
+    $('#userModal').modal('show');
+
+    $.ajax({
+        url: '/admin/utilisateur/' + id + '/edit',
+        type: 'GET',
+        data: { ajax: true },
+        success: function(response) {
+            if (response.html) {
+                $('#modalBody').html(response.html);
+            } else {
+                $('#modalBody').html(response);
+            }
+        },
+        error: function() {
+            $('#modalBody').html('<div class="alert alert-danger m-3">Erreur de chargement du formulaire</div>');
+        }
+    });
+}
+
+function viewUser(id) {
+    $('#viewBody').html('<div class="text-center p-5"><div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div><p class="mt-3">Chargement des informations...</p></div>');
+    $('#viewModal').modal('show');
+
+    $.ajax({
+        url: '/admin/utilisateur/' + id,
+        type: 'GET',
+        data: { ajax: true },
+        success: function(response) {
+            if (response.html) {
+                $('#viewBody').html(response.html);
+                initModalEvents();
+            } else {
+                $('#viewBody').html(response);
+                initModalEvents();
+            }
+        },
+        error: function() {
+            $('#viewBody').html('<div class="alert alert-danger m-3">Erreur de chargement des informations</div>');
+        }
+    });
+}
+
+function deleteUser(id, name, btn) {
+    Swal.fire({
+        title: 'Confirmer la suppression',
+        html: 'Êtes-vous sûr de vouloir supprimer <strong>' + name + '</strong> ?<br>Cette action est irréversible !',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var token = btn ? $(btn).data('token') : '{{ csrf_token('delete') }}';
+            $.ajax({
+                url: '/admin/utilisateur/' + id + '/delete',
+                type: 'POST',
+                data: {
+                    _token: token
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(response.message, 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Erreur lors de la suppression', 'error');
+                }
+            });
+        }
+    });
+}
+
+function submitForm(form) {
+    var formData = new FormData(form);
+    $.ajax({
+        url: form.action,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast(response.message, 'success');
+                $('#userModal').modal('hide');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(response.message, 'error');
+            }
+        },
+        error: function() {
+            showToast('Erreur lors de l\'envoi', 'error');
+        }
+    });
+    return false;
+}
+
+function initModalEvents() {
+    // Réinitialiser les événements des boutons dans le contenu chargé
+    $(document).on('click', '[data-dismiss="modal"]', function(e) {
+        e.preventDefault();
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            modal.modal('hide');
+        }
+    });
+
+    // S'assurer que le bouton "Annuler" fonctionne
+    $('.btn-secondary').off('click').on('click', function(e) {
+        e.preventDefault();
+        $(this).closest('.modal').modal('hide');
+    });
+}
+
+// Nettoyer les modales à la fermeture
+$('#userModal, #viewModal').on('hidden.bs.modal', function () {
+    $(this).removeAttr('style');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+    // Vider le contenu de la modale pour éviter les conflits
+    $('#modalBody').empty();
+    $('#viewBody').empty();
+});
+</script>
+{% endblock %}

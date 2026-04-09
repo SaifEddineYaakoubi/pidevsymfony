@@ -1,0 +1,95 @@
+{# templates/admin/pages/utilisateur_show_modal.html.twig #}
+<div class="text-center mb-4">
+    {% set colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#a8edea'] %}
+    {% set colorIndex = utilisateur.getIdUser() % colors|length %}
+    <div class="user-avatar mx-auto" style="width: 100px; height: 100px; font-size: 40px; background: {{ colors[colorIndex] }}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: white;">
+        {{ utilisateur.prenom|first|upper }}{{ utilisateur.nom|first|upper }}
+    </div>
+    <h3 class="mt-3 mb-1">{{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
+    <p class="text-muted">
+        {% if utilisateur.role == 'admin' %}
+            <span class="badge badge-danger px-3 py-2"><i class="fas fa-crown"></i> Administrateur</span>
+        {% elseif utilisateur.role == 'responsable_stock' %}
+            <span class="badge badge-warning px-3 py-2"><i class="fas fa-boxes"></i> Responsable Stock</span>
+        {% elseif utilisateur.role == 'agriculteur' %}
+            <span class="badge badge-success px-3 py-2"><i class="fas fa-tractor"></i> Agriculteur</span>
+        {% else %}
+            <span class="badge badge-info px-3 py-2"><i class="fas fa-user"></i> Utilisateur</span>
+        {% endif %}
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-borderless table-striped">
+            <tbody>
+                <tr>
+                    <td width="35%" class="font-weight-bold bg-light">
+                        <i class="fas fa-id-card text-primary mr-2"></i> ID
+                    </td>
+                    <td>{{ utilisateur.getIdUser() }}</td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold bg-light">
+                        <i class="fas fa-user text-primary mr-2"></i> Nom complet
+                    </td>
+                    <td>{{ utilisateur.nom }} {{ utilisateur.prenom }}</td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold bg-light">
+                        <i class="fas fa-envelope text-primary mr-2"></i> Email
+                    </td>
+                    <td>{{ utilisateur.email }}</td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold bg-light">
+                        <i class="fas fa-tag text-primary mr-2"></i> Rôle
+                    </td>
+                    <td>
+                        {% if utilisateur.role == 'admin' %}
+                            Administrateur
+                        {% elseif utilisateur.role == 'responsable_stock' %}
+                            Responsable Stock
+                        {% elseif utilisateur.role == 'agriculteur' %}
+                            Agriculteur
+                        {% else %}
+                            Utilisateur
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold bg-light">
+                        <i class="fas fa-calendar-alt text-primary mr-2"></i> Date de création
+                    </td>
+                    <td>{{ utilisateur.getDateCreation() ? utilisateur.getDateCreation()|date('d/m/Y H:i') : '' }}</td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold bg-light">
+                        <i class="fas fa-toggle-on text-primary mr-2"></i> Statut
+                    </td>
+                    <td>
+                        {% if utilisateur.statut %}
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Actif</span>
+                        {% else %}
+                            <span class="badge badge-danger"><i class="fas fa-ban"></i> Inactif</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="text-right mt-3">
+    <button type="button" class="btn btn-warning" onclick="editUser({{ utilisateur.getIdUser() }})" data-dismiss="modal">
+        <i class="fas fa-edit"></i> Modifier
+    </button>
+</div>
+
+<script>
+    $('#viewModal').on('hidden.bs.modal', function () {
+        $(this).removeAttr('style');
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+    });
+</script>

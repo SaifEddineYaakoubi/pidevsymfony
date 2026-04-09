@@ -1,55 +1,182 @@
+{# templates/admin/auth/login.html.twig #}
 {% extends 'admin/base_auth.html.twig' %}
 
-{% block title %}Admin - Login{% endblock %}
+{% block title %}SmartFarm - Connexion{% endblock %}
 
 {% block admin_auth_body %}
-    <div class="login-box">
-        <div class="login-logo">
-            <a href="{{ path('app_admin_dashboard') }}"><b>Admin</b>LTE</a>
-        </div>
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="mb-3">
+                        <i class="fas fa-leaf fa-3x"></i>
+                    </div>
+                    <h3 class="font-weight-bold mb-0">SmartFarm</h3>
+                    <p class="mb-0 mt-2">Système de Gestion Agricole Intelligent</p>
+                </div>
 
-        <div class="card">
-            <div class="card-body login-card-body">
-                <p class="login-box-msg">Connecte-toi pour continuer</p>
+                <div class="card-body p-5">
+                    {# Gestion sécurisée de l'erreur - Vérifie si la variable error existe #}
+                    {% if (error is defined and error) or (app.request.get('error') is defined) %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {# Use error.messageKey when available, otherwise show error as string #}
+                            {% if error is defined and error %}
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            {% else %}
+                                {{ app.request.get('error') }}
+                            {% endif %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
 
-                {# TODO: brancher sur Symfony Security (check_path, csrf_token, last_username, error) #}
-                <form action="#" method="post">
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Email">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
+                    {# Afficher les messages flash s'il y en a #}
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" action="{{ path('app_admin_login') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        {# Let the authenticator decide the target redirect based on roles. Remove forced _target_path. #}
+
+                        <div class="form-group mb-4">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-envelope me-2"></i>Adresse Email
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                </span>
+                                <input type="email"
+                                       name="email"
+                                       value="{{ last_username is defined ? last_username : (app.request.get('_username')|default('')) }}"
+                                       class="form-control form-control-lg"
+                                       placeholder="exemple@smartfarm.com"
+                                       required
+                                       autofocus>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-lock me-2"></i>Mot de passe
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-key text-primary"></i>
+                                </span>
+                                <input type="password"
+                                       name="password"
+                                       class="form-control form-control-lg"
+                                       placeholder="••••••••"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="_remember_me"
+                                       id="remember_me">
+                                <label class="form-check-label text-muted" for="remember_me">
+                                    <i class="fas fa-check-circle me-1"></i>Se souvenir de moi
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-gradient btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </button>
+                        </div>
+
+
+                        <div class="text-center mt-4">
+                            <div class="small text-muted">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Connexion sécurisée - SmartFarm
+                            </div>
+                        </div>
+                    </form>
+                {# Ajoutez ceci juste avant <hr class="my-4"> #}
+                <div class="text-center mt-3">
+                    <p class="mb-0">
+                        Pas encore de compte ?
+                        <a href="{{ path('app_register') }}" class="text-primary font-weight-bold">
+                            <i class="fas fa-user-plus"></i> S'inscrire
+                        </a>
+                    </p>
+                </div>
+
+                <hr class="my-4">
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Démo des rôles:
+                        </p>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-crown"></i> Admin
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-boxes"></i> Stock
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-tractor"></i> Agriculteur
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="input-group mb-3">
-                        <input type="password" class="form-control" placeholder="Mot de passe">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="remember">
-                                <label for="remember">Se souvenir de moi</label>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-                        </div>
-                    </div>
-                </form>
-
-                <p class="mb-0 mt-3">
-                    <a href="{{ path('app_admin_dashboard') }}" class="text-center">Aller au dashboard (demo)</a>
+            <!-- Footer -->
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    &copy; {{ "now"|date("Y") }} SmartFarm - Tous droits réservés
                 </p>
             </div>
         </div>
     </div>
-{% endblock %}
+</div>
 
+<style>
+    .btn-gradient {
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+</style>
+{% endblock %}

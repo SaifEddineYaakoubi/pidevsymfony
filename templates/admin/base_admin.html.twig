@@ -1,40 +1,137 @@
-{#
-  Base layout for the AdminLTE HTML template.
-  NOTE: the original AdminLTE static HTML sources were used only as a reference during integration
-  and can be removed once your Twig/partials are in place.
-
-  We keep Symfony's Twig blocks (title/stylesheets/javascripts/body) so your pages can extend it.
-#}
-
+{# templates/admin/base_admin.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
     {{ parent() }}
-    {# AdminLTE css (served from public/adminlte after running app:install-theme-assets) #}
+    {# AdminLTE css #}
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    {# DataTables CSS #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+    {# SweetAlert2 #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    {# Custom animations #}
+    <style>
+        /* Styles pour les modales */
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border: none;
+        }
+
+        .modal-header .close {
+            color: white;
+            opacity: 1;
+            text-shadow: none;
+        }
+
+        .modal-header .close:hover {
+            color: white;
+            opacity: 0.8;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .table-borderless td {
+            padding: 12px 8px;
+            vertical-align: middle;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .user-avatar {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card i {
+            font-size: 40px;
+            opacity: 0.8;
+        }
+    </style>
 {% endblock %}
 
 {% block javascripts %}
-    {# AdminLTE relies on jQuery + Bootstrap bundle #}
     <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+    {# DataTables #}
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+    {# SweetAlert2 #}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {# Keep importmap block available if the app uses it #}
     {{ parent() }}
 {% endblock %}
 
 {% block body %}
-    <div class="hold-transition sidebar-mini">
+<div class="hold-transition sidebar-mini">
     <div class="wrapper">
-        {# Navbar #}
         {% include 'admin/partials/_navbar.html.twig' %}
-
-        {# Sidebar #}
         {% include 'admin/partials/_sidebar.html.twig' %}
 
-        {# Content Wrapper. Contains page content #}
         <div class="content-wrapper">
             {% block admin_content_header %}
                 <div class="content-header">
@@ -60,6 +157,8 @@
 
         {% include 'admin/partials/_footer.html.twig' %}
     </div>
-    </div>
-{% endblock %}
+</div>
 
+<!-- Toast Container -->
+<div class="toast-container"></div>
+{% endblock %}

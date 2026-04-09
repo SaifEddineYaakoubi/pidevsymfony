@@ -1,40 +1,59 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="{{ path('app_admin_dashboard') }}" class="brand-link">
         <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light">Admin</span>
+        <span class="brand-text font-weight-light">SmartFarm</span>
     </a>
 
     <div class="sidebar">
+        <!-- AFFICHAGE UTILISATEUR SIMPLE -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="#" class="d-block">{{ app.user ? app.user.userIdentifier : 'Invité' }}</a>
+                <small>
+                    {% if app.user %}
+                        {% set roles = app.user.roles %}
+                        {% if 'ROLE_ADMIN' in roles %}
+                            <span class="badge bg-danger">Administrateur</span>
+                        {% elseif 'ROLE_STOCK' in roles %}
+                            <span class="badge bg-warning">Responsable Stock</span>
+                        {% elseif 'ROLE_AGRICULTEUR' in roles %}
+                            <span class="badge bg-success">Agriculteur</span>
+                        {% endif %}
+                    {% endif %}
+                </small>
             </div>
         </div>
 
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
-                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_' ? 'active' : '' }}">
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_dashboard' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-header">AdminLTE Pages</li>
+
+                <li class="nav-header">GESTION</li>
+
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_utilisateur_index') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_utilisateur_' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Gestion Utilisateurs</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">ADMINLTE</li>
+
                 <li class="nav-item">
                     <a href="{{ path('app_admin_pages_starter') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_starter' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-play"></i>
                         <p>Starter</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_widgets') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_widgets' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>Widgets</p>
-                    </a>
-                </li>
+
                 <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-table"></i>
@@ -45,45 +64,221 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ path('app_admin_pages_tables_simple') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_tables_simple' ? 'active' : '' }}">
+                            <a href="{{ path('app_admin_pages_tables_simple') }}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Simple</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ path('app_admin_pages_tables_data') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_tables_data' ? 'active' : '' }}">
+                            <a href="{{ path('app_admin_pages_tables_data') }}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>DataTables</p>
                             </a>
                         </li>
                     </ul>
                 </li>
+
                 <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_calendar') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_calendar' ? 'active' : '' }}">
+                    <a href="{{ path('app_admin_pages_calendar') }}" class="nav-link">
                         <i class="nav-icon far fa-calendar-alt"></i>
                         <p>Calendar</p>
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_kanban') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_kanban' ? 'active' : '' }}">
+                    <a href="{{ path('app_admin_pages_kanban') }}" class="nav-link">
                         <i class="nav-icon fas fa-columns"></i>
                         <p>Kanban</p>
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a href="{{ path('app_admin_theme_page', {page: 'widgets'}) }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_theme_page' ? 'active' : '' }}">
+                    <a href="{{ path('app_admin_theme_page', {page: 'widgets'}) }}" class="nav-link">
                         <i class="nav-icon fas fa-palette"></i>
                         <p>Theme Router</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_demo') }}" class="nav-link">
-                        <i class="nav-icon fas fa-vial"></i>
-                        <p>Demo</p>
+
+                <!-- SECTION COMPTE -->
+                <li class="nav-header">COMPTE</li>
+
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user-circle"></i>
+                        <p>
+                            Mon Compte
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#profileModal">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Mon Profil</p>
+                            </a>
+                        </li>
+                        <!-- Option "Changer mot de passe" commentée pour l'instant -->
+                        {# <li class="nav-item">
+                            <a href="#" class="nav-link" onclick="event.preventDefault(); changePassword();">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Changer mot de passe</p>
+                            </a>
+                        </li> #}
+                        <li class="nav-item">
+                            <a href="/admin/logout" class="nav-link text-danger"
+                               onclick="event.preventDefault(); confirmLogout();">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Déconnexion</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>
     </div>
 </aside>
 
+<!-- Modal Profil -->
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-circle"></i> Mon Profil
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}"
+                         class="img-circle elevation-2"
+                         style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+                <table class="table table-borderless">
+                    <tr>
+                        <th><i class="fas fa-user"></i> Nom complet :</th>
+                        <td>{{ app.user.nom }} {{ app.user.prenom }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-envelope"></i> Email :</th>
+                        <td>{{ app.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-tag"></i> Rôle :</th>
+                        <td>
+                            {% set roles = app.user.roles %}
+                            {% if 'ROLE_ADMIN' in roles %}
+                                <span class="badge bg-danger">Administrateur</span>
+                            {% elseif 'ROLE_STOCK' in roles %}
+                                <span class="badge bg-warning">Responsable Stock</span>
+                            {% elseif 'ROLE_AGRICULTEUR' in roles %}
+                                <span class="badge bg-success">Agriculteur</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-calendar"></i> Date création :</th>
+                        <td>{{ app.user.dateCreation ? app.user.dateCreation|date('d/m/Y') : 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-power-off"></i> Statut :</th>
+                        <td>
+                            {% if app.user.statut %}
+                                <span class="badge bg-success">Actif</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmLogout() {
+    Swal.fire({
+        title: 'Déconnexion',
+        text: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, me déconnecter',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/admin/logout";
+        }
+    });
+}
+
+// La fonction changePassword est commentée car la route n'existe pas encore
+/*
+function changePassword() {
+    Swal.fire({
+        title: 'Changer le mot de passe',
+        html: `
+            <input type="password" id="currentPassword" class="swal2-input" placeholder="Mot de passe actuel">
+            <input type="password" id="newPassword" class="swal2-input" placeholder="Nouveau mot de passe">
+            <input type="password" id="confirmPassword" class="swal2-input" placeholder="Confirmer le mot de passe">
+        `,
+        confirmButtonText: 'Changer',
+        showCancelButton: true,
+        cancelButtonText: 'Annuler',
+        preConfirm: () => {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                Swal.showValidationMessage('Tous les champs sont requis');
+                return false;
+            }
+
+            if (newPassword !== confirmPassword) {
+                Swal.showValidationMessage('Les mots de passe ne correspondent pas');
+                return false;
+            }
+
+            if (newPassword.length < 6) {
+                Swal.showValidationMessage('Le mot de passe doit contenir au moins 6 caractères');
+                return false;
+            }
+
+            return { currentPassword, newPassword };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/change-password',
+                type: 'POST',
+                data: {
+                    current_password: result.value.currentPassword,
+                    new_password: result.value.newPassword,
+                    _token: '{{ csrf_token('change_password') }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Succès', response.message, 'success');
+                    } else {
+                        Swal.fire('Erreur', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Erreur', 'Une erreur est survenue', 'error');
+                }
+            });
+        }
+    });
+}
+*/
+</script>

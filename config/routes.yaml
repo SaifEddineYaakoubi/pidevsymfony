@@ -1,5 +1,16 @@
+# config/routes.yaml
+
+# Route principale pour les contrôleurs avec attributs
 controllers:
     resource:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Route de redirection pour la racine
+app_index:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+    defaults:
+        route: app_admin_login
+        permanent: false

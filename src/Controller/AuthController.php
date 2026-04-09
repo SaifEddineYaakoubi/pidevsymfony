@@ -1,50 +1,87 @@
 <?php
-
+// src/Controller/AuthController.php
 namespace App\Controller;
 
+use App\Entity\Utilisateur;
+use App\Form\UtilisateurType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-final class AuthController extends AbstractController
+class AuthController extends AbstractController
 {
-    #[Route('/', name: 'app_root')]
-    public function root(): Response
+    #[Route('/admin/login', name: 'app_login')]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        return $this->redirectToRoute('app_login');
-    }
+        // Votre code de login existant
+        if ($this->getUser()) {
+            $user = $this->getUser();
+            $roles = $user->getRoles();
 
-    #[Route('/login', name: 'app_login')]
-    public function login(Request $request): Response
-    {
-        // Demo-only: allow quick role switching without implementing Security yet.
-        // Example: /login?as=admin|agriculteur|stock
-        $as = strtolower((string) $request->query->get('as', ''));
-
-        if ($as !== '') {
-            return $this->redirectAfterRole($as);
+            if (in_array('ROLE_ADMIN', $roles)) {
+                return $this->redirectToRoute('app_admin_dashboard');
+            } elseif (in_array('ROLE_STOCK', $roles)) {
+                return $this->redirectToRoute('app_stock_dashboard');
+            } elseif (in_array('ROLE_AGRICULTEUR', $roles)) {
+                return $this->redirectToRoute('app_agriculteur_dashboard');
+            }
         }
 
-        return $this->render('security/login.html.twig');
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('admin/auth/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+        ]);
     }
 
-    #[Route('/after-login', name: 'app_after_login')]
-    public function afterLogin(): Response
+    #[Route('/admin/logout', name: 'app_logout')]
+    public function logout(): void
     {
-        // When Symfony Security is enabled, we'll use the authenticated user roles here.
-        return $this->redirectToRoute('app_agriculteur_home');
+        // Cette méthode peut être vide, elle sera interceptée par le firewall
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    private function redirectAfterRole(string $role): RedirectResponse
+    #[Route('/register', name: 'app_register')]
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
-        return match ($role) {
-            'admin' => $this->redirectToRoute('app_admin_dashboard'),
-            'agriculteur' => $this->redirectToRoute('app_agriculteur_home'),
-            'stock', 'responsable', 'responsable_stock' => $this->redirectToRoute('app_stock_home'),
-            default => $this->redirectToRoute('app_agriculteur_home'),
-        };
+        // Votre code d'inscription
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
+
+        $user = new Utilisateur();
+        $form = $this->createForm(UtilisateurType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('mot_de_passe')->getData();
+            if ($plainPassword) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+                $user->setMotDePasse($hashedPassword);
+            }
+
+            $user->setDateCreation(new \DateTime());
+            $user->setStatut(true);
+
+            if (!$user->getRole()) {
+                $user->setRole('agriculteur');
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Inscription réussie ! Vous pouvez maintenant vous connecter.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('admin/auth/register.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 }
-
