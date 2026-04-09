@@ -21,23 +21,27 @@ class VenteType extends AbstractType
                 'label' => 'Date de vente',
                 'widget' => 'single_text',
                 'html5' => true,
+                'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('montantTotal', NumberType::class, [
                 'label' => 'Montant total',
                 'scale' => 2,
+                'required' => false,
                 'attr' => ['class' => 'form-control', 'placeholder' => '0.00'],
             ])
             ->add('idClient', EntityType::class, [
                 'label' => 'Client',
                 'class' => Client::class,
                 'choice_label' => 'nom',
+                'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('idUser', EntityType::class, [
                 'label' => 'Utilisateur',
                 'class' => Utilisateur::class,
                 'choice_label' => 'nom',
+                'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
         ;
@@ -47,6 +51,8 @@ class VenteType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Vente::class,
+            // Désactiver complètement la validation HTML5 du navigateur
+            'attr' => ['novalidate' => 'novalidate'],
         ]);
     }
 }
