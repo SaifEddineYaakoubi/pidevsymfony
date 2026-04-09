@@ -1,0 +1,55 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Liste des Rendements{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📊 Gestion des Rendements</h1>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('app_rendement_new') }}" class="btn" style="background: #4A7C2F;">+ Calculer un Nouveau Rendement</a>
+    <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary" style="margin-left: 1rem;">📋 Voir les Récoltes</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Récolte</th>
+            <th>Surface Exploitée (m²)</th>
+            <th>Quantité Totale (kg)</th>
+            <th>Productivité (kg/m²)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for rendement in rendements %}
+        <tr>
+            <td>
+                {% if rendement.id_recolte %}
+                    <strong>Récolte du {{ rendement.id_recolte.dateRecolte ? rendement.id_recolte.dateRecolte|date('d/m/Y') : 'Date inconnue' }}</strong><br>
+                    <small style="color: #666;">{{ rendement.id_recolte.typeCulture ?? 'Type non défini' }}</small>
+                {% else %}
+                    <span style="color: #999;">Récolte non associée</span>
+                {% endif %}
+            </td>
+            <td>{{ rendement.surface_exploitee }}</td>
+            <td>{{ rendement.quantite_totale }}</td>
+            <td><strong style="color: #16a34a;">{{ rendement.productivite|number_format(2, '.', '') }}</strong></td>
+            <td>
+                <a href="{{ path('app_rendement_show', {'idRendement': rendement.id_rendement}) }}" class="btn">Voir</a>
+                <a href="{{ path('app_rendement_edit', {'idRendement': rendement.id_rendement}) }}" class="btn btn-secondary">Modifier</a>
+                <form method="post" action="{{ path('app_rendement_delete', {'idRendement': rendement.id_rendement}) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rendement.id_rendement) }}">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" style="text-align: center;">Aucun rendement trouvé.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

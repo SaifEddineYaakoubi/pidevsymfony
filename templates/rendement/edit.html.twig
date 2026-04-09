@@ -1,0 +1,61 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Modifier le Rendement #{{ rendement.id_rendement }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>✏️ Modifier le Rendement #{{ rendement.id_rendement }}</h1>
+
+<div style="background: #fff3cd; padding: 1rem; margin-bottom: 2rem; border-left: 4px solid #f59e0b;">
+    <h4>⚠️ Modification du Rendement</h4>
+    <p>La productivité sera automatiquement recalculée lors de la sauvegarde.</p>
+</div>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="form-group">
+        <label>Récolte *</label>
+        {{ form_widget(form.id_recolte, {'attr': {'class': 'form-control'}}) }}
+        {% if form.id_recolte.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.id_recolte) }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label>Surface Exploitée (m²) *</label>
+        {{ form_widget(form.surface_exploitee, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 100'}}) }}
+        {% if form.surface_exploitee.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.surface_exploitee) }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label>Quantité Totale Récoltée (kg) *</label>
+        {{ form_widget(form.quantite_totale, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 250'}}) }}
+        {% if form.quantite_totale.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.quantite_totale) }}</span>
+        {% endif %}
+    </div>
+
+    <div style="background: #f0f8ff; padding: 1rem; margin: 1rem 0; border-left: 4px solid #3b82f6;">
+        <h5>📊 Aperçu du Calcul</h5>
+        <p>Productivité actuelle : <strong>{{ rendement.productivite|number_format(2, '.', '') }} kg/m²</strong></p>
+        <p><em>La nouvelle productivité sera calculée automatiquement après sauvegarde.</em></p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <button type="submit" class="btn" style="background: #4A7C2F;">✓ Enregistrer les modifications</button>
+        <a href="{{ path('app_rendement_index') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+
+{{ form_end(form) }}
+
+<div style="margin-top: 3rem; padding: 1rem; background: #fee; border: 1px solid #fcc;">
+    <h3>⚠️ Zone Danger</h3>
+    <form method="post" action="{{ path('app_rendement_delete', {'idRendement': rendement.id_rendement}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rendement ? Cette action est irréversible.');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rendement.id_rendement) }}">
+        <button type="submit" class="btn btn-danger">🗑 Supprimer ce Rendement</button>
+    </form>
+</div>
+
+{% endblock %}

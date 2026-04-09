@@ -11,21 +11,22 @@ class Recolte
 {
 
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_recolte;
 
     #[ORM\Column(type: "float")]
     private float $quantite;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $date_recolte;
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?\DateTimeInterface $date_recolte;
 
     #[ORM\Column(type: "string", length: 50)]
     private string $qualite;
 
         #[ORM\ManyToOne(targetEntity: Culture::class, inversedBy: "recoltes")]
-    #[ORM\JoinColumn(name: 'id_culture', referencedColumnName: 'id_culture', onDelete: 'CASCADE')]
-    private Culture $id_culture;
+    #[ORM\JoinColumn(name: 'id_culture', referencedColumnName: 'id_culture', nullable: true, onDelete: 'CASCADE')]
+    private ?Culture $id_culture;
 
     #[ORM\Column(type: "string", length: 100)]
     private string $type_culture;
@@ -35,6 +36,17 @@ class Recolte
 
     #[ORM\Column(type: "integer")]
     private int $id_user;
+
+    public function __construct()
+    {
+        $this->quantite = 0.0;
+        $this->date_recolte = null;
+        $this->qualite = '';
+        $this->id_culture = null;
+        $this->type_culture = '';
+        $this->localisation = '';
+        $this->id_user = 0;
+    }
 
     public function getId_recolte()
     {
@@ -114,5 +126,55 @@ class Recolte
     public function setId_user($value)
     {
         $this->id_user = $value;
+    }
+
+    public function getDateRecolte()
+    {
+        return $this->getDate_recolte();
+    }
+
+    public function setDateRecolte($value)
+    {
+        return $this->setDate_recolte($value);
+    }
+
+    public function getTypeCulture()
+    {
+        return $this->getType_culture();
+    }
+
+    public function setTypeCulture($value)
+    {
+        return $this->setType_culture($value);
+    }
+
+    public function getIdRecolte()
+    {
+        return $this->getId_recolte();
+    }
+
+    public function setIdRecolte($value)
+    {
+        return $this->setId_recolte($value);
+    }
+
+    public function getIdCulture()
+    {
+        return $this->getId_culture();
+    }
+
+    public function setIdCulture($value)
+    {
+        return $this->setId_culture($value);
+    }
+
+    public function getIdUser()
+    {
+        return $this->getId_user();
+    }
+
+    public function setIdUser($value)
+    {
+        return $this->setId_user($value);
     }
 }

@@ -1,0 +1,63 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Calculer un Nouveau Rendement{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📊 Calculer un Nouveau Rendement</h1>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="form-group">
+        <label>Récolte *</label>
+        {{ form_widget(form.id_recolte, {'attr': {'class': 'form-control'}}) }}
+        {% if form.id_recolte.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.id_recolte) }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label>Surface Exploitée (m²) *</label>
+        {{ form_widget(form.surface_exploitee, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 100'}}) }}
+        {% if form.surface_exploitee.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.surface_exploitee) }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label>Quantité Totale Récoltée (kg) *</label>
+        {{ form_widget(form.quantite_totale, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 250'}}) }}
+        {% if form.quantite_totale.vars.errors|length > 0 %}
+            <span style="color: red; font-size: 12px;">{{ form_errors(form.quantite_totale) }}</span>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <button type="submit" class="btn" style="background: #4A7C2F;">✓ Calculer et Enregistrer</button>
+        <a href="{{ path('app_rendement_index') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+
+{{ form_end(form) }}
+
+<script>
+// Calcul en temps réel de la productivité
+document.addEventListener('DOMContentLoaded', function() {
+    const surfaceInput = document.querySelector('input[name="rendement[surface_exploitee]"]');
+    const quantiteInput = document.querySelector('input[name="rendement[quantite_totale]"]');
+
+    function calculateProductivity() {
+        const surface = parseFloat(surfaceInput.value) || 0;
+        const quantite = parseFloat(quantiteInput.value) || 0;
+
+        if (surface > 0 && quantite > 0) {
+            const productivity = quantite / surface;
+            console.log('Productivité calculée :', productivity.toFixed(2), 'kg/m²');
+        }
+    }
+
+    surfaceInput.addEventListener('input', calculateProductivity);
+    quantiteInput.addEventListener('input', calculateProductivity);
+});
+</script>
+
+{% endblock %}
