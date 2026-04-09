@@ -15,7 +15,7 @@ class Client
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id_client;
+    private ?int $id_client = null;
 
     #[ORM\Column(type: "string", length: 100)]
     #[Assert\NotBlank(message: "Le nom du client est obligatoire.")]
@@ -63,11 +63,7 @@ class Client
         return $this->id_client;
     }
 
-    public function setId_client(int $id_client): self
-    {
-        $this->id_client = $id_client;
-        return $this;
-    }
+    // Pas de setter pour l'id: il est auto-généré par la base
 
     public function getNom(): ?string
     {

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Rendement;
+use App\Entity\Utilisateur;
 use App\Form\RendementType;
 use App\Repository\RendementRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,10 +16,33 @@ use Symfony\Component\Routing\Annotation\Route;
 class RendementController extends AbstractController
 {
     #[Route('/', name: 'app_rendement_index', methods: ['GET'])]
-    public function index(RendementRepository $rendementRepository): Response
+    public function index(RendementRepository $rendementRepository, Request $request): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $q = $request->query->getString('q', '');
+        $sort = $request->query->getString('sort', 'prod_desc');
+
+        $rendements = $rendementRepository->findForIndexForUser($user, $q, $sort);
+        $stats = $rendementRepository->getIndexStatsForUser($user, $q);
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('rendement/_results.html.twig', [
+                'rendements' => $rendements,
+                'stats' => $stats,
+                'q' => $q,
+                'sort' => $sort,
+            ]);
+        }
+
         return $this->render('rendement/index.html.twig', [
-            'rendements' => $rendementRepository->findAll(),
+            'rendements' => $rendements,
+            'stats' => $stats,
+            'q' => $q,
+            'sort' => $sort,
         ]);
     }
 
@@ -49,16 +73,36 @@ class RendementController extends AbstractController
     }
 
     #[Route('/{idRendement}', name: 'app_rendement_show', methods: ['GET'])]
-    public function show(Rendement $rendement): Response
+    public function show(int $idRendement, RendementRepository $rendementRepository): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $rendement = $rendementRepository->findOneForUser($idRendement, $user);
+        if (!$rendement) {
+            throw $this->createNotFoundException('Rendement non trouvé');
+        }
+
         return $this->render('rendement/show.html.twig', [
             'rendement' => $rendement,
         ]);
     }
 
     #[Route('/{idRendement}/edit', name: 'app_rendement_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Rendement $rendement, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $idRendement, RendementRepository $rendementRepository, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $rendement = $rendementRepository->findOneForUser($idRendement, $user);
+        if (!$rendement) {
+            throw $this->createNotFoundException('Rendement non trouvé');
+        }
+
         $form = $this->createForm(RendementType::class, $rendement);
         $form->handleRequest($request);
 
@@ -81,8 +125,18 @@ class RendementController extends AbstractController
     }
 
     #[Route('/{idRendement}', name: 'app_rendement_delete', methods: ['POST'])]
-    public function delete(Request $request, Rendement $rendement, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $idRendement, RendementRepository $rendementRepository, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $rendement = $rendementRepository->findOneForUser($idRendement, $user);
+        if (!$rendement) {
+            throw $this->createNotFoundException('Rendement non trouvé');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$rendement->getIdRendement(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($rendement);
             $entityManager->flush();

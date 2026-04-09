@@ -3,6 +3,7 @@
 namespace App\Controller\Agriculteur;
 
 use App\Entity\Culture;
+use App\Entity\Utilisateur;
 use App\Form\CultureType;
 use App\Repository\CultureRepository;
 use App\Repository\ParcelleRepository;
@@ -22,11 +23,16 @@ final class CultureCrudController extends AbstractController
     #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, CultureRepository $repo, PdfExporter $pdfExporter): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'plantation';
         $dir = $request->query->getString('dir') ?: 'DESC';
 
-        $cultures = $repo->searchByQuery($q, $sort, $dir);
+        $cultures = $repo->searchByQueryForUser($user, $q, $sort, $dir);
 
         $html = $this->renderView('agriculteur/culture/export_pdf.html.twig', [
             'cultures' => $cultures,
@@ -48,8 +54,18 @@ final class CultureCrudController extends AbstractController
     #[Route('/{id}/show', name: 'show', requirements: ['id' => '\\d+'], methods: ['GET'])]
     public function show(int $id, CultureRepository $repo): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $culture = $repo->find($id);
         if (!$culture) {
+            throw $this->createNotFoundException();
+        }
+
+        // Ownership check via parcelle
+        if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
             throw $this->createNotFoundException();
         }
 
@@ -61,12 +77,18 @@ final class CultureCrudController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request, CultureRepository $repo, CultureAlertService $alertService): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'plantation';
         $dir = $request->query->getString('dir') ?: 'DESC';
-        $cultures = $repo->searchByQuery($q, $sort, $dir);
-        $totalAll = $repo->count([]);
-        $countsByEtat = $repo->countByEtatCroissance($q);
+
+        $cultures = $repo->searchByQueryForUser($user, $q, $sort, $dir);
+        $totalAll = count($repo->searchByQueryForUser($user, null, null, null));
+        $countsByEtat = $repo->countByEtatCroissanceForUser($user, $q);
 
         // Alerts module: harvest due soon (< 7 days)
         $alerts = $alertService->getHarvestDueSoonAlerts($cultures);
@@ -108,13 +130,25 @@ final class CultureCrudController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em, SymfonyEntityValidator $validator): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $culture = new Culture();
-        $form = $this->createForm(CultureType::class, $culture);
+        $form = $this->createForm(CultureType::class, $culture, [
+            'user' => $user,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $errors = $validator->validate($culture);
             if ($form->isValid() && $errors === []) {
+                // Ownership guard: the selected parcelle must belong to the current user.
+                if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
+                    throw $this->createAccessDeniedException();
+                }
+
                 $em->persist($culture);
                 $em->flush();
                 $this->addFlash('success', 'Culture ajoutée avec succès.');
@@ -138,12 +172,23 @@ final class CultureCrudController extends AbstractController
     #[Route('/{id}', name: 'edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, CultureRepository $repo, EntityManagerInterface $em, SymfonyEntityValidator $validator): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $culture = $repo->find($id);
         if (!$culture) {
             throw $this->createNotFoundException();
         }
 
-        $form = $this->createForm(CultureType::class, $culture);
+        if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
+            throw $this->createNotFoundException();
+        }
+
+        $form = $this->createForm(CultureType::class, $culture, [
+            'user' => $user,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -180,8 +225,17 @@ final class CultureCrudController extends AbstractController
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
 
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $culture = $repo->find($id);
         if (!$culture) {
+            throw $this->createNotFoundException();
+        }
+
+        if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
             throw $this->createNotFoundException();
         }
 

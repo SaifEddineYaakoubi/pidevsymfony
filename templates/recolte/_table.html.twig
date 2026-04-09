@@ -1,0 +1,54 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="text-muted small">
+        {{ recoltes|length }} résultat(s)
+        {% if search %}pour "{{ search }}"{% endif %}
+    </div>
+</div>
+
+<div class="agri-table-wrapper table-responsive">
+    <table class="table agri-table table-hover align-middle" id="recolteTable">
+        <thead>
+        <tr>
+            <th>Quantité (kg)</th>
+            <th>Date</th>
+            <th>Qualité</th>
+            <th>Type</th>
+            <th>Localisation</th>
+            <th>Rendement</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for recolte in recoltes %}
+            <tr role="button"
+                data-id="{{ recolte.id_recolte }}"
+                data-href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}"
+                data-delete-token="{{ csrf_token('delete' ~ recolte.id_recolte) }}">
+                <td>{{ recolte.quantite }}</td>
+                <td>{{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : '-' }}</td>
+                <td>
+                    {% set q = recolte.qualite|default('') %}
+                    {% set badgeColor =
+                        q == 'excellente' ? 'success' :
+                        (q == 'bonne' ? 'primary' :
+                        (q == 'moyenne' ? 'warning' :
+                        (q ? 'danger' : 'secondary')))
+                    %}
+                    <span class="badge bg-{{ badgeColor }}">{{ q ?: '-' }}</span>
+                </td>
+                <td>{{ recolte.type_culture }}</td>
+                <td>{{ recolte.localisation }}</td>
+                <td>
+                    {% if rendements[recolte.id_recolte] is defined and rendements[recolte.id_recolte] is not null %}
+                        <strong>{{ rendements[recolte.id_recolte]|number_format(2, '.', '') }} kg/m²</strong>
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="text-muted">Aucune récolte</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+

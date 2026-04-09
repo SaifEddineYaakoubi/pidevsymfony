@@ -24,6 +24,9 @@
     {# Main template CSS #}
     <link rel="stylesheet" href="{{ asset(theme ~ '/assets/css/main.css') }}">
 
+    {# CRUD UI CSS (tables, badges, loader overlay) #}
+    <link rel="stylesheet" href="{{ asset('assets/styles/agri_crud.css') }}">
+
     <style>
         /* ===== DASHBOARD MODERN DESIGN ===== */
 
@@ -354,6 +357,7 @@
 
 {% block body %}
     {% block front_header %}
+        {% include 'front/partials/_header.html.twig' %}
     {% endblock %}
 
     <main class="main">

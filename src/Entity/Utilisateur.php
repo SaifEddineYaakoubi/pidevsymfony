@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UtilisateurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: 'App\\Repository\\UtilisateurRepository')]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
@@ -16,15 +19,37 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id_user = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $nom = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank(message: 'L\'email est obligatoire.')]
+    #[Assert\Email(message: 'Format d\'email invalide.')]
+    #[Assert\Length(max: 255, maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $email = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le rôle est obligatoire.')]
+    #[Assert\Choice(
+        choices: ['admin', 'responsable_stock', 'agriculteur'],
+        message: 'Rôle invalide.'
+    )]
     private ?string $role = null;
 
     #[ORM\Column(length: 255)]
@@ -35,6 +60,26 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
+
+    /**
+     * Inverse side for Parcelle::id_user
+     * @var Collection<int, Parcelle>
+     */
+    #[ORM\OneToMany(mappedBy: 'id_user', targetEntity: Parcelle::class, orphanRemoval: false)]
+    private Collection $parcelles;
+
+    /**
+     * Inverse side for Vente::id_user
+     * @var Collection<int, Vente>
+     */
+    #[ORM\OneToMany(mappedBy: 'id_user', targetEntity: Vente::class, orphanRemoval: false)]
+    private Collection $ventes;
+
+    public function __construct()
+    {
+        $this->parcelles = new ArrayCollection();
+        $this->ventes = new ArrayCollection();
+    }
 
     // Getters et Setters existants...
 
@@ -166,5 +211,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
+    }
+
+    /** @return Collection<int, Parcelle> */
+    public function getParcelles(): Collection
+    {
+        return $this->parcelles;
+    }
+
+    /** @return Collection<int, Vente> */
+    public function getVentes(): Collection
+    {
+        return $this->ventes;
     }
 }

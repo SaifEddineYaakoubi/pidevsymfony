@@ -1,0 +1,55 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Mon profil - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Mon profil',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Profil' }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h5 class="card-title mb-1">Informations du compte</h5>
+                            <p class="text-muted mb-0">Données issues de la session utilisateur</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {% if user %}
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Email</dt>
+                            <dd class="col-sm-9">{{ user.userIdentifier }}</dd>
+
+                            <dt class="col-sm-3">Rôles</dt>
+                            <dd class="col-sm-9">
+                                {% for r in user.roles %}
+                                    <span class="badge bg-secondary me-1">{{ r }}</span>
+                                {% endfor %}
+                            </dd>
+                        </dl>
+                    {% else %}
+                        <div class="alert alert-warning mb-0">
+                            Utilisateur non connecté.
+                        </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <a class="btn btn-outline-danger" href="{{ path('app_logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

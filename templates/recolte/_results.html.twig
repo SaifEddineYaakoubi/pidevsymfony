@@ -1,0 +1,39 @@
+{# Partial returned for AJAX: stats + table #}
+
+<div class="crud-header">
+    {% set total = stats.total_filtered ?? recoltes|length %}
+    {% set counts = stats.counts_by_qualite ?? {} %}
+    {% set sumQte = stats.sum_quantite ?? 0 %}
+    {% set lastDate = stats.last_date ?? null %}
+
+    {% set excellente = counts.excellente ?? 0 %}
+    {% set bonne = counts.bonne ?? 0 %}
+    {% set moyenne = counts.moyenne ?? 0 %}
+    {% set faible = counts.faible ?? 0 %}
+
+    <div class="agri-stats-top mb-2">
+        <div class="agri-stats-title">Statistiques des récoltes</div>
+        <div class="agri-stats-title">Répartition des qualités</div>
+    </div>
+
+
+    <div class="agri-progress mt-3" aria-hidden="true" title="Répartition">
+        {% set qualites = ['excellente','bonne','moyenne','faible'] %}
+        {% for ql in qualites %}
+            {% set count = counts[ql] ?? 0 %}
+            {% set percent = (total > 0 ? ((count / total) * 100) : 0) %}
+            <div class="agri-progress__seg agri-progress__seg--{{ ql }}" style="width: {{ percent }}%"></div>
+        {% endfor %}
+    </div>
+
+    <div class="agri-stats-badges justify-content-end mt-2">
+        <span class="badge text-bg-success">Excellente: {{ excellente }}</span>
+        <span class="badge text-bg-primary">Bonne: {{ bonne }}</span>
+        <span class="badge text-bg-warning">Moyenne: {{ moyenne }}</span>
+        <span class="badge text-bg-danger">Faible: {{ faible }}</span>
+    </div>
+</div>
+
+<div class="mt-3">
+    {% include 'recolte/_table.html.twig' %}
+</div>

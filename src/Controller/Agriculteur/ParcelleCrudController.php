@@ -3,6 +3,7 @@
 namespace App\Controller\Agriculteur;
 
 use App\Entity\Parcelle;
+use App\Entity\Utilisateur;
 use App\Form\ParcelleType;
 use App\Repository\ParcelleRepository;
 use App\Service\Validation\SymfonyEntityValidator;
@@ -20,11 +21,16 @@ final class ParcelleCrudController extends AbstractController
     #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, ParcelleRepository $repo, PdfExporter $pdfExporter): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'nom';
         $dir = $request->query->getString('dir') ?: 'ASC';
 
-        $parcelles = $repo->searchByQuery($q, $sort, $dir);
+        $parcelles = $repo->searchByQueryForUser($user, $q, $sort, $dir);
 
         $html = $this->renderView('agriculteur/parcelle/export_pdf.html.twig', [
             'parcelles' => $parcelles,
@@ -46,7 +52,12 @@ final class ParcelleCrudController extends AbstractController
     #[Route('/{id}/show', name: 'show', requirements: ['id' => '\\d+'], methods: ['GET'])]
     public function show(int $id, ParcelleRepository $repo): Response
     {
-        $parcelle = $repo->find($id);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $parcelle = $repo->findOneForUser($id, $user);
         if (!$parcelle) {
             throw $this->createNotFoundException();
         }
@@ -59,12 +70,18 @@ final class ParcelleCrudController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request, ParcelleRepository $repo): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'nom';
         $dir = $request->query->getString('dir') ?: 'ASC';
-        $parcelles = $repo->searchByQuery($q, $sort, $dir);
-        $totalAll = $repo->count([]);
-        $countsByEtat = $repo->countByEtat($q);
+
+        $parcelles = $repo->searchByQueryForUser($user, $q, $sort, $dir);
+        $totalAll = $repo->count(['id_user' => $user]);
+        $countsByEtat = $repo->countByEtatForUser($user, $q);
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('agriculteur/parcelle/_results.html.twig', [
@@ -96,7 +113,13 @@ final class ParcelleCrudController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em, SymfonyEntityValidator $validator): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $parcelle = new Parcelle();
+        $parcelle->setId_user($user);
 
         $form = $this->createForm(ParcelleType::class, $parcelle);
         $form->handleRequest($request);
@@ -127,7 +150,12 @@ final class ParcelleCrudController extends AbstractController
     #[Route('/{id}', name: 'edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, ParcelleRepository $repo, EntityManagerInterface $em, SymfonyEntityValidator $validator): Response
     {
-        $parcelle = $repo->find($id);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $parcelle = $repo->findOneForUser($id, $user);
         if (!$parcelle) {
             throw $this->createNotFoundException();
         }
@@ -169,7 +197,12 @@ final class ParcelleCrudController extends AbstractController
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
 
-        $parcelle = $repo->find($id);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $parcelle = $repo->findOneForUser($id, $user);
         if (!$parcelle) {
             throw $this->createNotFoundException();
         }

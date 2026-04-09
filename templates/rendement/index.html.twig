@@ -4,52 +4,73 @@
 
 {% block agriculteur_body %}
 
-<h1>📊 Gestion des Rendements</h1>
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Rendements',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Rendements' }
+        ]
+    } %}
 
-<div style="margin-bottom: 2rem;">
-    <a href="{{ path('app_rendement_new') }}" class="btn" style="background: #4A7C2F;">+ Calculer un Nouveau Rendement</a>
-    <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary" style="margin-left: 1rem;">📋 Voir les Récoltes</a>
-</div>
+    <section class="section">
+        <div class="container">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Récolte</th>
-            <th>Surface Exploitée (m²)</th>
-            <th>Quantité Totale (kg)</th>
-            <th>Productivité (kg/m²)</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for rendement in rendements %}
-        <tr>
-            <td>
-                {% if rendement.id_recolte %}
-                    <strong>Récolte du {{ rendement.id_recolte.dateRecolte ? rendement.id_recolte.dateRecolte|date('d/m/Y') : 'Date inconnue' }}</strong><br>
-                    <small style="color: #666;">{{ rendement.id_recolte.typeCulture ?? 'Type non défini' }}</small>
-                {% else %}
-                    <span style="color: #999;">Récolte non associée</span>
-                {% endif %}
-            </td>
-            <td>{{ rendement.surface_exploitee }}</td>
-            <td>{{ rendement.quantite_totale }}</td>
-            <td><strong style="color: #16a34a;">{{ rendement.productivite|number_format(2, '.', '') }}</strong></td>
-            <td>
-                <a href="{{ path('app_rendement_show', {'idRendement': rendement.id_rendement}) }}" class="btn">Voir</a>
-                <a href="{{ path('app_rendement_edit', {'idRendement': rendement.id_rendement}) }}" class="btn btn-secondary">Modifier</a>
-                <form method="post" action="{{ path('app_rendement_delete', {'idRendement': rendement.id_rendement}) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rendement.id_rendement) }}">
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
-                </form>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="5" style="text-align: center;">Aucun rendement trouvé.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+            <div class="agri-crud">
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="crud-header mb-4"
+                     data-controller="crud-search"
+                     data-crud-search-url-value="{{ path('app_rendement_index') }}">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-8">
+                            <form class="d-flex gap-2" method="get">
+                                <input class="form-control"
+                                       name="q"
+                                       value="{{ q }}"
+                                       placeholder="Rechercher (type, localisation)"
+                                       autocomplete="off"
+                                       data-crud-search-target="input"
+                                       data-action="input->crud-search#search">
+                                <input type="hidden" name="sort" value="{{ sort|default('prod_desc') }}">
+
+                                {% if q %}
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_rendement_index', {sort: sort|default('prod_desc')}) }}">Effacer</a>
+                                {% endif %}
+                            </form>
+                        </div>
+
+                        <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end flex-wrap">
+                            <a class="btn btn-outline-secondary" href="{{ path('app_recolte_index') }}">Récoltes</a>
+                            <a class="btn btn-outline-secondary" href="{{ path('app_archive_index') }}">Archives</a>
+                            <a class="btn btn-success" href="{{ path('app_rendement_new') }}">Calculer</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                        <label class="small text-muted align-self-center">Trier par</label>
+                        <select class="form-select form-select-sm"
+                                name="sort"
+                                data-crud-search-target="sort"
+                                data-action="change->crud-search#sortChanged">
+                            <option value="prod_desc" {{ (sort|default('prod_desc')) == 'prod_desc' ? 'selected' : '' }}>Productivité (haut)</option>
+                            <option value="prod_asc" {{ (sort|default('prod_desc')) == 'prod_asc' ? 'selected' : '' }}>Productivité (bas)</option>
+                            <option value="date_desc" {{ (sort|default('prod_desc')) == 'date_desc' ? 'selected' : '' }}>Date récolte (récent)</option>
+                            <option value="date_asc" {{ (sort|default('prod_desc')) == 'date_asc' ? 'selected' : '' }}>Date récolte (ancien)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="agri-crud-results" data-crud-search-target="results">
+                    <div class="agri-crud-loader" aria-hidden="true"></div>
+                    {% include 'rendement/_results.html.twig' %}
+                </div>
+
+            </div>
+        </div>
+    </section>
 
 {% endblock %}

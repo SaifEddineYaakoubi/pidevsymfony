@@ -33,57 +33,12 @@
     {% set total = stats.total_filtered ?? cultures|length %}
     {% set counts = stats.counts_by_etat ?? {} %}
 
-    <div class="agri-kpis">
-        <div class="agri-kpi">
-            <div class="agri-kpi__icon"><i class="bi bi-collection"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Affichés</div>
-                <div class="agri-kpi__value">{{ total }}</div>
-            </div>
-        </div>
-
-
-
-        <div class="agri-kpi agri-kpi--warning">
-            <div class="agri-kpi__icon"><i class="bi bi-alarm"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Alertes</div>
-                <div class="agri-kpi__value">{{ alerts is defined ? (alerts|length) : 0 }}</div>
-            </div>
-        </div>
-
-        <div class="agri-kpi agri-kpi--germination">
-            <div class="agri-kpi__icon"><i class="bi bi-flower1"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Germination</div>
-                <div class="agri-kpi__value">{{ counts.germination ?? 0 }}</div>
-            </div>
-        </div>
-
-        <div class="agri-kpi agri-kpi--croissance">
-            <div class="agri-kpi__icon"><i class="bi bi-graph-up"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Croissance</div>
-                <div class="agri-kpi__value">{{ counts.croissance ?? 0 }}</div>
-            </div>
-        </div>
-
-        <div class="agri-kpi agri-kpi--floraison">
-            <div class="agri-kpi__icon"><i class="bi bi-brightness-high"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Floraison</div>
-                <div class="agri-kpi__value">{{ counts.floraison ?? 0 }}</div>
-            </div>
-        </div>
-
-        <div class="agri-kpi agri-kpi--maturite">
-            <div class="agri-kpi__icon"><i class="bi bi-award"></i></div>
-            <div class="agri-kpi__body">
-                <div class="agri-kpi__label">Mature</div>
-                <div class="agri-kpi__value">{{ counts.maturite ?? 0 }}</div>
-            </div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div class="small text-muted">Statistiques des cultures</div>
+        <div class="small text-muted">Répartition des états</div>
     </div>
+
+
 
     <div class="agri-progress mt-3" aria-hidden="true" title="Répartition">
         {% set etats = ['germination','croissance','floraison','maturite'] %}
@@ -92,6 +47,15 @@
             {% set percent = (total > 0 ? ((count / total) * 100) : 0) %}
             <div class="agri-progress__seg agri-progress__seg--{{ e }}" style="width: {{ percent }}%"></div>
         {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-end flex-wrap gap-2 mt-2">
+        <span class="badge text-bg-dark">Affichés: {{ total }}</span>
+        <span class="badge text-bg-warning">Alertes: {{ alerts is defined ? (alerts|length) : 0 }}</span>
+        <span class="badge" style="background:#6f42c1;">Germination: {{ counts.germination ?? 0 }}</span>
+        <span class="badge text-bg-success">Croissance: {{ counts.croissance ?? 0 }}</span>
+        <span class="badge text-bg-warning">Floraison: {{ counts.floraison ?? 0 }}</span>
+        <span class="badge text-bg-danger">Mature: {{ counts.maturite ?? 0 }}</span>
     </div>
 </div>
 

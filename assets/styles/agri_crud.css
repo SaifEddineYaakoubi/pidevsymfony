@@ -291,6 +291,24 @@
 .agri-progress__seg--floraison { background: rgba(253, 126, 20, 0.65); }
 .agri-progress__seg--maturite { background: rgba(220, 53, 69, 0.60); }
 
+/* Récoltes (qualité) segments */
+.agri-progress__seg--excellente { background: rgba(25, 135, 84, 0.65); }
+.agri-progress__seg--bonne { background: rgba(13, 110, 253, 0.60); }
+.agri-progress__seg--moyenne { background: rgba(255, 193, 7, 0.70); }
+.agri-progress__seg--faible { background: rgba(220, 53, 69, 0.62); }
+
+/* Rendements (classes productivité) segments */
+.agri-progress__seg--faible { background: rgba(220, 53, 69, 0.62); }
+.agri-progress__seg--moyen { background: rgba(255, 193, 7, 0.70); }
+.agri-progress__seg--bon { background: rgba(13, 110, 253, 0.60); }
+.agri-progress__seg--eleve { background: rgba(25, 135, 84, 0.65); }
+
+/* Archives (causes) segments */
+.agri-progress__seg--cause1 { background: rgba(111, 66, 193, 0.55); }
+.agri-progress__seg--cause2 { background: rgba(253, 126, 20, 0.65); }
+.agri-progress__seg--cause3 { background: rgba(13, 110, 253, 0.60); }
+.agri-progress__seg--autres { background: rgba(107, 79, 42, 0.45); }
+
 /* Generic warning badge (for alerts counter) */
 .agri-badge--warning {
   border-color: rgba(253, 126, 20, 0.30);

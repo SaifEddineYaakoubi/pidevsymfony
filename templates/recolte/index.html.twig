@@ -1,148 +1,177 @@
 {% extends 'front/base_agriculteur.html.twig' %}
 
-{% block title %}Gestion des Récoltes{% endblock %}
+{% block title %}Récoltes - AgriCulture{% endblock %}
 
 {% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Récoltes',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Récoltes' }
+        ]
+    } %}
 
-<h1>🌱 Gestion des Récoltes</h1>
+    <section class="section">
+        <div class="container">
 
-<div style="margin-bottom: 2rem;">
-    <a href="{{ path('app_recolte_new') }}" class="btn" style="background: #4A7C2F;">+ Ajouter Récolte</a>
-    <a href="{{ path('app_rendement_index') }}" class="btn" style="background: #8B6F47; margin-left: 1rem;">📊 Gérer les Rendements</a>
-    <a href="{{ path('app_archive_index') }}" class="btn" style="background: #6B5636; margin-left: 1rem;">📁 Voir les Archives</a>
-    <a href="{{ path('app_recolte_statistiques') }}" class="btn" style="background: #2D5016; margin-left: 1rem;">📈 Statistiques</a>
-</div>
+            <div class="agri-crud">
 
-<!-- Barre de recherche et tri -->
-<div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-    <form method="GET" action="{{ path('app_recolte_index') }}" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-        <!-- Recherche -->
-        <div style="flex: 1; min-width: 250px;">
-            <label for="search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">🔍 Rechercher</label>
-            <input type="text" id="search" name="search" value="{{ search }}" placeholder="Type de culture ou localisation..."
-                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="crud-header mb-4"
+                     data-controller="crud-search"
+                     data-crud-search-url-value="{{ path('app_recolte_index') }}">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-8">
+                            <form class="d-flex gap-2" method="get">
+                                <input class="form-control"
+                                       name="search"
+                                       value="{{ search }}"
+                                       placeholder="Rechercher (type, localisation)"
+                                       autocomplete="off"
+                                       data-crud-search-target="input"
+                                       data-action="input->crud-search#search">
+                                <input type="hidden" name="sort" value="{{ sort|default('date_desc') }}">
+
+                                {% if search %}
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_recolte_index', {sort: sort|default('date_desc')}) }}">Effacer</a>
+                                {% endif %}
+                            </form>
+                        </div>
+
+                        <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end flex-wrap">
+                            <a class="btn btn-outline-secondary" href="{{ path('app_rendement_index') }}">Rendements</a>
+                            <a class="btn btn-outline-secondary" href="{{ path('app_archive_index') }}">Archives</a>
+                            <a class="btn btn-outline-secondary" href="{{ path('app_recolte_statistiques') }}">Statistiques</a>
+                            <a class="btn btn-success" href="{{ path('app_recolte_new') }}">Ajouter</a>
+                            <a id="btnEdit" class="btn btn-outline-primary disabled" href="#">Modifier</a>
+                            <form id="deleteForm" method="post" class="m-0">
+                                <input type="hidden" name="_token" id="deleteToken" value="">
+                                <button id="btnDelete" class="btn btn-outline-danger" type="submit" disabled>Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                        <label class="small text-muted align-self-center">Trier par</label>
+                        <select class="form-select form-select-sm"
+                                name="sort"
+                                data-crud-search-target="sort"
+                                data-action="change->crud-search#sortChanged">
+                            <option value="date_desc" {{ (sort|default('date_desc')) == 'date_desc' ? 'selected' : '' }}>Date (récent)</option>
+                            <option value="date_asc" {{ (sort|default('date_desc')) == 'date_asc' ? 'selected' : '' }}>Date (ancien)</option>
+                            <option value="type_asc" {{ (sort|default('date_desc')) == 'type_asc' ? 'selected' : '' }}>Type (A→Z)</option>
+                            <option value="type_desc" {{ (sort|default('date_desc')) == 'type_desc' ? 'selected' : '' }}>Type (Z→A)</option>
+                        </select>
+                    </div>
+
+                    {# results area below #}
+                </div>
+
+                <div class="agri-crud-results" data-crud-search-target="results">
+                    <div class="agri-crud-loader" aria-hidden="true"></div>
+
+                    {# Render the list itself (also returned for AJAX) #}
+                    {% include 'recolte/_results.html.twig' %}
+                </div>
+
+            </div>
         </div>
+    </section>
 
-        <!-- Tri -->
-        <div style="min-width: 200px;">
-            <label for="sort" style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333;">📅 Trier par</label>
-            <select id="sort" name="sort" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; transition: all 0.3s ease;">
-                <option value="date_desc" {{ sort == 'date_desc' ? 'selected' : '' }}>📅 Date (Plus récent → Plus ancien)</option>
-                <option value="date_asc" {{ sort == 'date_asc' ? 'selected' : '' }}>📅 Date (Plus ancien → Plus récent)</option>
-                <option value="type_asc" {{ sort == 'type_asc' ? 'selected' : '' }}>🌱 Type (A → Z)</option>
-                <option value="type_desc" {{ sort == 'type_desc' ? 'selected' : '' }}>🌱 Type (Z → A)</option>
-            </select>
-        </div>
+    <script>
+        (function() {
+            const btnEdit = document.getElementById('btnEdit');
+            const btnDelete = document.getElementById('btnDelete');
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteToken = document.getElementById('deleteToken');
+            const results = document.querySelector('[data-crud-search-target="results"]');
 
-        <!-- Boutons -->
-        <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
-            <button type="submit" class="btn" style="background: #4A7C2F;">🔍 Rechercher</button>
-            <a href="{{ path('app_recolte_index') }}" class="btn" style="background: #8B6F47;">🔄 Réinitialiser</a>
-        </div>
-    </form>
-</div>
+            function clearSelection() {
+                const table = document.getElementById('recolteTable');
+                if (!table) return;
+                table.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('is-selected'));
+            }
 
-<!-- Résultats -->
-{% if search %}
-    <div style="background: #e8f5e8; padding: 1rem; border-left: 4px solid #16a34a; border-radius: 4px; margin-bottom: 1rem;">
-        <strong>Résultats pour :</strong> "{{ search }}"
-        <span style="color: #666;">({{ recoltes|length }} résultat{{ recoltes|length > 1 ? 's' : '' }})</span>
-    </div>
-{% endif %}
+            function setSelected(row) {
+                clearSelection();
+                row.classList.add('is-selected');
+                const selectedId = row.dataset.id;
+                if (!selectedId) return;
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Quantité (kg)</th>
-            <th>Date</th>
-            <th>Qualité</th>
-            <th>Type</th>
-            <th>Localisation</th>
-            <th>Rendement</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for recolte in recoltes %}
-        <tr>
-            <td>{{ recolte.quantite }}</td>
-            <td>{{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : '-' }}</td>
-            <td>
-                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background:
-                    {% if recolte.qualite == 'excellente' %}#10b981
-                    {% elseif recolte.qualite == 'bonne' %}#3b82f6
-                    {% elseif recolte.qualite == 'moyenne' %}#f59e0b
-                    {% else %}#ef4444
-                    {% endif %};
-                    color: white; font-size: 12px;">
-                    {{ recolte.qualite }}
-                </span>
-            </td>
-            <td>{{ recolte.type_culture }}</td>
-            <td>{{ recolte.localisation }}</td>
-            <td>
-                {% if rendements[recolte.id_recolte] %}
-                    <strong>{{ rendements[recolte.id_recolte]|number_format(2, '.', '') }} kg/m²</strong>
-                {% else %}
-                    <span style="color: #999;">-</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn">Voir</a>
-                <a href="{{ path('app_recolte_edit', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-secondary">Modifier</a>
-                <a href="{{ path('app_recolte_delete_confirm', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette récolte ? Vous devrez indiquer une cause.');">Supprimer</a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="7" style="text-align: center;">Aucune récolte trouvée.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+                btnEdit.classList.remove('disabled');
+                btnEdit.href = '{{ path('app_recolte_edit', {'id_recolte': 0}) }}'.replace('/0/edit', '/' + selectedId + '/edit');
 
-<script>
-// Recherche en temps réel (optionnel - amélioration UX)
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search');
-    const sortSelect = document.getElementById('sort');
-    const form = document.querySelector('form');
+                btnDelete.disabled = false;
+                deleteForm.action = '{{ path('app_recolte_delete', {'id_recolte': 0}) }}'.replace('/0', '/' + selectedId);
+                deleteToken.value = row.dataset.deleteToken || '';
+            }
 
-    // Auto-submit après un délai pour la recherche
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            form.submit();
-        }, 800); // Délai de 800ms pour éviter trop de requêtes
-    });
+            if (results) {
+                results.addEventListener('click', (e) => {
+                    const row = e.target.closest('tr[data-id]');
+                    if (!row) return;
+                    setSelected(row);
+                });
 
-    // Auto-submit immédiat pour le tri
-    sortSelect.addEventListener('change', function() {
-        form.submit();
-    });
+                results.addEventListener('dblclick', (e) => {
+                    const row = e.target.closest('tr[data-id][data-href]');
+                    if (!row) return;
+                    const href = row.dataset.href;
+                    if (href) window.location.href = href;
+                });
+            }
 
-    // Animation pour les résultats
-    const resultsDiv = document.querySelector('[style*="e8f5e8"]');
-    if (resultsDiv) {
-        resultsDiv.style.animation = 'fadeIn 0.5s ease-in';
-    }
-});
+            document.addEventListener('crud:results-updated', () => {
+                btnEdit.classList.add('disabled');
+                btnEdit.href = '#';
+                btnDelete.disabled = true;
+                deleteToken.value = '';
+                deleteForm.action = '';
+            });
+        })();
+    </script>
 
-// Animation CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    {# Fallback: if Stimulus is not running for some reason, still do live search #}
+    <script>
+        (function() {
+            const wrapper = document.querySelector('[data-controller="crud-search"]');
+            const input = document.querySelector('[data-crud-search-target="input"]');
+            const sort = document.querySelector('[data-crud-search-target="sort"]');
+            const results = document.querySelector('[data-crud-search-target="results"]');
+            if (!wrapper || !input || !results) return;
 
-    .table tr:hover {
-        transform: scale(1.01);
-        transition: transform 0.2s ease;
-    }
-`;
-document.head.appendChild(style);
-</script>
+            let timer = null;
+            async function doSearch() {
+                const q = input.value || '';
+                const url = new URL(wrapper.getAttribute('data-crud-search-url-value'), window.location.origin);
+                url.searchParams.set('search', q);
+                if (sort) url.searchParams.set('sort', sort.value);
 
+                const loader = results.querySelector('.agri-crud-loader');
+                results.classList.add('is-loading');
+                try {
+                    const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!res.ok) return;
+                    results.innerHTML = await res.text();
+                    if (loader) results.prepend(loader);
+                    document.dispatchEvent(new CustomEvent('crud:results-updated'));
+                } catch (e) {
+                    // ignore network errors
+                } finally {
+                    results.classList.remove('is-loading');
+                }
+            }
+
+            input.addEventListener('input', () => {
+                window.clearTimeout(timer);
+                timer = window.setTimeout(doSearch, 250);
+            });
+            if (sort) sort.addEventListener('change', doSearch);
+        })();
+    </script>
 {% endblock %}

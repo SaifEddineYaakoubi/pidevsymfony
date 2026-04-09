@@ -15,7 +15,7 @@ class Vente
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private int $id_vente;
+    private ?int $id_vente = null;
 
     #[ORM\Column(type: "date", nullable: true)]
     #[Assert\NotNull(message: "La date de vente est obligatoire.")]
@@ -46,15 +46,12 @@ class Vente
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', onDelete: 'CASCADE')]
     private ?Utilisateur $id_user = null;
 
-    public function getId_vente()
+    public function getId_vente(): ?int
     {
         return $this->id_vente;
     }
 
-    public function setId_vente($value)
-    {
-        $this->id_vente = $value;
-    }
+    // Pas de setter pour l'id: il est auto-généré par la base
 
     public function getDate_vente()
     {
