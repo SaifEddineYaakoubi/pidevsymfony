@@ -23,7 +23,7 @@ class AuthController extends AbstractController
             $roles = $user->getRoles();
 
             if (in_array('ROLE_ADMIN', $roles)) {
-                return $this->redirectToRoute('app_admin_dashboard');
+                return $this->redirectToRoute('app_admin_utilisateur_index');
             } elseif (in_array('ROLE_STOCK', $roles)) {
                 return $this->redirectToRoute('app_stock_dashboard');
             } elseif (in_array('ROLE_AGRICULTEUR', $roles)) {
@@ -52,7 +52,7 @@ class AuthController extends AbstractController
     {
         // Votre code d'inscription
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_utilisateur_index');
         }
 
         $user = new Utilisateur();

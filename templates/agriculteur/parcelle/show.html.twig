@@ -66,12 +66,21 @@
                         <div class="mt-4 d-flex gap-2">
                             <a class="btn btn-outline-secondary" href="{{ path('agri_parcelle_index') }}">Retour</a>
                             <a class="btn btn-outline-primary" href="{{ path('agri_parcelle_edit', {id: parcelle.id_parcelle}) }}">Modifier</a>
+                            {% set hasCultures = (parcelle.cultures is defined and parcelle.cultures|length > 0) %}
                             <form method="post"
                                   action="{{ path('agri_parcelle_delete', {id: parcelle.id_parcelle}) }}"
                                   class="m-0">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_parcelle_' ~ parcelle.id_parcelle) }}">
-                                <button class="btn btn-outline-danger" type="submit">Supprimer</button>
+                                <button class="btn btn-outline-danger" type="submit" {{ hasCultures ? 'disabled' : '' }}>
+                                    Supprimer
+                                </button>
                             </form>
+
+                            {% if hasCultures %}
+                                <div class="text-muted small align-self-center">
+                                    Suppression impossible : cette parcelle contient des cultures.
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

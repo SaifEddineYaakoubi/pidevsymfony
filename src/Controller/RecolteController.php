@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Recolte;
 use App\Entity\Rendement;
 use App\Entity\Recolte_archive;
+use App\Entity\Utilisateur;
 use App\Form\RecolteType;
 use App\Repository\RecolteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,8 +20,16 @@ class RecolteController extends AbstractController
     #[Route('/statistiques', name: 'app_recolte_statistiques', methods: ['GET'])]
     public function statistiques(EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         // Récupérer toutes les récoltes avec leurs dates
-        $recoltes = $entityManager->getRepository(Recolte::class)->findBy([], ['date_recolte' => 'DESC']);
+        $recoltes = $entityManager->getRepository(Recolte::class)->findBy(
+            ['id_user' => $user->getIdUser()],
+            ['date_recolte' => 'DESC']
+        );
 
         // Traiter les statistiques par mois en PHP
         $statsParMois = [];
@@ -67,51 +76,52 @@ class RecolteController extends AbstractController
     #[Route('/', name: 'app_recolte_index', methods: ['GET'])]
     public function index(RecolteRepository $recolteRepository, EntityManagerInterface $entityManager, Request $request): Response
     {
-        $search = $request->query->get('search', '');
-        $sort = $request->query->get('sort', 'date_desc');
-
-        // Build query with search and sort
-        $qb = $entityManager->createQueryBuilder();
-        $qb->select('r')
-           ->from(Recolte::class, 'r');
-
-        // Add search conditions
-        if (!empty($search)) {
-            $qb->where('r.type_culture LIKE :search')
-               ->orWhere('r.localisation LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
         }
 
-        // Add sorting
-        switch ($sort) {
-            case 'date_desc':
-                $qb->orderBy('r.date_recolte', 'DESC');
-                break;
-            case 'date_asc':
-                $qb->orderBy('r.date_recolte', 'ASC');
-                break;
-            case 'type_asc':
-                $qb->orderBy('r.type_culture', 'ASC');
-                break;
-            case 'type_desc':
-                $qb->orderBy('r.type_culture', 'DESC');
-                break;
-            default:
-                $qb->orderBy('r.date_recolte', 'DESC');
-        }
+        $search = $request->query->getString('search', '');
+        $sort = $request->query->getString('sort', 'date_desc');
 
-        $recoltes = $qb->getQuery()->getResult();
+        $recoltes = $recolteRepository->findForIndexForUser($user, $search, $sort);
+        $stats = $recolteRepository->getIndexStatsForUser($user, $search);
 
-        // Get rendements for each recolte
+        // Get rendements for each recolte (map recolteId => productivite)
         $rendements = [];
-        foreach ($recoltes as $recolte) {
-            $rendement = $entityManager->getRepository(Rendement::class)->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
-            $rendements[$recolte->getId_recolte()] = $rendement ? $rendement->getProductivite() : null;
+        if (count($recoltes) > 0) {
+            $ids = array_map(static fn(Recolte $r) => $r->getId_recolte(), $recoltes);
+            $qbR = $entityManager->createQueryBuilder();
+            $qbR->select('re', 'r')
+                ->from(Rendement::class, 're')
+                ->leftJoin('re.id_recolte', 'r')
+                ->andWhere('r.id_recolte IN (:ids)')
+                ->setParameter('ids', $ids);
+            /** @var Rendement[] $rends */
+            $rends = $qbR->getQuery()->getResult();
+            foreach ($rends as $rend) {
+                $recolte = $rend->getId_recolte();
+                if ($recolte) {
+                    $rendements[$recolte->getId_recolte()] = $rend->getProductivite();
+                }
+            }
+        }
+
+        // If this is an AJAX (XMLHttpRequest) request, return only the results partial
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('recolte/_results.html.twig', [
+                'recoltes' => $recoltes,
+                'rendements' => $rendements,
+                'stats' => $stats,
+                'search' => $search,
+                'sort' => $sort,
+            ]);
         }
 
         return $this->render('recolte/index.html.twig', [
             'recoltes' => $recoltes,
             'rendements' => $rendements,
+            'stats' => $stats,
             'search' => $search,
             'sort' => $sort,
         ]);
@@ -120,8 +130,13 @@ class RecolteController extends AbstractController
     #[Route('/new', name: 'app_recolte_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $recolte = new Recolte();
-        $recolte->setId_user(1); // Auto-assign default agriculteur ID
+        $recolte->setId_user($user->getIdUser());
         $form = $this->createForm(RecolteType::class, $recolte);
         $form->handleRequest($request);
 
@@ -144,7 +159,12 @@ class RecolteController extends AbstractController
     #[Route('/{id_recolte}', name: 'app_recolte_show', methods: ['GET'])]
     public function show(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
-        $recolte = $recolteRepository->find($id_recolte);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
 
         if (!$recolte) {
             throw $this->createNotFoundException('Récolte non trouvée');
@@ -160,7 +180,12 @@ class RecolteController extends AbstractController
     #[Route('/{id_recolte}/edit', name: 'app_recolte_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
-        $recolte = $recolteRepository->find($id_recolte);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
 
         if (!$recolte) {
             throw $this->createNotFoundException('Récolte non trouvée');
@@ -187,7 +212,12 @@ class RecolteController extends AbstractController
     #[Route('/{id_recolte}', name: 'app_recolte_delete', methods: ['POST'])]
     public function delete(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
-        $recolte = $recolteRepository->find($id_recolte);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
 
         if (!$recolte) {
             throw $this->createNotFoundException('Récolte non trouvée');
@@ -204,7 +234,12 @@ class RecolteController extends AbstractController
     #[Route('/{id_recolte}/rendement', name: 'app_recolte_rendement', methods: ['GET'])]
     public function showRendement(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
-        $recolte = $recolteRepository->find($id_recolte);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
 
         if (!$recolte) {
             throw $this->createNotFoundException('Récolte non trouvée');
@@ -246,7 +281,12 @@ class RecolteController extends AbstractController
     #[Route('/{id_recolte}/delete-confirm', name: 'app_recolte_delete_confirm', methods: ['GET', 'POST'])]
     public function deleteConfirm(Request $request, int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
     {
-        $recolte = $recolteRepository->find($id_recolte);
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
 
         if (!$recolte) {
             throw $this->createNotFoundException('Récolte non trouvée');
@@ -270,7 +310,7 @@ class RecolteController extends AbstractController
             $archive->setLocalisation($recolte->getLocalisation());
             $archive->setCause_supression($cause);
             $archive->setDate_archivage(new \DateTime());
-            $archive->setId_user($recolte->getIdUser());
+            $archive->setId_user($user->getIdUser());
 
             $entityManager->persist($archive);
 
@@ -288,33 +328,4 @@ class RecolteController extends AbstractController
         ]);
     }
 
-
-    private function calculateRendement(Recolte $recolte, EntityManagerInterface $entityManager): void
-    {
-        $culture = $recolte->getId_culture();
-        if (!$culture) {
-            return; // Skip if no culture
-        }
-        $parcelle = $culture->getIdParcelle();
-        $surface = $parcelle->getSuperficie();
-        $quantite = $recolte->getQuantite();
-
-        $productivite = $quantite / $surface;
-
-        // Check if Rendement exists, else create
-        $rendementRepository = $entityManager->getRepository(Rendement::class);
-        $rendement = $rendementRepository->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
-
-        if (!$rendement) {
-            $rendement = new Rendement();
-            $rendement->setId_recolte($recolte->getId_recolte());
-        }
-
-        $rendement->setSurface_exploitee($surface);
-        $rendement->setQuantite_totale($quantite);
-        $rendement->setProductivite($productivite);
-
-        $entityManager->persist($rendement);
-        $entityManager->flush();
-    }
 }

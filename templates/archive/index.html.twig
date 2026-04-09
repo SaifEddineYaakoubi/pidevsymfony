@@ -4,45 +4,71 @@
 
 {% block agriculteur_body %}
 
-<h1>📁 Archives des Récoltes Supprimées</h1>
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Archives',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Archives' }
+        ]
+    } %}
 
-<div style="margin-bottom: 2rem;">
-    <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary">← Retour aux Récoltes Actives</a>
-</div>
+    <section class="section">
+        <div class="container">
+            <div class="agri-crud">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Type de Culture</th>
-            <th>Localisation</th>
-            <th>Quantité (kg)</th>
-            <th>Cause de Suppression</th>
-            <th>Date d'Archivage</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for archive in archives %}
-        <tr>
-            <td>{{ archive.type_culture }}</td>
-            <td>{{ archive.localisation }}</td>
-            <td>{{ archive.quantite }}</td>
-            <td>
-                <span style="background: #fee; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                    {{ archive.cause_supression }}
-                </span>
-            </td>
-            <td>{{ archive.date_archivage ? archive.date_archivage|date('d/m/Y H:i') : '-' }}</td>
-            <td>
-                <a href="{{ path('app_archive_show', {'idArchive': archive.id_archive}) }}" class="btn">Voir Détails</a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="6" style="text-align: center;">Aucune archive trouvée.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endfor %}
 
+                <div class="crud-header mb-4"
+                     data-controller="crud-search"
+                     data-crud-search-url-value="{{ path('app_archive_index') }}">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-8">
+                            <form class="d-flex gap-2" method="get">
+                                <input class="form-control"
+                                       name="q"
+                                       value="{{ q }}"
+                                       placeholder="Rechercher (type, localisation, cause)"
+                                       autocomplete="off"
+                                       data-crud-search-target="input"
+                                       data-action="input->crud-search#search">
+                                <input type="hidden" name="sort" value="{{ sort|default('archivage_desc') }}">
+
+                                {% if q %}
+                                    <a class="btn btn-outline-secondary" href="{{ path('app_archive_index', {sort: sort|default('archivage_desc')}) }}">Effacer</a>
+                                {% endif %}
+                            </form>
+                        </div>
+
+                        <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end flex-wrap">
+                            <a class="btn btn-outline-secondary" href="{{ path('app_recolte_index') }}">Récoltes</a>
+                            <a class="btn btn-outline-secondary" href="{{ path('app_rendement_index') }}">Rendements</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                        <label class="small text-muted align-self-center">Trier par</label>
+                        <select class="form-select form-select-sm"
+                                name="sort"
+                                data-crud-search-target="sort"
+                                data-action="change->crud-search#sortChanged">
+                            <option value="archivage_desc" {{ (sort|default('archivage_desc')) == 'archivage_desc' ? 'selected' : '' }}>Archivage (récent)</option>
+                            <option value="archivage_asc" {{ (sort|default('archivage_desc')) == 'archivage_asc' ? 'selected' : '' }}>Archivage (ancien)</option>
+                            <option value="type_asc" {{ (sort|default('archivage_desc')) == 'type_asc' ? 'selected' : '' }}>Type (A→Z)</option>
+                            <option value="type_desc" {{ (sort|default('archivage_desc')) == 'type_desc' ? 'selected' : '' }}>Type (Z→A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="agri-crud-results" data-crud-search-target="results">
+                    <div class="agri-crud-loader" aria-hidden="true"></div>
+                    {% include 'archive/_results.html.twig' %}
+                </div>
+
+            </div>
+        </div>
+    </section>
 {% endblock %}

@@ -17,19 +17,6 @@
                 </div>
 
                 <div class="card-body p-5">
-                    {# Gestion sécurisée de l'erreur - Vérifie si la variable error existe #}
-                    {% if (error is defined and error) or (app.request.get('error') is defined) %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            {# Use error.messageKey when available, otherwise show error as string #}
-                            {% if error is defined and error %}
-                                {{ error.messageKey|trans(error.messageData, 'security') }}
-                            {% else %}
-                                {{ app.request.get('error') }}
-                            {% endif %}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endif %}
 
                     {# Afficher les messages flash s'il y en a #}
                     {% for message in app.flashes('success') %}

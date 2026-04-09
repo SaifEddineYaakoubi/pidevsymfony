@@ -45,6 +45,59 @@
                 </form>
             </div>
 
+            {# Dashboard Header Stats #}
+            <div class="container" style="padding: 0; margin-bottom: 20px;">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-dark text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <div class="small opacity-75">Total Revenus</div>
+                                        <div class="h5 mb-0">{{ (stats.total_revenus ?? 0)|number_format(2, '.', ' ') }} DT</div>
+                                    </div>
+                                    <i class="fas fa-sack-dollar fa-lg opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-primary text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <div class="small opacity-75">Volume de Ventes</div>
+                                        <div class="h5 mb-0">{{ stats.ventes_count ?? 0 }}</div>
+                                    </div>
+                                    <i class="fas fa-receipt fa-lg opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-info text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <div class="small opacity-75">Dernière Vente</div>
+                                        <div class="h5 mb-0">
+                                            {% if stats.last_vente_date is not empty %}
+                                                {{ stats.last_vente_date|date('d/m/Y') }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-calendar-check fa-lg opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Table Card -->
             <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); margin-bottom: 20px;">
                 <div style="overflow-x: auto;">
@@ -107,13 +160,19 @@
                                         </span>
                                     </td>
                                     <td style="padding: 10px 16px; text-align: center;">
-                                        <div style="display: flex; gap: 4px; justify-content: center;">
-                                            <a href="{{ path('app_vente_show', {'id_vente': vente.id_vente}) }}" style="background: #f0f4f9; color: #667eea; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" title="Voir">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}" style="background: #fef3c7; color: #d97706; border: 1px solid #fbbf24; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" title="Modifier">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                        <div class="d-flex justify-content-center">
+                                            <div class="btn-group" role="group" aria-label="Actions vente">
+                                                <a href="{{ path('app_vente_show', {'id_vente': vente.id_vente}) }}"
+                                                   class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
+                                                   title="Voir">
+                                                    <i class="fas fa-eye"></i><span>Voir</span>
+                                                </a>
+                                                <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}"
+                                                   class="btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-1"
+                                                   title="Éditer">
+                                                    <i class="fas fa-edit"></i><span>Éditer</span>
+                                                </a>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

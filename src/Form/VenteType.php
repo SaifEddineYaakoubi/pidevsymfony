@@ -20,28 +20,30 @@ class VenteType extends AbstractType
             ->add('dateVente', FormDateType::class, [
                 'label' => 'Date de vente',
                 'widget' => 'single_text',
+                // Calendrier HTML5 (type="date")
                 'html5' => true,
-                'required' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('montantTotal', NumberType::class, [
                 'label' => 'Montant total',
                 'scale' => 2,
-                'required' => false,
+                'html5' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control', 'placeholder' => '0.00'],
             ])
             ->add('idClient', EntityType::class, [
                 'label' => 'Client',
                 'class' => Client::class,
                 'choice_label' => 'nom',
-                'required' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('idUser', EntityType::class, [
                 'label' => 'Utilisateur',
                 'class' => Utilisateur::class,
                 'choice_label' => 'nom',
-                'required' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control'],
             ])
         ;

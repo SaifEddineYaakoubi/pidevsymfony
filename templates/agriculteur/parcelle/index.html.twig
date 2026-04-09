@@ -79,10 +79,6 @@
 
             <div class="agri-crud-results" data-crud-search-target="results">
                 <div class="agri-crud-loader" aria-hidden="true">
-                    <div class="text-center">
-                        <div class="spinner-border" role="status" aria-label="Chargement"></div>
-                        <div class="small text-muted mt-2">Chargement...</div>
-                    </div>
                 </div>
                 {% include 'agriculteur/parcelle/_results.html.twig' %}
             </div>
@@ -180,12 +176,19 @@
                 if (dir) url.searchParams.set('dir', dir.value);
                 const loader = results.querySelector('.agri-crud-loader');
                 results.classList.add('is-loading');
-                const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                if (!res.ok) return;
-                results.innerHTML = await res.text();
-                if (loader) results.prepend(loader);
-                results.classList.remove('is-loading');
-                document.dispatchEvent(new CustomEvent('crud:results-updated'));
+                try {
+                    const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!res.ok) {
+                        return;
+                    }
+                    results.innerHTML = await res.text();
+                    if (loader) results.prepend(loader);
+                    document.dispatchEvent(new CustomEvent('crud:results-updated'));
+                } catch (e) {
+                    // ignore network errors
+                } finally {
+                    results.classList.remove('is-loading');
+                }
             }
 
             input.addEventListener('input', () => {

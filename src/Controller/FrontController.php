@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Utilisateur;
 use App\Repository\ClientRepository;
 use App\Repository\CultureRepository;
 use App\Repository\ParcelleRepository;
@@ -24,14 +25,21 @@ final class FrontController extends AbstractController
         RendementRepository $rendementRepository,
     ): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('agriculteur/pages/home.html.twig', [
             'counts' => [
-                'parcelles' => $parcelleRepository->count([]),
-                'cultures' => $cultureRepository->count([]),
-                'ventes' => $venteRepository->count([]),
-                'clients' => $clientRepository->count([]),
-                'recoltes' => $recolteRepository->count([]),
-                'rendements' => $rendementRepository->count([]),
+                'parcelles' => $parcelleRepository->count(['id_user' => $user]),
+                // Cultures are scoped via parcelle owner; repository doesn't expose countForUser, so approximate via filtered search.
+                'cultures' => count($cultureRepository->searchByQueryForUser($user, null, null, null)),
+                'ventes' => $venteRepository->count(['id_user' => $user]),
+                'clients' => $clientRepository->count(['id_user' => $user->getIdUser()]),
+                'recoltes' => $recolteRepository->count(['id_user' => $user->getIdUser()]),
+                // Rendement is scoped via recolte owner; repository doesn't expose countForUser, so approximate via filtered query.
+                'rendements' => count($rendementRepository->findForIndexForUser($user, null, 'prod_desc')),
             ],
         ]);
     }

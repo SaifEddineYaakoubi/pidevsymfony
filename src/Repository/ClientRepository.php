@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Client;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr\Orx;
@@ -48,6 +49,29 @@ class ClientRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findBySearchAndSortForUser(Utilisateur $user, ?string $search = null, string $sortBy = 'nom', string $order = 'ASC'): array
+    {
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+
+        $sortableColumns = ['nom', 'contact', 'id_client'];
+        if (!in_array($sortBy, $sortableColumns, true)) {
+            $sortBy = 'nom';
+        }
+
+        $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.id_user = :uid')
+            ->setParameter('uid', $user->getIdUser());
+
+        if (!empty($search)) {
+            $qb->andWhere('c.nom LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        $qb->orderBy('c.' . $sortBy, $order);
+
+        return $qb->getQuery()->getResult();
+    }
+
     /**
      * Obtenir tous les clients triés par défaut par nom
      *
@@ -59,5 +83,54 @@ class ClientRepository extends ServiceEntityRepository
             ->orderBy('c.nom', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Stats globales pour l'entête dashboard de la page index.
+     *
+     * @return array{clients_count: int, last_client_id: ?int}
+     */
+    public function getClientStats(): array
+    {
+        $row = $this->createQueryBuilder('c')
+            ->select(
+                'COUNT(c.id_client) AS clients_count',
+                'MAX(c.id_client) AS last_client_id'
+            )
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return [
+            'clients_count' => isset($row['clients_count']) ? (int) $row['clients_count'] : 0,
+            'last_client_id' => $row['last_client_id'] !== null ? (int) $row['last_client_id'] : null,
+        ];
+    }
+
+    public function getClientStatsForUser(Utilisateur $user): array
+    {
+        $row = $this->createQueryBuilder('c')
+            ->select(
+                'COUNT(c.id_client) AS clients_count',
+                'MAX(c.id_client) AS last_client_id'
+            )
+            ->andWhere('c.id_user = :uid')
+            ->setParameter('uid', $user->getIdUser())
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return [
+            'clients_count' => isset($row['clients_count']) ? (int) $row['clients_count'] : 0,
+            'last_client_id' => $row['last_client_id'] !== null ? (int) $row['last_client_id'] : null,
+        ];
+    }
+
+    public function findOneForUser(int $id, Utilisateur $user): ?Client
+    {
+        $c = $this->findOneBy([
+            'id_client' => $id,
+            'id_user' => $user->getIdUser(),
+        ]);
+
+        return $c instanceof Client ? $c : null;
     }
 }

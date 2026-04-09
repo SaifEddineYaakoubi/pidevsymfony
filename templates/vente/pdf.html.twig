@@ -147,6 +147,12 @@
         </div>
 
         {% if ventes is not empty %}
+            {# Twig "reduce" avec arrow functions peut échouer selon la version; on calcule en boucle #}
+            {% set totalAmount = 0 %}
+            {% for v in ventes %}
+                {% set totalAmount = totalAmount + (v.montant_total ?? 0) %}
+            {% endfor %}
+
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-label">Nombre de ventes</div>
@@ -155,13 +161,12 @@
                 <div class="stat-item">
                     <div class="stat-label">Montant total</div>
                     <div class="stat-value">
-                        {{ ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0))|number_format(2, ',', ' ') }} €
+                        {{ totalAmount|number_format(2, ',', ' ') }} €
                     </div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Montant moyen</div>
                     <div class="stat-value">
-                        {% set totalAmount = ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0)) %}
                         {% set avgAmount = ventes|length > 0 ? totalAmount / ventes|length : 0 %}
                         {{ avgAmount|number_format(2, ',', ' ') }} €
                     </div>
@@ -201,7 +206,7 @@
                     <tr class="total-row">
                         <td colspan="3" style="text-align: right;">TOTAL</td>
                         <td class="amount">
-                            {{ ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0))|number_format(2, ',', ' ') }} €
+                            {{ totalAmount|number_format(2, ',', ' ') }} €
                         </td>
                     </tr>
                 </tfoot>

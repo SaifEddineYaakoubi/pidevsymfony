@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Entity\Utilisateur;
 use App\Form\ClientType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,11 @@ final class ClientController extends AbstractController
     #[Route(name: 'app_client_index', methods: ['GET'])]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         // Récupérer les paramètres de recherche et tri depuis l'URL
         $search = $request->query->get('search', '');
         $sortBy = $request->query->get('sortBy', 'nom');
@@ -27,17 +33,22 @@ final class ClientController extends AbstractController
         $clientRepository = $entityManager->getRepository(Client::class);
 
         // Utiliser la méthode de recherche et tri
-        $clients = $clientRepository->findBySearchAndSort(
+        $clients = $clientRepository->findBySearchAndSortForUser(
+            $user,
             !empty($search) ? $search : null,
             $sortBy,
             $order
         );
+
+        // Stats globales pour l'entête dashboard
+        $stats = $clientRepository->getClientStatsForUser($user);
 
         // Déterminer l'ordre inverse pour les liens de tri
         $nextOrder = ($order === 'ASC') ? 'DESC' : 'ASC';
 
         return $this->render('client/index.html.twig', [
             'clients' => $clients,
+            'stats' => $stats,
             'search' => $search,
             'sortBy' => $sortBy,
             'order' => $order,
@@ -48,11 +59,19 @@ final class ClientController extends AbstractController
     #[Route('/new', name: 'app_client_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         $client = new Client();
         $form = $this->createForm(ClientType::class, $client);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ensure id_user is filled (DB constraint: NOT NULL)
+            $client->setId_user($user->getIdUser());
+
             $entityManager->persist($client);
             $entityManager->flush();
 
@@ -67,20 +86,47 @@ final class ClientController extends AbstractController
     }
 
     #[Route('/{id_client}', name: 'app_client_show', methods: ['GET'])]
-    public function show(Client $client): Response
+    public function show(int $id_client, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $clientRepo = $entityManager->getRepository(Client::class);
+        $client = $clientRepo->findOneForUser($id_client, $user);
+        if (!$client) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render('client/show.html.twig', [
             'client' => $client,
         ]);
     }
 
     #[Route('/{id_client}/edit', name: 'app_client_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Client $client, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_client, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $clientRepo = $entityManager->getRepository(Client::class);
+        $client = $clientRepo->findOneForUser($id_client, $user);
+        if (!$client) {
+            throw $this->createNotFoundException();
+        }
+
         $form = $this->createForm(ClientType::class, $client);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ensure ownership stays correct
+            if ($client->getId_user() === null) {
+                $client->setId_user($user->getIdUser());
+            }
+
             $entityManager->flush();
 
             $this->addFlash('success', 'Le client a été modifié avec succès.');
@@ -94,8 +140,19 @@ final class ClientController extends AbstractController
     }
 
     #[Route('/{id_client}', name: 'app_client_delete', methods: ['POST'])]
-    public function delete(Request $request, Client $client, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_client, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $clientRepo = $entityManager->getRepository(Client::class);
+        $client = $clientRepo->findOneForUser($id_client, $user);
+        if (!$client) {
+            throw $this->createNotFoundException();
+        }
+
         if ($this->isCsrfTokenValid('delete'.$client->getId_client(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($client);
             $entityManager->flush();
@@ -109,6 +166,11 @@ final class ClientController extends AbstractController
     #[Route('/export/pdf', name: 'app_client_export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
         // Récupérer les paramètres de filtrage
         $search = $request->query->get('search', '');
         $sortBy = $request->query->get('sortBy', 'nom');
@@ -116,7 +178,8 @@ final class ClientController extends AbstractController
 
         // Récupérer le repository et les clients
         $clientRepository = $entityManager->getRepository(Client::class);
-        $clients = $clientRepository->findBySearchAndSort(
+        $clients = $clientRepository->findBySearchAndSortForUser(
+            $user,
             !empty($search) ? $search : null,
             $sortBy,
             $order

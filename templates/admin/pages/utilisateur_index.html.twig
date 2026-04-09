@@ -12,8 +12,8 @@
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="mb-1">Total utilisateurs</h6>
-                    <h3 class="mb-0">{{ utilisateurs|length }}</h3>
+                    <h6 class="mb-1">Responsables de stock</h6>
+                    <h3 class="mb-0">{{ utilisateurs|filter(u => u.role == 'responsable_stock')|length }}</h3>
                 </div>
                 <i class="fas fa-users"></i>
             </div>
@@ -228,11 +228,23 @@ function openCreateModal() {
         type: 'GET',
         data: { ajax: true },
         success: function(response) {
-            if (response.html) {
-                $('#modalBody').html(response.html);
-            } else {
-                $('#modalBody').html(response);
+            // Le contrôleur renvoie parfois du JSON {html: ...} et parfois du HTML direct.
+            // On normalise ici.
+            try {
+                if (typeof response === 'string') {
+                    const parsed = JSON.parse(response);
+                    if (parsed && parsed.html) {
+                        $('#modalBody').html(parsed.html);
+                        return;
+                    }
+                } else if (response && response.html) {
+                    $('#modalBody').html(response.html);
+                    return;
+                }
+            } catch (e) {
+                // Not JSON
             }
+            $('#modalBody').html(response);
         },
         error: function() {
             $('#modalBody').html('<div class="alert alert-danger m-3">Erreur de chargement du formulaire</div>');
@@ -250,11 +262,21 @@ function editUser(id) {
         type: 'GET',
         data: { ajax: true },
         success: function(response) {
-            if (response.html) {
-                $('#modalBody').html(response.html);
-            } else {
-                $('#modalBody').html(response);
+            try {
+                if (typeof response === 'string') {
+                    const parsed = JSON.parse(response);
+                    if (parsed && parsed.html) {
+                        $('#modalBody').html(parsed.html);
+                        return;
+                    }
+                } else if (response && response.html) {
+                    $('#modalBody').html(response.html);
+                    return;
+                }
+            } catch (e) {
+                // Not JSON
             }
+            $('#modalBody').html(response);
         },
         error: function() {
             $('#modalBody').html('<div class="alert alert-danger m-3">Erreur de chargement du formulaire</div>');

@@ -29,12 +29,6 @@
 
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_dashboard' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
 
                 <li class="nav-header">GESTION</li>
 
@@ -45,59 +39,6 @@
                     </a>
                 </li>
 
-                <li class="nav-header">ADMINLTE</li>
-
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_starter') }}" class="nav-link {{ app.request.attributes.get('_route') == 'app_admin_pages_starter' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-play"></i>
-                        <p>Starter</p>
-                    </a>
-                </li>
-
-                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-table"></i>
-                        <p>
-                            Tables
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ path('app_admin_pages_tables_simple') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Simple</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ path('app_admin_pages_tables_data') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>DataTables</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_calendar') }}" class="nav-link">
-                        <i class="nav-icon far fa-calendar-alt"></i>
-                        <p>Calendar</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_pages_kanban') }}" class="nav-link">
-                        <i class="nav-icon fas fa-columns"></i>
-                        <p>Kanban</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ path('app_admin_theme_page', {page: 'widgets'}) }}" class="nav-link">
-                        <i class="nav-icon fas fa-palette"></i>
-                        <p>Theme Router</p>
-                    </a>
-                </li>
 
                 <!-- SECTION COMPTE -->
                 <li class="nav-header">COMPTE</li>
