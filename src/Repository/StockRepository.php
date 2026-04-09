@@ -36,8 +36,11 @@ class StockRepository extends ServiceEntityRepository
 
         $sortConfig = $sortFields[$sort] ?? $sortFields['dateEntreeDesc'];
 
+        // Important: on renvoie des tableaux (getArrayResult) pour éviter les proxies Doctrine
+        // cassés quand la FK pointe sur un produit supprimé (sinon Twig déclenche EntityNotFoundException).
         $qb = $this->createQueryBuilder('s')
             ->leftJoin('s.id_produit', 'p')
+            ->addSelect('p')
             ->orderBy($sortConfig['column'], $sortConfig['direction']);
 
         if ($search) {
@@ -50,16 +53,22 @@ class StockRepository extends ServiceEntityRepository
             }
         }
 
-        $results = $qb->getQuery()->getResult();
+        /** @var array<int, array<string, mixed>> $results */
+        $results = $qb->getQuery()->getArrayResult();
 
         // PHP-based sorting for duration (calculate days between entry and expiration)
         if (isset($sortConfig['php']) && $sortConfig['php']) {
-            usort($results, function ($a, $b) use ($sortConfig) {
-                $durationA = $a->getDateEntree() && $a->getDateExpiration() 
-                    ? $a->getDateExpiration()->diff($a->getDateEntree())->days 
+            usort($results, function (array $a, array $b) use ($sortConfig): int {
+                $dateEntreeA = $a['date_entree'] ?? null;
+                $dateExpA = $a['date_expiration'] ?? null;
+                $dateEntreeB = $b['date_entree'] ?? null;
+                $dateExpB = $b['date_expiration'] ?? null;
+
+                $durationA = ($dateEntreeA instanceof \DateTimeInterface && $dateExpA instanceof \DateTimeInterface)
+                    ? $dateExpA->diff($dateEntreeA)->days
                     : PHP_INT_MAX;
-                $durationB = $b->getDateEntree() && $b->getDateExpiration() 
-                    ? $b->getDateExpiration()->diff($b->getDateEntree())->days 
+                $durationB = ($dateEntreeB instanceof \DateTimeInterface && $dateExpB instanceof \DateTimeInterface)
+                    ? $dateExpB->diff($dateEntreeB)->days
                     : PHP_INT_MAX;
 
                 $comparison = $durationA <=> $durationB;
