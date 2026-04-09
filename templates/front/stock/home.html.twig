@@ -14,7 +14,7 @@
     <div class="container section py-5">
         <div class="row">
             <div class="col-lg-8">
-                <h2>Dashboard Stock</h2>
+                <h2>Statistiques</h2>
                 <p class="text-muted mb-4">
                     Ici, tu affiches les informations spécifiques au responsable de stock (stocks, alertes, mouvements, etc.).
                 </p>
@@ -23,16 +23,49 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Stocks faibles</h5>
-                                <p class="card-text">À brancher sur tes données.</p>
+                                <h5 class="card-title">Total Produits</h5>
+                                <p class="card-text display-4">{{ stats.totalProduits }}</p>
+                                <p class="text-muted">📈 Tendance à la hausse</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Entrées / Sorties</h5>
-                                <p class="card-text">À brancher sur tes données.</p>
+                                <h5 class="card-title">Total Entrées Stock</h5>
+                                <p class="card-text display-4">{{ stats.totalStocks }}</p>
+                                <p class="text-muted">📊 Fluctuation légère</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Quantité Totale en Stock</h5>
+                                <p class="card-text display-4">{{ stats.totalQuantity }}</p>
+                                <div class="alert alert-danger mt-2">
+                                    <small>⚠️ Alerte : Stock critique pour tomates</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Prix Moyen des Produits</h5>
+                                <p class="card-text display-4">{{ stats.averagePrice }} DT</p>
+                                <p class="text-muted">➡️ Tendance stable</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Répartition des Produits par Type</h5>
+                                <canvas id="productTypesChart" width="400" height="200"></canvas>
                             </div>
                         </div>
                     </div>
@@ -44,14 +77,77 @@
                     <div class="card-body">
                         <h5 class="card-title">Raccourcis</h5>
                         <div class="d-grid gap-2">
-                            <a class="btn btn-outline-primary" href="#">Voir Stock</a>
-                            <a class="btn btn-outline-primary" href="#">Mouvements</a>
-                            <a class="btn btn-outline-primary" href="#">Alertes</a>
+                            <a class="btn btn-outline-primary" href="{{ path('stock_index') }}">
+                                <i class="bi bi-box-seam me-1"></i>Voir Stock
+                            </a>
+                            <a class="btn btn-outline-success" href="{{ path('produit_index') }}">
+                                <i class="bi bi-bag-check me-1"></i>Voir Produit
+                            </a>
+                            <a class="btn btn-outline-warning" href="#">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Alertes
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="/adminlte/plugins/chart.js/Chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('productTypesChart').getContext('2d');
+    const productTypes = {{ productTypes|json_encode|raw }};
+    
+    function getEmoji(type) {
+        const emojiMap = {
+            'légume': '🥔',
+            'fruits': '🍓',
+            'hv': '🫛'
+        };
+        return emojiMap[type.toLowerCase()] || '❓';
+    }
+    
+    const labels = productTypes.map(item => `${getEmoji(item.type)} ${item.type}`);
+    const data = productTypes.map(item => parseInt(item.count));
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nombre de Produits',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)', // rose for fruits
+                    'rgba(54, 162, 235, 0.2)',  // blue for hv
+                    'rgba(255, 205, 86, 0.2)'   // yellow for légume
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Répartition des Produits par Type'
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
 

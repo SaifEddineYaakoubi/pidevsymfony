@@ -1,0 +1,148 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Liste des Produits{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section py-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 mb-2">🌾 Gestion des Produits</h1>
+                <p class="text-muted">Gérez votre catalogue de produits et consultez les informations rapidement.</p>
+            </div>
+            <div class="gap-2" style="display: flex; gap: 10px;">
+                <a href="{{ path('produit_export_pdf') }}" class="btn btn-danger btn-lg rounded-3 shadow-sm">
+                    <i class="bi bi-file-pdf me-2"></i>Exporter PDF
+                </a>
+                <a href="{{ path('produit_new') }}" class="btn btn-success btn-lg rounded-3 shadow-sm">
+                    <i class="bi bi-plus-circle me-2"></i>Ajouter un Produit
+                </a>
+            </div>
+        </div>
+
+        {% if app.request.query.get('export') %}
+            <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Succès !</strong> Le fichier PDF a été téléchargé avec succès.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        <div class="card shadow-sm rounded-4 border-0 mb-4">
+            <div class="card-body bg-light rounded-4">
+                <form id="produit-filter-form" method="get" action="{{ path('produit_index') }}" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold text-dark" for="produit-search">🔍 Rechercher</label>
+                        <input type="search" id="produit-search" name="q" value="{{ search }}" class="form-control form-control-lg rounded-3" placeholder="Entrez le nom ou type du produit...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark" for="produit-search-field">Critère</label>
+                        <select id="produit-search-field" name="searchField" class="form-select form-select-lg rounded-3">
+                            {% for value, label in searchOptions %}
+                                <option value="{{ value }}"{{ value == searchField ? ' selected' : '' }}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-dark" for="produit-sort">Trier par</label>
+                        <select id="produit-sort" name="sort" class="form-select form-select-lg rounded-3">
+                            {% for value, label in sortOptions %}
+                                <option value="{{ value }}"{{ value == sort ? ' selected' : '' }}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-dark" for="produit-direction">Ordre</label>
+                        <select id="produit-direction" name="direction" class="form-select form-select-lg rounded-3">
+                            <option value="ASC"{{ direction == 'ASC' ? ' selected' : '' }}>↑ Ascendant</option>
+                            <option value="DESC"{{ direction == 'DESC' ? ' selected' : '' }}>↓ Descendant</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm rounded-4 border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-success">
+                        <tr>
+                            <th class="fw-bold">ID</th>
+                            <th class="fw-bold">Nom</th>
+                            <th class="fw-bold">Type</th>
+                            <th class="fw-bold">Unité</th>
+                            <th class="fw-bold">Prix (DT)</th>
+                            <th class="fw-bold">Utilisateur</th>
+                            <th class="fw-bold text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produit in produits %}
+                            <tr class="border-bottom">
+                                <td><span class="badge bg-info">{{ produit.idProduit }}</span></td>
+                                <td class="fw-semibold">{{ produit.nom }}</td>
+                                <td><span class="badge bg-light text-dark">{{ produit.type }}</span></td>
+                                <td>{{ produit.unite }}</td>
+                                <td class="text-success fw-semibold">{{ produit.prixUnitaire }} DT</td>
+                                <td><small class="text-muted">U#{{ produit.idUser }}</small></td>
+                                <td class="text-end">
+                                    <a href="{{ path('produit_show', {'id_produit': produit.idProduit}) }}" class="btn btn-sm btn-outline-info rounded-2 me-1" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('produit_edit', {'id_produit': produit.idProduit}) }}" class="btn btn-sm btn-outline-warning rounded-2 me-1" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('produit_delete', {'id_produit': produit.idProduit}) }}" class="d-inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.idProduit) }}">
+                                        <button class="btn btn-sm btn-outline-danger rounded-2" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <p class="text-muted mb-0">📭 Aucun produit trouvé.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const produitFilterForm = document.getElementById('produit-filter-form');
+        const produitSearch = document.getElementById('produit-search');
+
+        if (produitFilterForm) {
+            produitSearch.addEventListener('input', () => {
+                clearTimeout(window.produitSearchTimeout);
+                window.produitSearchTimeout = setTimeout(() => produitFilterForm.submit(), 300);
+            });
+
+            document.querySelectorAll('#produit-sort, #produit-direction').forEach((el) => {
+                el.addEventListener('change', () => produitFilterForm.submit());
+            });
+        }
+
+        // Export PDF handler
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a[href*="produit_export_pdf"]') || e.target.closest('a[href*="/produit/export-pdf"]')) {
+                setTimeout(function() {
+                    const html = `<div class="alert alert-success alert-dismissible fade show rounded-3 position-fixed" style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <strong>Succès !</strong> Le fichier PDF a été téléchargé avec succès.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>`;
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    setTimeout(function() {
+                        const alert = document.querySelector('.alert-success.position-fixed');
+                        if (alert) alert.remove();
+                    }, 5000);
+                }, 300);
+            }
+        });
+    </script>
+{% endblock %}

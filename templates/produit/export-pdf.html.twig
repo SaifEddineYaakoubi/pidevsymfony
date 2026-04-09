@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport des Produits</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .info-item {
+            font-size: 11px;
+        }
+        .info-item strong {
+            color: #28a745;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        thead {
+            background-color: #28a745;
+            color: white;
+        }
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 11px;
+            border: 1px solid #28a745;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 11px;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tbody tr:hover {
+            background-color: #f0f0f0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+        }
+        .badge {
+            background-color: #e9ecef;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9px;
+            display: inline-block;
+        }
+        .price {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌾 Rapport des Produits</h1>
+        <p>Export généré le {{ generatedDate|date('d/m/Y à H:i:s') }}</p>
+    </div>
+
+    <div class="info-section">
+        <div class="info-item">
+            <strong>Total Produits:</strong> {{ produits|length }}
+        </div>
+        <div class="info-item">
+            <strong>Date d'Édition:</strong> {{ "now"|date('d/m/Y') }}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Unité</th>
+                <th>Prix Unitaire (DT)</th>
+                <th>Utilisateur</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produit in produits %}
+                <tr>
+                    <td><span class="badge">{{ produit.idProduit }}</span></td>
+                    <td>{{ produit.nom }}</td>
+                    <td><span class="badge">{{ produit.type }}</span></td>
+                    <td>{{ produit.unite }}</td>
+                    <td class="price">{{ produit.prixUnitaire }} DT</td>
+                    <td>U#{{ produit.idUser }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #999;">Aucun produit disponible</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Ce document a été généré automatiquement par le système de gestion Smart Farm</p>
+    </div>
+</body>
+</html>
