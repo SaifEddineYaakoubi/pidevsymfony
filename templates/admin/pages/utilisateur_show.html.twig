@@ -1,0 +1,84 @@
+{# templates/admin/pages/utilisateur_show.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Détails de l'utilisateur{% endblock %}
+
+{% block admin_page_title %}Détails de l'utilisateur{% endblock %}
+
+{% block admin_body %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Informations de {{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
+        <div class="card-tools">
+            <a href="{{ path('app_admin_utilisateur_edit', {'id_user': utilisateur.getIdUser()}) }}" class="btn btn-warning btn-sm">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{{ path('app_admin_utilisateur_index') }}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-list"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">ID</th>
+                        <td>{{ utilisateur.getIdUser() }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <td>{{ utilisateur.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Prénom</th>
+                        <td>{{ utilisateur.prenom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ utilisateur.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rôle</th>
+                        <td>
+                            {% if utilisateur.role == 'admin' %}
+                                <span class="badge badge-danger">Administrateur</span>
+                            {% elseif utilisateur.role == 'agriculteur' %}
+                                <span class="badge badge-success">Agriculteur</span>
+                            {% else %}
+                                <span class="badge badge-info">Utilisateur</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">Statut</th>
+                        <td>
+                            {% if utilisateur.statut %}
+                                <span class="badge badge-success">Actif</span>
+                            {% else %}
+                                <span class="badge badge-danger">Inactif</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Date de création</th>
+                        <td>{{ utilisateur.getDateCreation() ? utilisateur.getDateCreation()|date('d/m/Y H:i') : '' }}</td>
+                    </tr>
+                    <tr>
+                        <th>ID Agriculteur</th>
+                        <td>{{ utilisateur.getIdAgriculteur() ?: 'Non défini' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Chemin image faciale</th>
+                        <td>{{ utilisateur.getFaceImagePath() ?: 'Non défini' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

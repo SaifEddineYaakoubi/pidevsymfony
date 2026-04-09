@@ -1,177 +1,170 @@
 <?php
-
+// src/Entity/Utilisateur.php
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UtilisateurRepository;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-use Doctrine\Common\Collections\Collection;
-use App\Entity\Vente;
-
-#[ORM\Entity]
-class Utilisateur
+#[ORM\Entity(repositoryClass: 'App\\Repository\\UtilisateurRepository')]
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
-
     #[ORM\Id]
-    #[ORM\Column(type: "integer")]
-    private int $id_user;
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: "id_user", type: "integer")]
+    private ?int $id_user = null;
 
-    #[ORM\Column(type: "string", length: 100)]
-    private string $nom;
+    #[ORM\Column(length: 100)]
+    private ?string $nom = null;
 
-    #[ORM\Column(type: "string", length: 100)]
-    private string $prenom;
+    #[ORM\Column(length: 100)]
+    private ?string $prenom = null;
 
-    #[ORM\Column(type: "string", length: 150)]
-    private string $email;
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $email = null;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private string $mot_de_passe;
+    #[ORM\Column(length: 50)]
+    private ?string $role = null;
 
-    #[ORM\Column(type: "string", length: 50)]
-    private string $role;
+    #[ORM\Column(length: 255)]
+    private ?string $mot_de_passe = null;
 
     #[ORM\Column(type: "boolean")]
-    private bool $statut;
+    private ?bool $statut = null;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $date_creation;
+    #[ORM\Column(type: "datetime")]
+    private ?\DateTimeInterface $date_creation = null;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private string $face_image_path;
+    // Getters et Setters existants...
 
-    #[ORM\Column(type: "integer")]
-    private int $id_agriculteur;
+    // === Méthodes requises par UserInterface ===
 
-    public function getId_user()
+    public function getIdUser(): ?int
     {
         return $this->id_user;
     }
 
-    public function setId_user($value)
-    {
-        $this->id_user = $value;
-    }
-
-    public function getNom()
+    public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom($value)
+    public function setNom(string $nom): self
     {
-        $this->nom = $value;
+        $this->nom = $nom;
+        return $this;
     }
 
-    public function getPrenom()
+    public function getPrenom(): ?string
     {
         return $this->prenom;
     }
 
-    public function setPrenom($value)
+    public function setPrenom(string $prenom): self
     {
-        $this->prenom = $value;
+        $this->prenom = $prenom;
+        return $this;
     }
 
-    public function getEmail()
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail($value)
+    public function setEmail(string $email): self
     {
-        $this->email = $value;
+        $this->email = $email;
+        return $this;
     }
 
-    public function getMot_de_passe()
-    {
-        return $this->mot_de_passe;
-    }
-
-    public function setMot_de_passe($value)
-    {
-        $this->mot_de_passe = $value;
-    }
-
-    public function getRole()
+    public function getRole(): ?string
     {
         return $this->role;
     }
 
-    public function setRole($value)
+    public function setRole(string $role): self
     {
-        $this->role = $value;
+        $this->role = $role;
+        return $this;
     }
 
-    public function getStatut()
+    public function getMotDePasse(): ?string
+    {
+        return $this->mot_de_passe;
+    }
+
+    public function setMotDePasse(string $mot_de_passe): self
+    {
+        $this->mot_de_passe = $mot_de_passe;
+        return $this;
+    }
+
+    public function getStatut(): ?bool
     {
         return $this->statut;
     }
 
-    public function setStatut($value)
+    public function setStatut(bool $statut): self
     {
-        $this->statut = $value;
+        $this->statut = $statut;
+        return $this;
     }
 
-    public function getDate_creation()
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->date_creation;
     }
 
-    public function setDate_creation($value)
+    public function setDateCreation(\DateTimeInterface $date_creation): self
     {
-        $this->date_creation = $value;
+        $this->date_creation = $date_creation;
+        return $this;
     }
 
-    public function getFace_image_path()
+    // === UserInterface Methods ===
+
+    public function getUserIdentifier(): string
     {
-        return $this->face_image_path;
+        return $this->email;
     }
 
-    public function setFace_image_path($value)
+    public function getUsername(): string
     {
-        $this->face_image_path = $value;
+        return $this->email;
     }
 
-    public function getId_agriculteur()
+    public function getRoles(): array
     {
-        return $this->id_agriculteur;
-    }
+        // Support both short role identifiers (e.g. 'admin') and full Symfony roles (e.g. 'ROLE_ADMIN').
+        $role = $this->role ?? '';
 
-    public function setId_agriculteur($value)
-    {
-        $this->id_agriculteur = $value;
-    }
-
-    #[ORM\OneToMany(mappedBy: "id_user", targetEntity: Parcelle::class)]
-    private Collection $parcelles;
-
-        public function getParcelles(): Collection
-        {
-            return $this->parcelles;
-        }
-    
-        public function addParcelle(Parcelle $parcelle): self
-        {
-            if (!$this->parcelles->contains($parcelle)) {
-                $this->parcelles[] = $parcelle;
-                $parcelle->setId_user($this);
-            }
-    
-            return $this;
-        }
-    
-        public function removeParcelle(Parcelle $parcelle): self
-        {
-            if ($this->parcelles->removeElement($parcelle)) {
-                // set the owning side to null (unless already changed)
-                if ($parcelle->getId_user() === $this) {
-                    $parcelle->setId_user(null);
-                }
-            }
-    
-            return $this;
+        // If the role is already a full ROLE_* string, return it plus ROLE_USER
+        if (str_starts_with($role, 'ROLE_')) {
+            return [$role, 'ROLE_USER'];
         }
 
-    #[ORM\OneToMany(mappedBy: "id_user", targetEntity: Vente::class)]
-    private Collection $ventes;
+        // Map short role names to Symfony roles
+        return match (strtolower($role)) {
+            'admin' => ['ROLE_ADMIN', 'ROLE_USER'],
+            'responsable_stock' => ['ROLE_STOCK', 'ROLE_USER'],
+            'agriculteur' => ['ROLE_AGRICULTEUR', 'ROLE_USER'],
+            default => ['ROLE_USER'],
+        };
+    }
+
+    public function getPassword(): string
+    {
+        return $this->mot_de_passe;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+    }
 }
