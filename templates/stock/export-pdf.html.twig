@@ -124,7 +124,7 @@
             {% for stock in stocks %}
                 <tr>
                     <td><span class="badge">{{ stock.idStock }}</span></td>
-                    <td>{{ stock.idProduit.nom }}</td>
+                    <td>{{ stock.idProduit.icon }} {{ stock.idProduit.nom }}</td>
                     <td><span class="quantity">{{ stock.quantite }}</span></td>
                     <td>{{ stock.dateEntree ? stock.dateEntree|date('d/m/Y') : '—' }}</td>
                     <td>{{ stock.dateExpiration ? stock.dateExpiration|date('d/m/Y') : '—' }}</td>

@@ -72,7 +72,7 @@
                         {% for stock in stocks %}
                             <tr class="border-bottom">
                                 <td><span class="badge bg-info">{{ stock.idStock }}</span></td>
-                                <td class="fw-semibold">{{ stock.idProduit.nom }}</td>
+                                <td class="fw-semibold"><span style="font-size: 1.3em; margin-right: 8px;">{{ stock.idProduit.icon }}</span>{{ stock.idProduit.nom }}</td>
                                 <td><span class="badge bg-success">{{ stock.quantite }}</span></td>
                                 <td><small>{{ stock.dateEntree ? stock.dateEntree|date('d/m/Y') : '—' }}</small></td>
                                 <td><small class="text-danger">{{ stock.dateExpiration ? stock.dateExpiration|date('d/m/Y') : '—' }}</small></td>
