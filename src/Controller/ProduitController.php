@@ -150,6 +150,19 @@ class ProduitController extends AbstractController
             throw $this->createNotFoundException('Produit not found');
         }
         if ($this->isCsrfTokenValid('delete' . $produit->getId_produit(), $request->request->get('_token'))) {
+            // Supprimer toutes les entrées de stock associées à ce produit
+            $stockRepository = $em->getRepository(\App\Entity\Stock::class);
+            $stocks = $stockRepository->createQueryBuilder('s')
+                ->where('s.id_produit = :produitId')
+                ->setParameter('produitId', $id_produit)
+                ->getQuery()
+                ->getResult();
+            
+            foreach ($stocks as $stock) {
+                $em->remove($stock);
+            }
+            
+            // Supprimer le produit
             $em->remove($produit);
             $em->flush();
         }

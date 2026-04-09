@@ -70,8 +70,32 @@ class StockCrudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($stock);
-            $em->flush();
+            // Vérifier si un stock existe déjà avec les mêmes caractéristiques
+            $existingStock = $em->getRepository(Stock::class)->createQueryBuilder('s')
+                ->where('s.id_produit = :produit')
+                ->andWhere('s.date_entree = :dateEntree')
+                ->andWhere('s.date_expiration = :dateExpiration')
+                ->andWhere('s.id_user = :user')
+                ->setParameter('produit', $stock->getIdProduit())
+                ->setParameter('dateEntree', $stock->getDateEntree())
+                ->setParameter('dateExpiration', $stock->getDateExpiration())
+                ->setParameter('user', $stock->getIdUser())
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existingStock) {
+                // Augmenter la quantité du stock existant
+                $existingStock->setQuantite($existingStock->getQuantite() + $stock->getQuantite());
+                $em->flush();
+                
+                $this->addFlash('success', 'Quantité ajoutée au stock existant.');
+            } else {
+                // Créer un nouveau stock
+                $em->persist($stock);
+                $em->flush();
+                
+                $this->addFlash('success', 'Nouveau stock ajouté.');
+            }
 
             return $this->redirectToRoute('stock_index');
         }

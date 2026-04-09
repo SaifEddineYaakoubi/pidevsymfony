@@ -14,7 +14,7 @@
             background-color: #f9f9f9;
         }
         .header {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, #2E8B57 0%, #32CD32 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -47,7 +47,7 @@
             margin-bottom: 20px;
         }
         thead {
-            background-color: #28a745;
+            background-color: #2E8B57;
             color: white;
         }
         th {
@@ -113,7 +113,6 @@
                 <th>Type</th>
                 <th>Unité</th>
                 <th>Prix Unitaire (DT)</th>
-                <th>Utilisateur</th>
             </tr>
         </thead>
         <tbody>
@@ -124,11 +123,10 @@
                     <td><span class="badge">{{ produit.type }}</span></td>
                     <td>{{ produit.unite }}</td>
                     <td class="price">{{ produit.prixUnitaire }} DT</td>
-                    <td>U#{{ produit.idUser }}</td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #999;">Aucun produit disponible</td>
+                    <td colspan="5" style="text-align: center; color: #999;">Aucun produit disponible</td>
                 </tr>
             {% endfor %}
         </tbody>
