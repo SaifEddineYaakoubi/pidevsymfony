@@ -1,0 +1,149 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Ventes - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    <div style="background-color: #f8f9fa; min-height: 100vh; padding: 20px 0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+
+            <!-- Header Section -->
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h1 style="margin: 0 0 5px 0; font-weight: 700; color: #1a1a2e; font-size: 1.75rem;">📊 Ventes</h1>
+                        <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">Suivi de vos transactions</p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%); color: #15803d; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;">
+                        <i class="fas fa-chart-line" style="margin-right: 6px;"></i>{{ ventes|length }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Card -->
+            <div style="background: white; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+                <form method="GET" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="display: flex; align-items: center; border: 1px solid #e9ecef; border-radius: 8px; background: #f9fafb;">
+                            <i class="fas fa-search" style="padding: 8px 12px; color: #9ca3af;"></i>
+                            <input
+                                type="text"
+                                name="search"
+                                style="flex: 1; border: none; background: none; padding: 8px 12px; font-size: 0.9rem; outline: none;"
+                                placeholder="Rechercher..."
+                                value="{{ search }}"
+                            >
+                        </div>
+                    </div>
+                    <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; white-space: nowrap;">
+                        <i class="fas fa-search" style="margin-right: 6px;"></i> Chercher
+                    </button>
+                    {% if search %}
+                        <a href="{{ path('app_vente_index') }}" style="background: #f3f4f6; color: #6b7280; border: none; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; cursor: pointer;">
+                            <i class="fas fa-times" style="margin-right: 4px;"></i> Réinitialiser
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Table Card -->
+            <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); margin-bottom: 20px;">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                        <thead style="background: linear-gradient(135deg, #2d3561 0%, #1a1f4b 100%); color: white;">
+                            <tr>
+                                <th style="width: 25%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
+                                    <i class="fas fa-user" style="margin-right: 6px;"></i>Client
+                                </th>
+                                <th style="width: 20%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
+                                    <a href="{{ path('app_vente_index', {
+                                        'search': search,
+                                        'sortBy': 'date_vente',
+                                        'order': (sortBy == 'date_vente' ? nextOrder : 'DESC')
+                                    }) }}" style="color: white; text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                        <span><i class="fas fa-calendar" style="margin-right: 6px;"></i>Date</span>
+                                        {% if sortBy == 'date_vente' %}
+                                            <i class="fas fa-{{ order == 'ASC' ? 'sort-numeric-down' : 'sort-numeric-up' }}"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort" style="opacity: 0.5;"></i>
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th style="width: 25%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
+                                    <a href="{{ path('app_vente_index', {
+                                        'search': search,
+                                        'sortBy': 'montant_total',
+                                        'order': (sortBy == 'montant_total' ? nextOrder : 'DESC')
+                                    }) }}" style="color: white; text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                        <span><i class="fas fa-coins" style="margin-right: 6px;"></i>Montant</span>
+                                        {% if sortBy == 'montant_total' %}
+                                            <i class="fas fa-{{ order == 'ASC' ? 'sort-amount-down' : 'sort-amount-up' }}"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort" style="opacity: 0.5;"></i>
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th style="width: 30%; font-weight: 600; padding: 12px 16px; text-align: center; letter-spacing: 0.3px;">
+                                    <i class="fas fa-cog" style="margin-right: 4px;"></i>Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vente in ventes %}
+                                <tr style="border-bottom: 1px solid #e9ecef; transition: background-color 0.2s;">
+                                    <td style="padding: 10px 16px; color: #1a1a2e;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <span style="font-weight: 500; font-size: 0.9rem;">{{ vente.id_client ? (vente.id_client|safe_client_name) : 'Inconnu' }}</span>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 10px 16px; color: #666; font-size: 0.9rem;">
+                                        <i class="far fa-calendar-alt" style="margin-right: 4px; color: #9ca3af;"></i>{{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}
+                                    </td>
+                                    <td style="padding: 10px 16px;">
+                                        <span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                            {{ vente.montant_total ? (vente.montant_total|number_format(2, '.', ' ') ~ ' TND') : '0.00 TND' }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px 16px; text-align: center;">
+                                        <div style="display: flex; gap: 4px; justify-content: center;">
+                                            <a href="{{ path('app_vente_show', {'id_vente': vente.id_vente}) }}" style="background: #f0f4f9; color: #667eea; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}" style="background: #fef3c7; color: #d97706; border: 1px solid #fbbf24; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" style="padding: 40px 16px; text-align: center; color: #9ca3af;">
+                                        <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.3;"></i>
+                                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Aucune vente trouvée</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="{{ path('app_vente_new') }}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-plus"></i> Nouvelle
+                    </a>
+                    <a href="{{ path('app_vente_export_pdf', {'search': search, 'sortBy': sortBy, 'order': order}) }}" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                </div>
+                <div style="color: #6b7280; font-weight: 500; font-size: 0.9rem;">
+                    Total: <strong style="color: #10b981;">{{ ventes|length }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

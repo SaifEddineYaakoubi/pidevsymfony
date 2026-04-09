@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Ventes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .stats {
+            background-color: #f0f8f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #28a745;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #1e7e34;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e7f5eb;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .amount {
+            text-align: right;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .total-row td {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Rapport des Ventes</h1>
+            <p>Gestion des Ventes - Agriculture</p>
+        </div>
+
+        <div class="meta">
+            <div>
+                <strong>Total Ventes :</strong> {{ ventes|length }}
+            </div>
+            <div>
+                <strong>Date d'export :</strong> {{ exportDate|date('d/m/Y H:i:s') }}
+            </div>
+        </div>
+
+        {% if ventes is not empty %}
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Nombre de ventes</div>
+                    <div class="stat-value">{{ ventes|length }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Montant total</div>
+                    <div class="stat-value">
+                        {{ ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0))|number_format(2, ',', ' ') }} €
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Montant moyen</div>
+                    <div class="stat-value">
+                        {% set totalAmount = ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0)) %}
+                        {% set avgAmount = ventes|length > 0 ? totalAmount / ventes|length : 0 %}
+                        {{ avgAmount|number_format(2, ',', ' ') }} €
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%">ID</th>
+                        <th style="width: 20%">Client</th>
+                        <th style="width: 12%">Date</th>
+                        <th style="width: 15%">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vente in ventes %}
+                        <tr>
+                            <td>{{ vente.id_vente }}</td>
+                            <td>
+                                {% if vente.id_client %}
+                                    {{ vente.id_client.nom }}
+                                {% else %}
+                                    <span style="color: #999; font-style: italic;">Client supprimé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}
+                            </td>
+                            <td class="amount">
+                                {{ vente.montant_total ? (vente.montant_total|number_format(2, ',', ' ') ~ ' €') : '-' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">TOTAL</td>
+                        <td class="amount">
+                            {{ ventes|reduce(0, (carry, vente) => carry + (vente.montant_total ?? 0))|number_format(2, ',', ' ') }} €
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        {% else %}
+            <p class="no-data">Aucune vente trouvée pour les critères de recherche.</p>
+        {% endif %}
+
+        <div class="footer">
+            <p>Généré automatiquement par le système de gestion agricole</p>
+        </div>
+    </div>
+</body>
+</html>
+
