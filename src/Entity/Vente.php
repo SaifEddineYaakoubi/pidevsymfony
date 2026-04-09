@@ -3,10 +3,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\VenteRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Entity\Utilisateur;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: VenteRepository::class)]
 class Vente
 {
 
@@ -15,15 +17,29 @@ class Vente
     #[ORM\Column(type: "integer")]
     private int $id_vente;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $date_vente;
+    #[ORM\Column(type: "date", nullable: true)]
+    #[Assert\NotNull(message: "La date de vente est obligatoire.")]
+    #[Assert\Type(type: "\DateTimeInterface", message: "La date de vente doit être une date valide.")]
+    #[Assert\LessThanOrEqual(
+        value: "today",
+        message: "La date de vente ne peut pas être dans le futur."
+    )]
+    private ?\DateTimeInterface $date_vente = null;
 
-    #[ORM\Column(type: "float")]
-    private float $montant_total;
+    #[ORM\Column(type: "float", nullable: true)]
+    #[Assert\NotNull(message: "Le montant total est obligatoire.")]
+    #[Assert\Type(type: "float", message: "Le montant doit être un nombre valide.")]
+    #[Assert\Positive(message: "Le montant doit être un nombre positif.")]
+    #[Assert\LessThan(
+        value: 1000000,
+        message: "Le montant ne peut pas dépasser 1 000 000."
+    )]
+    private ?float $montant_total = null;
 
 
         #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: "ventes")]
     #[ORM\JoinColumn(name: 'id_client', referencedColumnName: 'id_client', onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: "Le client est obligatoire.")]
     private ?Client $id_client = null;
 
         #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "ventes")]

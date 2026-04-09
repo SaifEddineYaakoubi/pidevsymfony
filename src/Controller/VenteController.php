@@ -9,19 +9,39 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/vente')]
 final class VenteController extends AbstractController
 {
     #[Route(name: 'app_vente_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $ventes = $entityManager
-            ->createQuery('SELECT v FROM App\Entity\Vente v LEFT JOIN v.id_client c')
-            ->getResult();
+        // Récupérer les paramètres de recherche et tri depuis l'URL
+        $search = $request->query->get('search', '');
+        $sortBy = $request->query->get('sortBy', 'date_vente');
+        $order = $request->query->get('order', 'DESC');
+
+        // Récupérer le repository
+        $venteRepository = $entityManager->getRepository(Vente::class);
+
+        // Utiliser la méthode de recherche et tri
+        $ventes = $venteRepository->findBySearchAndSort(
+            !empty($search) ? $search : null,
+            $sortBy,
+            $order
+        );
+
+        // Déterminer l'ordre inverse pour les liens de tri
+        $nextOrder = ($order === 'ASC') ? 'DESC' : 'ASC';
 
         return $this->render('vente/index.html.twig', [
             'ventes' => $ventes,
+            'search' => $search,
+            'sortBy' => $sortBy,
+            'order' => $order,
+            'nextOrder' => $nextOrder,
         ]);
     }
 
@@ -36,6 +56,7 @@ final class VenteController extends AbstractController
             $entityManager->persist($vente);
             $entityManager->flush();
 
+            $this->addFlash('success', 'La vente a été créée avec succès.');
             return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -85,6 +106,7 @@ final class VenteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            $this->addFlash('success', 'La vente a été modifiée avec succès.');
             return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -100,8 +122,54 @@ final class VenteController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$vente->getId_vente(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($vente);
             $entityManager->flush();
+
+            $this->addFlash('success', 'La vente a été supprimée avec succès.');
         }
 
         return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/export/pdf', name: 'app_vente_export_pdf', methods: ['GET'])]
+    public function exportPdf(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer les paramètres de filtrage
+        $search = $request->query->get('search', '');
+        $sortBy = $request->query->get('sortBy', 'date_vente');
+        $order = $request->query->get('order', 'DESC');
+
+        // Récupérer le repository et les ventes
+        $venteRepository = $entityManager->getRepository(Vente::class);
+        $ventes = $venteRepository->findBySearchAndSort(
+            !empty($search) ? $search : null,
+            $sortBy,
+            $order
+        );
+
+        // Générer le HTML via Twig
+        $html = $this->renderView('vente/pdf.html.twig', [
+            'ventes' => $ventes,
+            'search' => $search,
+            'exportDate' => new \DateTime(),
+        ]);
+
+        // Configurer Dompdf
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('defaultMediaType', 'print');
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        // Retourner le PDF en téléchargement
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="ventes_'.date('Y-m-d_H-i-s').'.pdf"',
+            ]
+        );
     }
 }

@@ -15,15 +15,18 @@ class ClientType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom du client',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Entrez le nom du client'],
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: Jean Dupont'],
             ])
             ->add('contact', TextType::class, [
-                'label' => 'Contact (Téléphone/Email)',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: 06 12 34 56 78'],
+                'label' => 'Contact (Téléphone ou Email)',
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: 06 12 34 56 78 ou email@example.com'],
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Entrez l\'adresse complète'],
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: 123 Rue de la Paix, 75000 Paris'],
             ])
         ;
     }
@@ -32,6 +35,8 @@ class ClientType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Client::class,
+            // Désactiver complètement la validation HTML5 du navigateur
+            'attr' => ['novalidate' => 'novalidate'],
         ]);
     }
 }
