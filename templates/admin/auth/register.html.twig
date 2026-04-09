@@ -1,0 +1,105 @@
+{# templates/admin/auth/register.html.twig #}
+{% extends 'admin/base_auth.html.twig' %}
+
+{% block title %}SmartFarm - Inscription{% endblock %}
+
+{% block admin_auth_body %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="mb-3">
+                        <i class="fas fa-leaf fa-3x"></i>
+                    </div>
+                    <h3 class="font-weight-bold mb-0">Inscription</h3>
+                    <p class="mb-0 mt-2">Créez votre compte SmartFarm</p>
+                </div>
+
+                <div class="card-body p-5">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form_label(form.nom) }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Votre nom'}}) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form_label(form.prenom) }}
+                                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Votre prénom'}}) }}
+                                    {{ form_errors(form.prenom) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form_label(form.email) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'exemple@smartfarm.com'}}) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form_label(form.role) }}
+                            {{ form_widget(form.role, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.role) }}
+                            <small class="text-muted">Choisissez votre rôle dans la plateforme</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form_label(form.mot_de_passe) }}
+                            {{ form_widget(form.mot_de_passe, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.mot_de_passe) }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-gradient btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <i class="fas fa-user-plus me-2"></i>S'inscrire
+                            </button>
+                        </div>
+
+                    {{ form_end(form) }}
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Déjà inscrit ?
+                            <a href="{{ path('app_login') }}" class="text-primary">
+                                <i class="fas fa-sign-in-alt"></i> Se connecter
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    &copy; {{ "now"|date("Y") }} SmartFarm - Tous droits réservés
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-gradient {
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+</style>
+{% endblock %}
