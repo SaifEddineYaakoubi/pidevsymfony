@@ -70,20 +70,30 @@
                     <tbody>
                         {% for stock in stocks %}
                             <tr class="border-bottom">
-                                <td><span class="badge" style="background-color: #F4A460; color: #8B4513;">{{ stock.idStock }}</span></td>
-                                <td class="fw-semibold"><span style="font-size: 1.3em; margin-right: 8px;">{{ stock.idProduit.icon }}</span>{{ stock.idProduit.nom }}</td>
+                                <td><span class="badge" style="background-color: #F4A460; color: #8B4513;">{{ stock.id_stock }}</span></td>
+                                <td class="fw-semibold">
+                                    {% set produit = stock.id_produit ?? null %}
+                                    {% if produit is not null %}
+                                        {% if produit.icon is defined and produit.icon is not empty %}
+                                            <span style="font-size: 1.3em; margin-right: 8px;">{{ produit.icon }}</span>
+                                        {% endif %}
+                                        {{ produit.nom }}
+                                    {% else %}
+                                        <span class="text-muted">Produit supprimé / introuvable</span>
+                                    {% endif %}
+                                </td>
                                 <td><span class="badge" style="background-color: #2E8B57; color: white;">{{ stock.quantite }}</span></td>
-                                <td><small>{{ stock.dateEntree ? stock.dateEntree|date('d/m/Y') : '—' }}</small></td>
-                                <td><small class="text-danger">{{ stock.dateExpiration ? stock.dateExpiration|date('d/m/Y') : '—' }}</small></td>
+                                <td><small>{{ stock.date_entree ? stock.date_entree|date('d/m/Y') : '—' }}</small></td>
+                                <td><small class="text-danger">{{ stock.date_expiration ? stock.date_expiration|date('d/m/Y') : '—' }}</small></td>
                                 <td class="text-end">
-                                    <a href="{{ path('stock_show', {'id_stock': stock.idStock}) }}" class="btn btn-sm rounded-2 me-1" style="background-color: #2E8B57; color: white; border: none;" title="Voir">
+                                    <a href="{{ path('stock_show', {'id_stock': stock.id_stock}) }}" class="btn btn-sm rounded-2 me-1" style="background-color: #2E8B57; color: white; border: none;" title="Voir">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ path('stock_edit', {'id_stock': stock.idStock}) }}" class="btn btn-sm rounded-2 me-1" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;" title="Modifier">
+                                    <a href="{{ path('stock_edit', {'id_stock': stock.id_stock}) }}" class="btn btn-sm rounded-2 me-1" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;" title="Modifier">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form method="post" action="{{ path('stock_delete', {'id_stock': stock.idStock}) }}" class="d-inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entrée de stock ?');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.idStock) }}">
+                                    <form method="post" action="{{ path('stock_delete', {'id_stock': stock.id_stock}) }}" class="d-inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entrée de stock ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.id_stock) }}">
                                         <button class="btn btn-sm rounded-2" style="background-color: #8B4513; color: white; border: none;" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </button>
