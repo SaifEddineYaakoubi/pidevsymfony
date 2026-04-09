@@ -14,7 +14,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID Rendement</th>
             <th>Récolte</th>
             <th>Surface Exploitée (m²)</th>
             <th>Quantité Totale (kg)</th>
@@ -25,10 +24,9 @@
     <tbody>
     {% for rendement in rendements %}
         <tr>
-            <td>{{ rendement.id_rendement }}</td>
             <td>
                 {% if rendement.id_recolte %}
-                    <strong>Récolte #{{ rendement.id_recolte.idRecolte }}</strong><br>
+                    <strong>Récolte du {{ rendement.id_recolte.dateRecolte ? rendement.id_recolte.dateRecolte|date('d/m/Y') : 'Date inconnue' }}</strong><br>
                     <small style="color: #666;">{{ rendement.id_recolte.typeCulture ?? 'Type non défini' }}</small>
                 {% else %}
                     <span style="color: #999;">Récolte non associée</span>
@@ -48,7 +46,7 @@
         </tr>
     {% else %}
         <tr>
-            <td colspan="6" style="text-align: center;">Aucun rendement trouvé.</td>
+            <td colspan="5" style="text-align: center;">Aucun rendement trouvé.</td>
         </tr>
     {% endfor %}
     </tbody>

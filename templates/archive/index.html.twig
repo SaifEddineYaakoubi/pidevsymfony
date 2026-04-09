@@ -13,8 +13,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID Archive</th>
-            <th>ID Récolte Original</th>
             <th>Type de Culture</th>
             <th>Localisation</th>
             <th>Quantité (kg)</th>
@@ -26,8 +24,6 @@
     <tbody>
     {% for archive in archives %}
         <tr>
-            <td>{{ archive.id_archive }}</td>
-            <td>{{ archive.id_recolte_original }}</td>
             <td>{{ archive.type_culture }}</td>
             <td>{{ archive.localisation }}</td>
             <td>{{ archive.quantite }}</td>
@@ -43,7 +39,7 @@
         </tr>
     {% else %}
         <tr>
-            <td colspan="8" style="text-align: center;">Aucune archive trouvée.</td>
+            <td colspan="6" style="text-align: center;">Aucune archive trouvée.</td>
         </tr>
     {% endfor %}
     </tbody>
