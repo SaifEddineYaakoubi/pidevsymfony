@@ -1,0 +1,48 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Archives des Récoltes Supprimées{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📁 Archives des Récoltes Supprimées</h1>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary">← Retour aux Récoltes Actives</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Type de Culture</th>
+            <th>Localisation</th>
+            <th>Quantité (kg)</th>
+            <th>Cause de Suppression</th>
+            <th>Date d'Archivage</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for archive in archives %}
+        <tr>
+            <td>{{ archive.type_culture }}</td>
+            <td>{{ archive.localisation }}</td>
+            <td>{{ archive.quantite }}</td>
+            <td>
+                <span style="background: #fee; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                    {{ archive.cause_supression }}
+                </span>
+            </td>
+            <td>{{ archive.date_archivage ? archive.date_archivage|date('d/m/Y H:i') : '-' }}</td>
+            <td>
+                <a href="{{ path('app_archive_show', {'idArchive': archive.id_archive}) }}" class="btn">Voir Détails</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="6" style="text-align: center;">Aucune archive trouvée.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -10,6 +10,7 @@ class Recolte_archive
 {
 
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_archive;
 

@@ -1,0 +1,57 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Confirmer la Suppression - Récolte #{{ recolte.id_recolte }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>⚠️ Confirmer la Suppression de la Récolte</h1>
+
+<div style="background: #fff3cd; padding: 1rem; margin-bottom: 2rem; border-left: 4px solid #f59e0b;">
+    <h4>📋 Détails de la Récolte à Supprimer</h4>
+    <p><strong>ID Récolte:</strong> {{ recolte.id_recolte }}</p>
+    <p><strong>Type de Culture:</strong> {{ recolte.type_culture }}</p>
+    <p><strong>Localisation:</strong> {{ recolte.localisation }}</p>
+    <p><strong>Quantité:</strong> {{ recolte.quantite }} kg</p>
+    <p><strong>Qualité:</strong> {{ recolte.qualite }}</p>
+</div>
+
+<div style="background: #fee; padding: 1rem; margin-bottom: 2rem; border-left: 4px solid #dc2626;">
+    <h4>⚠️ Attention</h4>
+    <p>Cette action est <strong>irréversible</strong>. La récolte sera supprimée définitivement après archivage.</p>
+    <p>Vous devez indiquer la <strong>cause de suppression</strong> pour archiver cette récolte.</p>
+</div>
+
+<form method="post" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="margin-bottom: 2rem;">
+        <label for="cause_suppression" style="display: block; margin-bottom: 0.5rem; font-weight: bold; font-size: 1.1rem;">
+            Cause de Suppression * :
+        </label>
+        <textarea
+            id="cause_suppression"
+            name="cause_suppression"
+            required
+            placeholder="Veuillez expliquer pourquoi cette récolte doit être supprimée..."
+            style="width: 100%; min-height: 120px; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px; resize: vertical;"
+        ></textarea>
+        <small style="color: #666; display: block; margin-top: 0.5rem;">
+            Exemples: Erreur de saisie, Récolte annulée, Données obsolètes, etc.
+        </small>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-secondary">
+            ← Annuler et Retour
+        </a>
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir archiver et supprimer cette récolte ?');">
+            🗑️ Archiver et Supprimer
+        </button>
+    </div>
+</form>
+
+{% for message in app.flashes('error') %}
+    <div style="background: #fee; color: #c53030; padding: 1rem; margin-top: 1rem; border-left: 4px solid #c53030; border-radius: 4px;">
+        {{ message }}
+    </div>
+{% endfor %}
+
+{% endblock %}

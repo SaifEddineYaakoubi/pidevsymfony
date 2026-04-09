@@ -1,0 +1,169 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Statistiques des Récoltes{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📊 Statistiques des Récoltes par Mois</h1>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('app_recolte_index') }}" class="btn btn-secondary">← Retour aux Récoltes</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <!-- Graphique circulaire -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: center;">
+        <h3 style="text-align: center; margin-bottom: 1.5rem; color: #2D5016; font-size: 1.2rem;">📊 Répartition des Récoltes par Mois</h3>
+        <div style="height: 350px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="recoltesChart" style="max-height: 350px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Statistiques détaillées -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3>Détails par Mois</h3>
+        <div style="max-height: 400px; overflow-y: auto;">
+            {% for statistique in statistiques %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid #eee; {% if loop.first %}background: #e8f5e8; border-left: 4px solid #16a34a;{% endif %}">
+                    <div>
+                        <strong>{{ loop.index }}. {{ moisNoms[statistique.mois] ?? 'Mois ' ~ statistique.mois }}</strong>
+                        {% if loop.first %}
+                            <span style="color: #16a34a; font-size: 12px;">(Plus actif)</span>
+                        {% endif %}
+                    </div>
+                    <div style="font-weight: bold; color: #2D5016;">
+                        {{ statistique.nombre_recoltes }} récolte{{ statistique.nombre_recoltes > 1 ? 's' : '' }}
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    Aucune donnée disponible pour les statistiques.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Résumé -->
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3>📈 Résumé des Statistiques</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+            <h4 style="margin: 0; color: #2D5016;">Total Récoltes</h4>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0; color: #4A7C2F;">
+                {% set total = 0 %}
+                {% for stat in statistiques %}
+                    {% set total = total + stat.nombre_recoltes %}
+                {% endfor %}
+                {{ total }}
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+            <h4 style="margin: 0; color: #2D5016;">Mois le Plus Actif</h4>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0; color: #4A7C2F;">
+                {% if statistiques %}
+                    {{ moisNoms[statistiques[0].mois] ?? 'Mois ' ~ statistiques[0].mois }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+            <h4 style="margin: 0; color: #2D5016;">Nombre de Mois</h4>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0; color: #4A7C2F;">
+                {{ statistiques|length }}
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('recoltesChart').getContext('2d');
+
+    // Palette de couleurs harmonieuse - Charte graphique (Blanc, Marron, Vert)
+    const colors = [
+        '#2D5016',  // Vert foncé
+        '#4A7C2F',  // Vert moyen
+        '#8BC34A',  // Vert clair
+        '#8B6F47',  // Marron principal
+        '#6B5636',  // Marron foncé
+        '#D4C5B0',  // Marron clair
+        '#16a34a',  // Vert supplémentaire
+        '#15803d',  // Vert foncé supplémentaire
+        '#dc2626',  // Rouge (accent)
+        '#f59e0b',  // Orange (accent)
+        '#3b82f6',  // Bleu (accent)
+        '#1d4ed8'   // Bleu foncé (accent)
+    ];
+
+    const data = {{ data|raw }};
+    const labels = {{ labels|raw }};
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderColor: '#FFFFFF',
+                borderWidth: 3,
+                hoverOffset: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            layout: {
+                padding: 20
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 25,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        color: '#333333'
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return context.label + ': ' + context.parsed + ' récoltes (' + percentage + '%)';
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 0
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
