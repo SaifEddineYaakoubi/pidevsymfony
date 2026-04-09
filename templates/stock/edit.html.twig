@@ -1,0 +1,59 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Modifier l'entrée de Stock{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm rounded-4 border-0 overflow-hidden">
+                    <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);">
+                        <h3 class="mb-0 text-dark fw-bold"><i class="bi bi-pencil-square me-2"></i>Modifier le stock</h3>
+                    </div>
+                    <div class="card-body p-5">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                {{ form_label(form.quantite, 'Quantité', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.quantite, {'attr': {'class': 'form-control form-control-lg rounded-3', 'step': '0.01', 'placeholder': '0.00'}}) }}
+                                {{ form_errors(form.quantite) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.id_produit, 'Produit', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.id_produit, {'attr': {'class': 'form-select form-select-lg rounded-3'}}) }}
+                                {{ form_errors(form.id_produit) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.date_entree, 'Date entrée', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.date_entree, {'attr': {'class': 'form-control form-control-lg rounded-3'}}) }}
+                                {{ form_errors(form.date_entree) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.date_expiration, 'Date expiration', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.date_expiration, {'attr': {'class': 'form-control form-control-lg rounded-3'}}) }}
+                                {{ form_errors(form.date_expiration) }}
+                            </div>
+                            <div class="col-12">
+                                {{ form_label(form.id_user, 'ID utilisateur', {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.id_user, {'attr': {'class': 'form-control form-control-lg rounded-3'}}) }}
+                                {{ form_errors(form.id_user) }}
+                            </div>
+                        </div>
+
+                        <div class="mt-5 d-flex justify-content-between gap-3">
+                            <a href="{{ path('stock_index') }}" class="btn btn-lg rounded-3" style="background-color: #DEB887; color: #8B4513; border: none;">
+                                <i class="bi bi-arrow-left me-2"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-lg rounded-3 shadow-sm" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;">
+                                <i class="bi bi-check-circle me-2"></i>Enregistrer
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

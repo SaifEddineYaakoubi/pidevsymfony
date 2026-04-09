@@ -1,0 +1,37 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Détail du Stock{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container section py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm rounded-4">
+                    <div class="card-header" style="background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%); color: white;">
+                        <h3 class="mb-0"><i class="bi bi-box-seam me-2"></i>Stock #{% if stock.idStock %}{{ stock.idStock }}{% endif %}</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">Produit</dt>
+                            <dd class="col-sm-8"><span style="font-size: 1.3em; margin-right: 8px;">{{ stock.idProduit.icon }}</span>{{ stock.idProduit.nom }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Quantité</dt>
+                            <dd class="col-sm-8">{{ stock.quantite }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Date entrée</dt>
+                            <dd class="col-sm-8">{{ stock.dateEntree ? stock.dateEntree|date('Y-m-d') : '' }}</dd>
+
+                            <dt class="col-sm-4 text-muted">Date expiration</dt>
+                            <dd class="col-sm-8">{{ stock.dateExpiration ? stock.dateExpiration|date('Y-m-d') : '' }}</dd>
+                        </dl>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{{ path('stock_index') }}" class="btn" style="background-color: #DEB887; color: #8B4513; border: none;">Retour</a>
+                            <a href="{{ path('stock_edit', {'id_stock': stock.idStock}) }}" class="btn" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;">Modifier</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
