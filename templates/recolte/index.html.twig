@@ -53,7 +53,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Quantité (kg)</th>
             <th>Date</th>
             <th>Qualité</th>
@@ -66,7 +65,6 @@
     <tbody>
     {% for recolte in recoltes %}
         <tr>
-            <td>{{ recolte.id_recolte }}</td>
             <td>{{ recolte.quantite }}</td>
             <td>{{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : '-' }}</td>
             <td>
@@ -97,7 +95,7 @@
         </tr>
     {% else %}
         <tr>
-            <td colspan="8" style="text-align: center;">Aucune récolte trouvée.</td>
+            <td colspan="7" style="text-align: center;">Aucune récolte trouvée.</td>
         </tr>
     {% endfor %}
     </tbody>

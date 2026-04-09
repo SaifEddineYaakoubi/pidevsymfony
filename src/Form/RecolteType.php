@@ -30,6 +30,10 @@ class RecolteType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new Assert\NotBlank(),
+                    new Assert\LessThanOrEqual([
+                        'value' => 'today',
+                        'message' => 'La date de récolte ne peut pas être dans le futur.',
+                    ]),
                 ],
             ])
             ->add('qualite', ChoiceType::class, [
