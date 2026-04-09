@@ -23,6 +23,318 @@
 
     {# Main template CSS #}
     <link rel="stylesheet" href="{{ asset(theme ~ '/assets/css/main.css') }}">
+
+    <style>
+        /* ===== DASHBOARD MODERN DESIGN ===== */
+
+        /* Background général */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .main {
+            background-color: #f8f9fa;
+        }
+
+        /* Section padding */
+        .section {
+            background-color: transparent;
+        }
+
+        /* Container fluid optimization */
+        .container-fluid {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .container-fluid.section {
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        /* Header styling */
+        h1 {
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* Cards styling */
+        .card {
+            border: none;
+            border-radius: 12px;
+            background: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Shadow modern */
+        .shadow-sm {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Table styling */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #2d3561 0%, #1a1f4b 100%);
+            color: white;
+        }
+
+        .table th {
+            font-weight: 600;
+            padding: 1.2rem;
+            letter-spacing: 0.5px;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: 1rem 1.2rem;
+            border-color: #e9ecef;
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* Badges styling */
+        .badge {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+
+        .bg-light {
+            background-color: #f0f4f9 !important;
+        }
+
+        .bg-primary-light {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+        }
+
+        .text-primary {
+            color: #667eea !important;
+        }
+
+        .bg-success-light {
+            background: #dcfce7 !important;
+        }
+
+        .text-success {
+            color: #15803d !important;
+        }
+
+        /* Input styling */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        }
+
+        .form-control-lg {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+        }
+
+        .input-group-text {
+            border-radius: 8px 0 0 8px;
+            background-color: #f0f4f9;
+            border: 1px solid #e9ecef;
+        }
+
+        .input-group .form-control {
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Button styling */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-lg {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-outline-primary {
+            color: #667eea;
+            border-color: #667eea;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: #6b7280;
+            border-color: #d1d5db;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .btn-group {
+            gap: 6px;
+        }
+
+        /* Typography */
+        .fw-700 {
+            font-weight: 700 !important;
+        }
+
+        .fw-600 {
+            font-weight: 600 !important;
+        }
+
+        .text-muted {
+            color: #6b7280 !important;
+        }
+
+        /* Utilitaires */
+        .rounded-3 {
+            border-radius: 12px;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        /* Alert styling */
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background-color: #cffafe;
+            color: #0c4a6e;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .table th, .table td {
+                padding: 0.8rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+            }
+
+            .d-flex.gap-3 {
+                flex-direction: column;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block javascripts %}
@@ -46,6 +358,19 @@
     {% endblock %}
 
     <main class="main">
+        {% if app.flashes %}
+            <div class="container-fluid mt-3">
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'error' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% block agriculteur_body %}{% endblock %}
     </main>
 
