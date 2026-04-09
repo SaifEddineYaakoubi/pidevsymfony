@@ -7,7 +7,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card shadow-sm rounded-4">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header" style="background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%); color: white;">
                         <h3 class="mb-0"><i class="bi bi-box-seam me-2"></i>Stock #{% if stock.idStock %}{{ stock.idStock }}{% endif %}</h3>
                     </div>
                     <div class="card-body">
@@ -23,14 +23,11 @@
 
                             <dt class="col-sm-4 text-muted">Date expiration</dt>
                             <dd class="col-sm-8">{{ stock.dateExpiration ? stock.dateExpiration|date('Y-m-d') : '' }}</dd>
-
-                            <dt class="col-sm-4 text-muted">Utilisateur</dt>
-                            <dd class="col-sm-8">{{ stock.idUser }}</dd>
                         </dl>
 
                         <div class="mt-4 d-flex justify-content-between">
-                            <a href="{{ path('stock_index') }}" class="btn btn-outline-secondary">Retour</a>
-                            <a href="{{ path('stock_edit', {'id_stock': stock.idStock}) }}" class="btn btn-warning">Modifier</a>
+                            <a href="{{ path('stock_index') }}" class="btn" style="background-color: #DEB887; color: #8B4513; border: none;">Retour</a>
+                            <a href="{{ path('stock_edit', {'id_stock': stock.idStock}) }}" class="btn" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;">Modifier</a>
                         </div>
                     </div>
                 </div>
