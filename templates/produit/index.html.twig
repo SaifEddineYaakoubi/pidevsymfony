@@ -79,7 +79,7 @@
                         {% for produit in produits %}
                             <tr class="border-bottom">
                                 <td><span class="badge bg-info">{{ produit.idProduit }}</span></td>
-                                <td class="fw-semibold">{{ produit.nom }}</td>
+                                <td class="fw-semibold"><span style="font-size: 1.3em; margin-right: 8px;">{{ produit.icon }}</span>{{ produit.nom }}</td>
                                 <td><span class="badge bg-light text-dark">{{ produit.type }}</span></td>
                                 <td>{{ produit.unite }}</td>
                                 <td class="text-success fw-semibold">{{ produit.prixUnitaire }} DT</td>

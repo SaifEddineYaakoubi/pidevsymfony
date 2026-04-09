@@ -120,7 +120,7 @@
             {% for produit in produits %}
                 <tr>
                     <td><span class="badge">{{ produit.idProduit }}</span></td>
-                    <td>{{ produit.nom }}</td>
+                    <td>{{ produit.icon }} {{ produit.nom }}</td>
                     <td><span class="badge">{{ produit.type }}</span></td>
                     <td>{{ produit.unite }}</td>
                     <td class="price">{{ produit.prixUnitaire }} DT</td>

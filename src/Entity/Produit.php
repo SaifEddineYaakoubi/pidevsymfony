@@ -132,4 +132,83 @@ class Produit
 
         return $this;
     }
+
+    /**
+     * Retourne une icône/emoji basée sur le nom du produit
+     */
+    public function getIcon(): string
+    {
+        $nom = strtolower($this->nom ?? '');
+        
+        // Mapping des produits à leurs icônes
+        $iconMap = [
+            'pomme de terre' => '🥔',
+            'tomate' => '🍅',
+            'carotte' => '🥕',
+            'salade' => '🥗',
+            'oignon' => '🧅',
+            'ail' => '🧄',
+            'poivron' => '🫑',
+            'concombre' => '🥒',
+            'courgette' => '🥒',
+            'brocoli' => '🥦',
+            'épinard' => '🥬',
+            'laitue' => '🥬',
+            'chou' => '🥬',
+            'haricot' => '🫛',
+            'pois' => '🫛',
+            'betterave' => '🍠',
+            'navet' => '🥔',
+            'champignon' => '🍄',
+            'maïs' => '🌽',
+            'courge' => '🎃',
+            'pastèque' => '🍉',
+            'melon' => '🍈',
+            'fraise' => '🍓',
+            'cerise' => '🍒',
+            'raisin' => '🍇',
+            'pomme' => '🍎',
+            'poire' => '🍐',
+            'pêche' => '🍑',
+            'abricot' => '🍑',
+            'prune' => '🍒',
+            'banane' => '🍌',
+            'kiwi' => '🥝',
+            'noix' => '🥜',
+            'amande' => '🥜',
+            'cacahuète' => '🥜',
+            'miel' => '🍯',
+            'oeufs' => '🥚',
+            'fromage' => '🧀',
+            'lait' => '🥛',
+            'beurre' => '🧈',
+            'pain' => '🍞',
+            'riz' => '🍚',
+            'blé' => '🌾',
+            'poulet' => '🍗',
+            'viande' => '🥩',
+            'poisson' => '🐟',
+            'crevette' => '🍤',
+            'huile' => '🫒',
+            'café' => '☕',
+            'thé' => '🫖',
+            'jus' => '🧃',
+            'eau' => '💧',
+        ];
+
+        // Vérification exacte d'abord
+        if (isset($iconMap[$nom])) {
+            return $iconMap[$nom];
+        }
+
+        // Recherche par contenant (partial match)
+        foreach ($iconMap as $key => $icon) {
+            if (strpos($nom, $key) !== false || strpos($key, $nom) !== false) {
+                return $icon;
+            }
+        }
+
+        // Icône par défaut
+        return '🥬';
+    }
 }
