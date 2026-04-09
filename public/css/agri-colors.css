@@ -1,0 +1,111 @@
+/* Palette de couleurs agricole pour Smart Farm */
+:root {
+    /* Couleurs principales agricoles */
+    --agri-vert-foret: #2E8B57;
+    --agri-vert-clair: #32CD32;
+    --agri-vert-olive: #556B2F;
+    --agri-bleu-ciel: #87CEEB;
+    --agri-bleu-fonce: #4682B4;
+    --agri-orange: #FFA500;
+    --agri-jaune: #FFD700;
+    --agri-terre: #8B4513;
+    --agri-terre-clair: #A0522D;
+    --agri-beige: #DEB887;
+    --agri-sable: #F4A460;
+
+    /* Couleurs secondaires */
+    --agri-rouge-fruit: #FF6347;
+    --agri-rouge-alert: #8B0000;
+    --agri-bg-alert: #FFE4E1;
+}
+
+/* Classes utilitaires agricoles */
+.btn-agri-vert {
+    background: linear-gradient(135deg, var(--agri-vert-foret) 0%, var(--agri-vert-clair) 100%);
+    color: white;
+    border: none;
+}
+
+.btn-agri-bleu {
+    background: linear-gradient(135deg, var(--agri-bleu-ciel) 0%, var(--agri-bleu-fonce) 100%);
+    color: white;
+    border: none;
+}
+
+.btn-agri-orange {
+    background: linear-gradient(135deg, var(--agri-orange) 0%, var(--agri-jaune) 100%);
+    color: white;
+    border: none;
+}
+
+.btn-agri-terre {
+    background: linear-gradient(135deg, var(--agri-terre) 0%, var(--agri-terre-clair) 100%);
+    color: white;
+    border: none;
+}
+
+.btn-agri-beige {
+    background-color: var(--agri-beige);
+    color: var(--agri-terre);
+    border: none;
+}
+
+.text-agri-vert { color: var(--agri-vert-foret); }
+.text-agri-bleu { color: var(--agri-bleu-ciel); }
+.text-agri-orange { color: var(--agri-orange); }
+.text-agri-terre { color: var(--agri-terre); }
+
+.bg-agri-vert { background-color: var(--agri-vert-foret); }
+.bg-agri-bleu { background-color: var(--agri-bleu-ciel); }
+.bg-agri-orange { background-color: var(--agri-orange); }
+.bg-agri-terre { background-color: var(--agri-terre); }
+.bg-agri-beige { background-color: var(--agri-beige); }
+
+.border-agri-vert { border-left: 5px solid var(--agri-vert-foret); }
+.border-agri-bleu { border-left: 5px solid var(--agri-bleu-ciel); }
+.border-agri-olive { border-left: 5px solid var(--agri-vert-olive); }
+.border-agri-orange { border-left: 5px solid var(--agri-orange); }
+
+.badge-agri-terre {
+    background-color: var(--agri-sable);
+    color: var(--agri-terre);
+}
+
+.badge-agri-vert {
+    background-color: var(--agri-vert-olive);
+    color: white;
+}
+
+.alert-agri-danger {
+    background-color: var(--agri-bg-alert);
+    color: var(--agri-rouge-alert);
+    border: 1px solid var(--agri-rouge-fruit);
+}
+
+/* Gradients pour les en-têtes */
+.gradient-agri-vert {
+    background: linear-gradient(135deg, var(--agri-vert-foret) 0%, var(--agri-vert-clair) 100%);
+}
+
+.gradient-agri-bleu {
+    background: linear-gradient(135deg, var(--agri-bleu-ciel) 0%, var(--agri-bleu-fonce) 100%);
+}
+
+.gradient-agri-orange {
+    background: linear-gradient(135deg, var(--agri-orange) 0%, var(--agri-jaune) 100%);
+}
+
+.gradient-agri-terre {
+    background: linear-gradient(135deg, var(--agri-terre) 0%, var(--agri-terre-clair) 100%);
+}
+
+/* Table headers agricoles */
+.table-agri-vert thead {
+    background: linear-gradient(135deg, var(--agri-vert-foret) 0%, var(--agri-vert-clair) 100%);
+    color: white;
+}
+
+.table-agri-bleu thead {
+    background: linear-gradient(135deg, var(--agri-bleu-ciel) 0%, var(--agri-bleu-fonce) 100%);
+    color: white;
+}

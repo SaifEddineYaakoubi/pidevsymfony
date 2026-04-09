@@ -2,121 +2,213 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Stock;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 class Produit
 {
-
     #[ORM\Id]
-    #[ORM\Column(type: "integer")]
-    private int $id_produit;
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id_produit = null;
 
-    #[ORM\Column(type: "string", length: 100)]
-    private string $nom;
+    #[ORM\Column(type: 'string', length: 100)]
+    private ?string $nom = null;
 
-    #[ORM\Column(type: "string", length: 50)]
-    private string $type;
+    #[ORM\Column(type: 'string', length: 50)]
+    private ?string $type = null;
 
-    #[ORM\Column(type: "string", length: 20)]
-    private string $unite;
+    #[ORM\Column(type: 'string', length: 20)]
+    private ?string $unite = null;
 
-    #[ORM\Column(type: "float")]
-    private float $prix_unitaire;
+    #[ORM\Column(type: 'float')]
+    private ?float $prix_unitaire = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $id_user;
+    #[ORM\Column(type: 'integer')]
+    private ?int $id_user = null;
 
-    public function getId_produit()
+    #[ORM\OneToMany(mappedBy: 'id_produit', targetEntity: Stock::class, cascade: ['persist', 'remove'])]
+    private Collection $stocks;
+
+    public function __construct()
+    {
+        $this->stocks = new ArrayCollection();
+    }
+
+    public function getId_produit(): ?int
     {
         return $this->id_produit;
     }
 
-    public function setId_produit($value)
+    public function getIdProduit(): ?int
     {
-        $this->id_produit = $value;
+        return $this->id_produit;
     }
 
-    public function getNom()
+    public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom($value)
+    public function setNom(?string $nom): self
     {
-        $this->nom = $value;
+        $this->nom = $nom;
+
+        return $this;
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType($value)
+    public function setType(?string $type): self
     {
-        $this->type = $value;
+        $this->type = $type;
+
+        return $this;
     }
 
-    public function getUnite()
+    public function getUnite(): ?string
     {
         return $this->unite;
     }
 
-    public function setUnite($value)
+    public function setUnite(?string $unite): self
     {
-        $this->unite = $value;
+        $this->unite = $unite;
+
+        return $this;
     }
 
-    public function getPrix_unitaire()
+    public function getPrixUnitaire(): ?float
     {
         return $this->prix_unitaire;
     }
 
-    public function setPrix_unitaire($value)
+    public function setPrixUnitaire(?float $prixUnitaire): self
     {
-        $this->prix_unitaire = $value;
+        $this->prix_unitaire = $prixUnitaire;
+
+        return $this;
     }
 
-    public function getId_user()
+    public function getIdUser(): ?int
     {
         return $this->id_user;
     }
 
-    public function setId_user($value)
+    public function setIdUser(?int $idUser): self
     {
-        $this->id_user = $value;
+        $this->id_user = $idUser;
+
+        return $this;
     }
 
-    #[ORM\OneToMany(mappedBy: "id_produit", targetEntity: Stock::class)]
-    private Collection $stocks;
+    public function getStocks(): Collection
+    {
+        return $this->stocks;
+    }
 
-        public function getStocks(): Collection
-        {
-            return $this->stocks;
+    public function addStock(Stock $stock): self
+    {
+        if (!$this->stocks->contains($stock)) {
+            $this->stocks[] = $stock;
+            $stock->setId_produit($this);
         }
-    
-        public function addStock(Stock $stock): self
-        {
-            if (!$this->stocks->contains($stock)) {
-                $this->stocks[] = $stock;
-                $stock->setId_produit($this);
+
+        return $this;
+    }
+
+    public function removeStock(Stock $stock): self
+    {
+        if ($this->stocks->removeElement($stock)) {
+            if ($stock->getId_produit() === $this) {
+                $stock->setId_produit(null);
             }
-    
-            return $this;
         }
-    
-        public function removeStock(Stock $stock): self
-        {
-            if ($this->stocks->removeElement($stock)) {
-                // set the owning side to null (unless already changed)
-                if ($stock->getId_produit() === $this) {
-                    $stock->setId_produit(null);
-                }
+
+        return $this;
+    }
+
+    /**
+     * Retourne une icône/emoji basée sur le nom du produit
+     */
+    public function getIcon(): string
+    {
+        $nom = strtolower($this->nom ?? '');
+        
+        // Mapping des produits à leurs icônes
+        $iconMap = [
+            'pomme de terre' => '🥔',
+            'tomate' => '🍅',
+            'carotte' => '🥕',
+            'salade' => '🥗',
+            'oignon' => '🧅',
+            'ail' => '🧄',
+            'poivron' => '🫑',
+            'concombre' => '🥒',
+            'courgette' => '🥒',
+            'brocoli' => '🥦',
+            'épinard' => '🥬',
+            'laitue' => '🥬',
+            'chou' => '🥬',
+            'haricot' => '🫛',
+            'pois' => '🫛',
+            'betterave' => '🍠',
+            'navet' => '🥔',
+            'champignon' => '🍄',
+            'maïs' => '🌽',
+            'courge' => '🎃',
+            'pastèque' => '🍉',
+            'melon' => '🍈',
+            'fraise' => '🍓',
+            'cerise' => '🍒',
+            'raisin' => '🍇',
+            'pomme' => '🍎',
+            'poire' => '🍐',
+            'pêche' => '🍑',
+            'abricot' => '🍑',
+            'prune' => '🍒',
+            'banane' => '🍌',
+            'kiwi' => '🥝',
+            'noix' => '🥜',
+            'amande' => '🥜',
+            'cacahuète' => '🥜',
+            'miel' => '🍯',
+            'oeufs' => '🥚',
+            'fromage' => '🧀',
+            'lait' => '🥛',
+            'beurre' => '🧈',
+            'pain' => '🍞',
+            'riz' => '🍚',
+            'blé' => '🌾',
+            'poulet' => '🍗',
+            'viande' => '🥩',
+            'poisson' => '🐟',
+            'crevette' => '🍤',
+            'huile' => '🫒',
+            'café' => '☕',
+            'thé' => '🫖',
+            'jus' => '🧃',
+            'eau' => '💧',
+        ];
+
+        // Vérification exacte d'abord
+        if (isset($iconMap[$nom])) {
+            return $iconMap[$nom];
+        }
+
+        // Recherche par contenant (partial match)
+        foreach ($iconMap as $key => $icon) {
+            if (strpos($nom, $key) !== false || strpos($key, $nom) !== false) {
+                return $icon;
             }
-    
-            return $this;
         }
+
+        // Icône par défaut
+        return '🥬';
+    }
 }
