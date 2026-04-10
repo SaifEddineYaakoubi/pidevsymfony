@@ -51,7 +51,7 @@ security:
         - { path: ^/admin/logout$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/stock, roles: ROLE_STOCK }
-        - { path: ^/agriculteur, roles: ROLE_AGRICULTEUR }
+        - { path: ^/agriculteur, roles: [ROLE_AGRICULTEUR, ROLE_ADMIN] }
         - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/api, roles: ROLE_USER }
 

@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 class Produit
@@ -15,18 +16,37 @@ class Produit
     private ?int $id_produit = null;
 
     #[ORM\Column(type: 'string', length: 100)]
+    #[Assert\NotBlank(message: 'Le nom du produit est obligatoire.')]
+    #[Assert\Length(
+        max: 100,
+        maxMessage: 'Le nom ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $nom = null;
 
     #[ORM\Column(type: 'string', length: 50)]
+    #[Assert\NotBlank(message: 'Le type est obligatoire.')]
+    #[Assert\Length(
+        max: 50,
+        maxMessage: 'Le type ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $type = null;
 
     #[ORM\Column(type: 'string', length: 20)]
+    #[Assert\NotBlank(message: 'L\'unité est obligatoire.')]
+    #[Assert\Length(
+        max: 20,
+        maxMessage: 'L\'unité ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $unite = null;
 
     #[ORM\Column(type: 'float')]
+    #[Assert\NotNull(message: 'Le prix unitaire est obligatoire.')]
+    #[Assert\PositiveOrZero(message: 'Le prix unitaire doit être supérieur ou égal à 0.')]
     private ?float $prix_unitaire = null;
 
     #[ORM\Column(type: 'integer')]
+    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
     private ?int $id_user = null;
 
     #[ORM\OneToMany(mappedBy: 'id_produit', targetEntity: Stock::class, cascade: ['persist', 'remove'])]
@@ -116,7 +136,7 @@ class Produit
     {
         if (!$this->stocks->contains($stock)) {
             $this->stocks[] = $stock;
-            $stock->setId_produit($this);
+            $stock->setIdProduit($this);
         }
 
         return $this;
@@ -125,8 +145,8 @@ class Produit
     public function removeStock(Stock $stock): self
     {
         if ($this->stocks->removeElement($stock)) {
-            if ($stock->getId_produit() === $this) {
-                $stock->setId_produit(null);
+            if ($stock->getIdProduit() === $this) {
+                $stock->setIdProduit(null);
             }
         }
 

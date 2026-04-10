@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 use App\Entity\Recolte;
 
@@ -17,9 +19,13 @@ class Rendement
     private int $id_rendement;
 
     #[ORM\Column(type: "float")]
+    #[Assert\NotNull(message: 'La surface exploitée est obligatoire.')]
+    #[Assert\Positive(message: 'La surface exploitée doit être strictement supérieure à 0.')]
     private float $surface_exploitee;
 
     #[ORM\Column(type: "float")]
+    #[Assert\NotNull(message: 'La quantité totale est obligatoire.')]
+    #[Assert\Positive(message: 'La quantité totale doit être strictement supérieure à 0.')]
     private float $quantite_totale;
 
     #[ORM\Column(type: "float")]
@@ -27,7 +33,26 @@ class Rendement
 
     #[ORM\ManyToOne(targetEntity: Recolte::class)]
     #[ORM\JoinColumn(name: 'id_recolte', referencedColumnName: 'id_recolte')]
+    #[Assert\NotNull(message: 'La récolte est obligatoire.')]
     private ?Recolte $id_recolte = null;
+
+    #[Assert\Callback]
+    public function validateBusinessRules(ExecutionContextInterface $context): void
+    {
+        if ($this->id_recolte === null) {
+            return;
+        }
+
+        // Règle métier: quantité totale saisie ne doit pas dépasser la quantité de la récolte.
+        // (Protection si l'utilisateur saisit une valeur incohérente)
+        $recolteQuantite = $this->id_recolte->getQuantite();
+        if (is_numeric($recolteQuantite) && $this->quantite_totale > (float) $recolteQuantite) {
+            $context->buildViolation('La quantité totale ne peut pas dépasser la quantité de la récolte sélectionnée ({{ q }} kg).')
+                ->setParameter('{{ q }}', (string) $recolteQuantite)
+                ->atPath('quantite_totale')
+                ->addViolation();
+        }
+    }
 
     public function getId_rendement()
     {
@@ -86,7 +111,9 @@ class Rendement
 
     public function setIdRecolte($value)
     {
-        return $this->setId_recolte($value);
+        $this->setId_recolte($value);
+
+        return $this;
     }
 
     public function getSurfaceExploitee()
@@ -96,7 +123,9 @@ class Rendement
 
     public function setSurfaceExploitee($value)
     {
-        return $this->setSurface_exploitee($value);
+        $this->setSurface_exploitee($value);
+
+        return $this;
     }
 
     public function getQuantiteTotale()
@@ -106,7 +135,9 @@ class Rendement
 
     public function setQuantiteTotale($value)
     {
-        return $this->setQuantite_totale($value);
+        $this->setQuantite_totale($value);
+
+        return $this;
     }
 
     public function getIdRendement()
@@ -116,6 +147,8 @@ class Rendement
 
     public function setIdRendement($value)
     {
-        return $this->setId_rendement($value);
+        $this->setId_rendement($value);
+
+        return $this;
     }
 }

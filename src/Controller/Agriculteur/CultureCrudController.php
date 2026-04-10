@@ -59,13 +59,15 @@ final class CultureCrudController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
         $culture = $repo->find($id);
         if (!$culture) {
             throw $this->createNotFoundException();
         }
 
-        // Ownership check via parcelle
-        if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
+        // Ownership check via parcelle (admin can view all)
+        if (!$isAdmin && ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user)) {
             throw $this->createNotFoundException();
         }
 
@@ -82,13 +84,21 @@ final class CultureCrudController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'plantation';
         $dir = $request->query->getString('dir') ?: 'DESC';
 
-        $cultures = $repo->searchByQueryForUser($user, $q, $sort, $dir);
-        $totalAll = count($repo->searchByQueryForUser($user, null, null, null));
-        $countsByEtat = $repo->countByEtatCroissanceForUser($user, $q);
+        if ($isAdmin) {
+            $cultures = $repo->searchByQuery($q, $sort, $dir);
+            $totalAll = count($repo->searchByQuery(null, null, null));
+            $countsByEtat = $repo->countByEtatCroissance($q);
+        } else {
+            $cultures = $repo->searchByQueryForUser($user, $q, $sort, $dir);
+            $totalAll = count($repo->searchByQueryForUser($user, null, null, null));
+            $countsByEtat = $repo->countByEtatCroissanceForUser($user, $q);
+        }
 
         // Alerts module: harvest due soon (< 7 days)
         $alerts = $alertService->getHarvestDueSoonAlerts($cultures);

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Entity\Culture;
 
@@ -16,25 +17,47 @@ class Recolte
     private int $id_recolte;
 
     #[ORM\Column(type: "float")]
+    #[Assert\NotNull(message: 'La quantité est obligatoire.')]
+    #[Assert\Positive(message: 'La quantité doit être strictement supérieure à 0.')]
     private float $quantite;
 
     #[ORM\Column(type: "date", nullable: true)]
+    #[Assert\NotNull(message: 'La date de récolte est obligatoire.')]
+    #[Assert\LessThanOrEqual('today', message: 'La date de récolte ne peut pas être dans le futur.')]
     private ?\DateTimeInterface $date_recolte;
 
     #[ORM\Column(type: "string", length: 50)]
-    private string $qualite;
+    #[Assert\NotBlank(message: 'La qualité est obligatoire.')]
+    #[Assert\Choice(choices: ['excellente','bonne','moyenne','mauvaise'], message: 'Qualité invalide.')]
+    private ?string $qualite = null;
 
         #[ORM\ManyToOne(targetEntity: Culture::class, inversedBy: "recoltes")]
     #[ORM\JoinColumn(name: 'id_culture', referencedColumnName: 'id_culture', nullable: true, onDelete: 'CASCADE')]
     private ?Culture $id_culture;
 
     #[ORM\Column(type: "string", length: 100)]
-    private string $type_culture;
+    #[Assert\NotBlank(message: 'Le type de culture est obligatoire.')]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Le type de culture doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le type de culture ne doit pas dépasser {{ limit }} caractères.'
+    )]
+    private ?string $type_culture = null;
 
     #[ORM\Column(type: "string", length: 150)]
-    private string $localisation;
+    #[Assert\NotBlank(message: 'La localisation est obligatoire.')]
+    #[Assert\Length(
+        min: 2,
+        max: 150,
+        minMessage: 'La localisation doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'La localisation ne doit pas dépasser {{ limit }} caractères.'
+    )]
+    private ?string $localisation = null;
 
     #[ORM\Column(type: "integer")]
+    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
     private int $id_user;
 
     public function __construct()
@@ -135,7 +158,9 @@ class Recolte
 
     public function setDateRecolte($value)
     {
-        return $this->setDate_recolte($value);
+        $this->setDate_recolte($value);
+
+        return $this;
     }
 
     public function getTypeCulture()
@@ -145,7 +170,9 @@ class Recolte
 
     public function setTypeCulture($value)
     {
-        return $this->setType_culture($value);
+        $this->setType_culture($value);
+
+        return $this;
     }
 
     public function getIdRecolte()
@@ -155,7 +182,9 @@ class Recolte
 
     public function setIdRecolte($value)
     {
-        return $this->setId_recolte($value);
+        $this->setId_recolte($value);
+
+        return $this;
     }
 
     public function getIdCulture()
@@ -165,7 +194,9 @@ class Recolte
 
     public function setIdCulture($value)
     {
-        return $this->setId_culture($value);
+        $this->setId_culture($value);
+
+        return $this;
     }
 
     public function getIdUser()
@@ -175,6 +206,8 @@ class Recolte
 
     public function setIdUser($value)
     {
-        return $this->setId_user($value);
+        $this->setId_user($value);
+
+        return $this;
     }
 }

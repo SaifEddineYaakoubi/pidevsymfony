@@ -75,13 +75,21 @@ final class ParcelleCrudController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'nom';
         $dir = $request->query->getString('dir') ?: 'ASC';
 
-        $parcelles = $repo->searchByQueryForUser($user, $q, $sort, $dir);
-        $totalAll = $repo->count(['id_user' => $user]);
-        $countsByEtat = $repo->countByEtatForUser($user, $q);
+        if ($isAdmin) {
+            $parcelles = $repo->searchByQuery($q, $sort, $dir);
+            $totalAll = $repo->count([]);
+            $countsByEtat = $repo->countByEtat($q);
+        } else {
+            $parcelles = $repo->searchByQueryForUser($user, $q, $sort, $dir);
+            $totalAll = $repo->count(['id_user' => $user]);
+            $countsByEtat = $repo->countByEtatForUser($user, $q);
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('agriculteur/parcelle/_results.html.twig', [

@@ -1,0 +1,62 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Admin - Parcelles{% endblock %}
+{% block admin_page_title %}Parcelles{% endblock %}
+
+{% block admin_body %}
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% set qVal = q ?? app.request.query.get('q') ?? '' %}
+    {% set sortVal = sort ?? app.request.query.get('sort') ?? 'nom' %}
+    {% set dirVal = dir ?? app.request.query.get('dir') ?? 'ASC' %}
+
+    {# helper macro to build sort links that keep the current search query #}
+    {% macro sort_link(routeName, q, currentSort, currentDir, key, label) %}
+        {% set isActive = (currentSort == key) %}
+        {% set nextDir = (isActive and (currentDir|upper == 'ASC')) ? 'DESC' : 'ASC' %}
+        <a href="{{ path(routeName, { q: q, sort: key, dir: nextDir }) }}" class="text-decoration-none">
+            {{ label }}
+            {% if isActive %}
+                <i class="fas {{ (currentDir|upper == 'ASC') ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
+            {% else %}
+                <i class="fas fa-sort text-muted"></i>
+            {% endif %}
+        </a>
+    {% endmacro %}
+    {% import _self as ui %}
+
+    <div data-controller="crud-search"
+         data-crud-search-url-value="{{ path('app_admin_parcelles') }}">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: .75rem;">
+                <h3 class="card-title mb-0">Liste des parcelles</h3>
+
+                <form method="get" action="{{ path(currentRoute) }}" class="d-flex align-items-center" style="gap: .5rem;" onsubmit="return false;">
+                    <input type="hidden" name="sort" value="{{ sortVal }}">
+                    <input type="hidden" name="dir" value="{{ dirVal }}">
+                    <div class="input-group input-group-sm" style="width: 320px;">
+                        <input type="text" name="q" value="{{ qVal }}" class="form-control" placeholder="Rechercher (nom, localisation, état)…"
+                               autocomplete="off"
+                               data-crud-search-target="input"
+                               data-action="input->crud-search#search">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ path(currentRoute) }}" title="Réinitialiser">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <div data-crud-search-target="results">
+                {% include 'admin/pages/parcelles/_results.html.twig' %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+

@@ -39,6 +39,20 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_parcelles') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_parcelles' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-map-marked-alt"></i>
+                        <p>Parcelles</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_cultures') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_cultures' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-seedling"></i>
+                        <p>Cultures</p>
+                    </a>
+                </li>
+
 
                 <!-- SECTION COMPTE -->
                 <li class="nav-header">COMPTE</li>
