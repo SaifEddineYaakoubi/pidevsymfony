@@ -115,9 +115,7 @@
             }
 
             function clearSelection() {
-                const table = document.getElementById('cultureTable');
-                if (!table) return;
-                table.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('is-selected'));
+                results.querySelectorAll('.agri-culture-card').forEach(el => el.classList.remove('is-selected'));
             }
 
             function setSelected(row) {
@@ -134,16 +132,16 @@
             }
 
             results.addEventListener('click', (e) => {
-                const row = e.target.closest('tr[data-id]');
-                if (!row) return;
-                setSelected(row);
+                const card = e.target.closest('.agri-culture-card[data-id]');
+                if (!card) return;
+                setSelected(card);
             });
 
             // Open details on double click on the row
             results.addEventListener('dblclick', (e) => {
-                const row = e.target.closest('tr[data-id][data-href]');
-                if (!row) return;
-                const href = row.dataset.href;
+                const card = e.target.closest('.agri-culture-card[data-id][data-href]');
+                if (!card) return;
+                const href = card.dataset.href;
                 if (href) window.location.href = href;
             });
 

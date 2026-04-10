@@ -9,7 +9,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class RendementType extends AbstractType
 {
@@ -23,23 +22,12 @@ class RendementType extends AbstractType
                 },
                 'label' => 'Récolte',
                 'placeholder' => 'Sélectionnez une récolte',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
             ])
             ->add('surface_exploitee', NumberType::class, [
                 'label' => 'Surface Exploitée (m²)',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Positive(),
-                ],
             ])
             ->add('quantite_totale', NumberType::class, [
                 'label' => 'Quantité Totale Récoltée (kg)',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Positive(),
-                ],
             ])
         ;
     }

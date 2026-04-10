@@ -60,6 +60,70 @@
 </div>
 
 <div class="mt-3">
-    {% include 'agriculteur/culture/_table.html.twig' %}
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="text-muted small">
+            {{ cultures|length }} résultat(s)
+            {% if q %}pour "{{ q }}"{% endif %}
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for c in cultures %}
+            {% set etatLabel = {
+                'germination': 'Germination',
+                'croissance': 'Croissance',
+                'floraison': 'Floraison',
+                'maturite': 'Mature'
+            }[c.etat_croissance] ?? c.etat_croissance %}
+
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card shadow-sm h-100 agri-culture-card"
+                     role="button"
+                     tabindex="0"
+                     data-id="{{ c.id_culture }}"
+                     data-href="{{ path('agri_culture_show', {id: c.id_culture}) }}"
+                     data-delete-token="{{ csrf_token('delete_culture_' ~ c.id_culture) }}">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
+                            <div>
+                                <div class="text-muted small">Culture</div>
+                                <div class="h5 mb-1">
+                                    <a class="text-decoration-none" href="{{ path('agri_culture_show', {id: c.id_culture}) }}">
+                                        {{ c.type_culture }}
+                                    </a>
+                                </div>
+                                <div class="small text-muted">Parcelle: <strong>{{ c.parcelle ? c.parcelle.nom : '-' }}</strong></div>
+                            </div>
+                            <div>
+                                <span class="agri-badge agri-badge--{{ c.etat_croissance }}">{{ etatLabel }}</span>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="d-grid" style="row-gap: .5rem;">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Plantation</span>
+                                <strong>{{ c.date_plantation ? c.date_plantation|date('Y-m-d') : '-' }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Récolte prévue</span>
+                                <strong>{{ c.date_recolte_prevue ? c.date_recolte_prevue|date('Y-m-d') : '-' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0">
+                        <div class="d-flex justify-content-end">
+                            <span class="text-muted small">Double-clic : détails</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="text-center text-muted py-4">Aucune culture</div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 

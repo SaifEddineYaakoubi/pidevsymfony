@@ -114,9 +114,7 @@
             }
 
             function clearSelection() {
-                const table = document.getElementById('parcelleTable');
-                if (!table) return;
-                table.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('is-selected'));
+                results.querySelectorAll('.agri-parcelle-card').forEach(el => el.classList.remove('is-selected'));
             }
 
             function setSelected(row) {
@@ -133,16 +131,16 @@
             }
 
             results.addEventListener('click', (e) => {
-                const row = e.target.closest('tr[data-id]');
-                if (!row) return;
-                setSelected(row);
+                const card = e.target.closest('.agri-parcelle-card[data-id]');
+                if (!card) return;
+                setSelected(card);
             });
 
             // Open details on double click anywhere on the row (except when selecting text)
             results.addEventListener('dblclick', (e) => {
-                const row = e.target.closest('tr[data-id][data-href]');
-                if (!row) return;
-                const href = row.dataset.href;
+                const card = e.target.closest('.agri-parcelle-card[data-id][data-href]');
+                if (!card) return;
+                const href = card.dataset.href;
                 if (href) window.location.href = href;
             });
 

@@ -45,7 +45,7 @@ class Parcelle
     private ?string $etat = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "parcelles")]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: true, onDelete: 'SET NULL')]
     private ?Utilisateur $id_user = null;
 
     #[ORM\OneToMany(mappedBy: "id_parcelle", targetEntity: Culture::class)]

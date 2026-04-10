@@ -199,6 +199,42 @@
   box-shadow: inset 4px 0 0 var(--agri-green);
 }
 
+/* Parcelle cards (premium list) */
+.agri-parcelle-card {
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.10);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.agri-parcelle-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border-color: rgba(27, 127, 58, 0.35);
+}
+
+.agri-parcelle-card.is-selected {
+  outline: 3px solid rgba(27, 127, 58, 0.18);
+  border-color: rgba(27, 127, 58, 0.55);
+}
+
+/* Culture cards (premium list) */
+.agri-culture-card {
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.10);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.agri-culture-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border-color: rgba(107, 66, 193, 0.30);
+}
+
+.agri-culture-card.is-selected {
+  outline: 3px solid rgba(107, 66, 193, 0.14);
+  border-color: rgba(107, 66, 193, 0.45);
+}
+
 .agri-crud-results {
   position: relative;
 }

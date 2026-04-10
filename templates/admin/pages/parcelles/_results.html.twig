@@ -1,0 +1,62 @@
+{# Partial for AJAX: stats + table #}
+
+<div class="mt-3 d-flex flex-wrap" style="gap: .5rem;">
+    {% set counts = stats.counts_by_etat ?? {} %}
+    <span class="badge badge-dark p-2">Total (DB) : <strong>{{ stats.total_all ?? '?' }}</strong></span>
+    <span class="badge badge-info p-2">Affichés : <strong>{{ stats.total_filtered ?? parcelles|length }}</strong></span>
+
+    {% if q is defined and q|trim != '' %}
+        <span class="badge badge-light p-2">Filtre : “{{ q|e }}”</span>
+    {% endif %}
+
+    {% if counts is not empty %}
+        {% for etat, nb in counts %}
+            {% set etatLower = etat|lower %}
+            {% set color = 'secondary' %}
+            {% if etatLower == 'active' %}{% set color = 'success' %}{% endif %}
+            {% if etatLower == 'repos' %}{% set color = 'warning' %}{% endif %}
+            {% if etatLower == 'exploitée' or etatLower == 'exploitee' %}{% set color = 'primary' %}{% endif %}
+            <span class="badge badge-{{ color }} p-2">{{ etat }} : <strong>{{ nb }}</strong></span>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<table class="table table-hover text-nowrap mb-0">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Superficie</th>
+        <th>Localisation</th>
+        <th>État</th>
+        <th>Ajoutée par</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for p in parcelles %}
+        <tr>
+            <td>{{ p.nom }}</td>
+            <td>{{ p.superficie }}</td>
+            <td>{{ p.localisation }}</td>
+            <td>{{ p.etat }}</td>
+            <td>
+                {% set authorName = null %}
+                {% if p.id_user is defined and p.id_user %}
+                    {# If the FK is orphaned, Doctrine may throw an EntityNotFoundException when accessing fields #}
+                    {% set authorName = (p.id_user.nom ?? null) %}
+                {% endif %}
+
+                {% if authorName %}
+                    {{ p.id_user.nom }} {{ p.id_user.prenom }}
+                {% else %}
+                    <span class="text-muted fst-italic">Utilisateur supprimé</span>
+                {% endif %}
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" class="text-center text-muted p-4">Aucune parcelle.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+

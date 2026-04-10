@@ -10,7 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class RecolteType extends AbstractType
 {
@@ -19,22 +18,11 @@ class RecolteType extends AbstractType
         $builder
             ->add('quantite', NumberType::class, [
                 'label' => 'Quantité',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Positive(),
-                ],
             ])
             ->add('date_recolte', DateType::class, [
                 'label' => 'Date de récolte',
                 'widget' => 'single_text',
                 'required' => false,
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\LessThanOrEqual([
-                        'value' => 'today',
-                        'message' => 'La date de récolte ne peut pas être dans le futur.',
-                    ]),
-                ],
             ])
             ->add('qualite', ChoiceType::class, [
                 'label' => 'Qualité',
@@ -44,23 +32,12 @@ class RecolteType extends AbstractType
                     'Moyenne' => 'moyenne',
                     'Mauvaise' => 'mauvaise',
                 ],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
             ])
             ->add('type_culture', TextType::class, [
                 'label' => 'Type de culture',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['min' => 2, 'max' => 100]),
-                ],
             ])
             ->add('localisation', TextType::class, [
                 'label' => 'Localisation',
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['min' => 2, 'max' => 150]),
-                ],
             ])
         ;
     }

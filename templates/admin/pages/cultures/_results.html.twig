@@ -1,0 +1,53 @@
+{# Partial for AJAX: stats + table #}
+
+{# Stats strip #}
+<div class="mt-3 d-flex flex-wrap" style="gap: .5rem;">
+    {% set counts = stats.counts_by_etat ?? {} %}
+    <span class="badge badge-dark p-2">Total (DB) : <strong>{{ stats.total_all ?? '?' }}</strong></span>
+    <span class="badge badge-info p-2">Affichés : <strong>{{ stats.total_filtered ?? cultures|length }}</strong></span>
+
+    {% if q is defined and q|trim != '' %}
+        <span class="badge badge-light p-2">Filtre : “{{ q|e }}”</span>
+    {% endif %}
+
+    {% if counts is not empty %}
+        {% for etat, nb in counts %}
+            {% set etatLower = etat|lower %}
+            {% set color = 'secondary' %}
+            {% if etatLower == 'germination' %}{% set color = 'primary' %}{% endif %}
+            {% if etatLower == 'croissance' %}{% set color = 'info' %}{% endif %}
+            {% if etatLower == 'floraison' %}{% set color = 'warning' %}{% endif %}
+            {% if etatLower == 'mature' %}{% set color = 'success' %}{% endif %}
+            <span class="badge badge-{{ color }} p-2">{{ etat }} : <strong>{{ nb }}</strong></span>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{# Table #}
+<table class="table table-hover text-nowrap mb-0">
+    <thead>
+    <tr>
+        <th>Parcelle</th>
+        <th>Type</th>
+        <th>Plantation</th>
+        <th>Récolte prévue</th>
+        <th>État croissance</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for c in cultures %}
+        <tr>
+            <td>{{ c.parcelle ? c.parcelle.nom : '-' }}</td>
+            <td>{{ c.typeCulture }}</td>
+            <td>{{ c.datePlantation ? c.datePlantation|date('Y-m-d') : '-' }}</td>
+            <td>{{ c.dateRecoltePrevue ? c.dateRecoltePrevue|date('Y-m-d') : '-' }}</td>
+            <td>{{ c.etatCroissance }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" class="text-center text-muted p-4">Aucune culture.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
