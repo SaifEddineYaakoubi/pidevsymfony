@@ -53,6 +53,20 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_stocks') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_stocks' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <p>Stock</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_produits') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_produits' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>Produits</p>
+                    </a>
+                </li>
+
 
                 <!-- SECTION COMPTE -->
                 <li class="nav-header">COMPTE</li>

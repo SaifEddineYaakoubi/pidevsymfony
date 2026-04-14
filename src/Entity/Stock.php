@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Utilisateur;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -34,10 +35,10 @@ class Stock
     #[Assert\NotNull(message: 'Le produit est obligatoire.')]
     private ?Produit $id_produit = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
     #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
-    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
-    private ?int $id_user = null;
+    private ?Utilisateur $id_user = null;
 
     #[Assert\Callback]
     public function validateDates(ExecutionContextInterface $context): void
@@ -113,12 +114,24 @@ class Stock
 
     public function getIdUser(): ?int
     {
-        return $this->id_user;
+        return $this->id_user?->getIdUser();
     }
 
     public function setIdUser(?int $idUser): self
     {
-        $this->id_user = $idUser;
+        // Cette méthode est conservée pour compatibilité.
+        // Pour remplir la relation, utilisez setUtilisateur() lorsque vous avez une instance Utilisateur.
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->id_user;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->id_user = $utilisateur;
 
         return $this;
     }

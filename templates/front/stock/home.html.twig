@@ -92,62 +92,76 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block javascripts %}
-{{ parent() }}
-<script src="/adminlte/plugins/chart.js/Chart.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('productTypesChart').getContext('2d');
-    const productTypes = {{ productTypes|json_encode|raw }};
-    
-    function getEmoji(type) {
-        const emojiMap = {
-            'légume': '🥔',
-            'fruits': '🍓',
-            'hv': '🫛'
-        };
-        return emojiMap[type.toLowerCase()] || '❓';
-    }
-    
-    const labels = productTypes.map(item => `${getEmoji(item.type)} ${item.type}`);
-    const data = productTypes.map(item => parseInt(item.count));
+    <script src="/adminlte/plugins/chart.js/Chart.min.js"></script>
+    <script>
+    (function() {
+        const chartEl = document.getElementById('productTypesChart');
+        if (!chartEl || typeof Chart === 'undefined') {
+            return;
+        }
 
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Nombre de Produits',
-                data: data,
-                backgroundColor: [
-                    'rgba(46, 139, 87, 0.8)', // vert forêt
-                    'rgba(85, 107, 47, 0.8)',  // vert olive
-                    'rgba(139, 69, 19, 0.8)'   // terre cuite
-                ],
-                borderColor: [
-                    'rgba(46, 139, 87, 1)',
-                    'rgba(85, 107, 47, 1)',
-                    'rgba(139, 69, 19, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Répartition des Produits par Type'
+        const ctx = chartEl.getContext('2d');
+        const productTypes = {{ productTypes|json_encode|raw }};
+
+        function getEmoji(type) {
+            const emojiMap = {
+                'légume': '🥔',
+                'fruit': '🍓',
+                'huile': '🛢️',
+                'céréale': '🌾',
+                'herbe aromatique': '🌿',
+                'racine/tubercule': '🥕',
+                'autres': '❓'
+            };
+            return emojiMap[type.toLowerCase()] || '❓';
+        }
+
+        const labels = productTypes.map(item => `${getEmoji(item.type)} ${item.type}`);
+        const data = productTypes.map(item => parseInt(item.count, 10));
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Nombre de Produits',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(46, 139, 87, 0.8)',
+                        'rgba(85, 107, 47, 0.8)',
+                        'rgba(139, 69, 19, 0.8)',
+                        'rgba(233, 150, 122, 0.8)',
+                        'rgba(255, 215, 0, 0.8)',
+                        'rgba(70, 130, 180, 0.8)',
+                        'rgba(128, 128, 128, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(46, 139, 87, 1)',
+                        'rgba(85, 107, 47, 1)',
+                        'rgba(139, 69, 19, 1)',
+                        'rgba(233, 150, 122, 1)',
+                        'rgba(255, 215, 0, 1)',
+                        'rgba(70, 130, 180, 1)',
+                        'rgba(128, 128, 128, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Répartition des Produits par Type'
+                    }
                 }
             }
-        }
-    });
-});
-</script>
+        });
+    })();
+    </script>
 {% endblock %}
 

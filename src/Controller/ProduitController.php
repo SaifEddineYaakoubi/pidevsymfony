@@ -68,6 +68,12 @@ class ProduitController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Assigner l'utilisateur connecté
+            $user = $this->getUser();
+            if ($user instanceof \App\Entity\Utilisateur) {
+                $produit->setUtilisateur($user);
+            }
+
             $em->persist($produit);
             $em->flush();
 

@@ -31,7 +31,7 @@ class StockRepository extends ServiceEntityRepository
             'quantite' => 's.quantite',
             'dateEntree' => 's.date_entree',
             'dateExpiration' => 's.date_expiration',
-            'idUser' => 's.id_user',
+            'idUser' => 'u.nom',
         ];
 
         $sortConfig = $sortFields[$sort] ?? $sortFields['dateEntreeDesc'];
@@ -40,7 +40,9 @@ class StockRepository extends ServiceEntityRepository
         // cassés quand la FK pointe sur un produit supprimé (sinon Twig déclenche EntityNotFoundException).
         $qb = $this->createQueryBuilder('s')
             ->leftJoin('s.id_produit', 'p')
+            ->leftJoin('s.id_user', 'u')
             ->addSelect('p')
+            ->addSelect('u')
             ->orderBy($sortConfig['column'], $sortConfig['direction']);
 
         if ($search) {
@@ -48,7 +50,7 @@ class StockRepository extends ServiceEntityRepository
                 $qb->andWhere($searchFields[$searchField] . ' LIKE :search')
                     ->setParameter('search', '%'.$search.'%');
             } else {
-                $qb->andWhere('p.nom LIKE :search OR s.quantite LIKE :search OR s.id_user LIKE :search')
+                $qb->andWhere('p.nom LIKE :search OR s.quantite LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search')
                     ->setParameter('search', '%'.$search.'%');
             }
         }
@@ -77,5 +79,35 @@ class StockRepository extends ServiceEntityRepository
         }
 
         return $results;
+    }
+
+    public function countByStatus(?string $search = null): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->leftJoin('s.id_produit', 'p')
+            ->leftJoin('s.id_user', 'u')
+            ->select("CASE
+                    WHEN s.date_expiration < :now THEN 'Expiré'
+                    WHEN s.date_expiration < :warningDate THEN 'Expiration proche'
+                    ELSE 'Disponible'
+                END as status,
+                COUNT(s.id_stock) as count")
+            ->setParameter('now', new \DateTime())
+            ->setParameter('warningDate', new \DateTime('+30 days'))
+            ->groupBy('status');
+
+        if ($search) {
+            $qb->andWhere('p.nom LIKE :search OR s.quantite LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search')
+                ->setParameter('search', '%'.$search.'%');
+        }
+
+        $results = $qb->getQuery()->getResult();
+
+        $counts = [];
+        foreach ($results as $result) {
+            $counts[$result['status']] = (int) $result['count'];
+        }
+
+        return $counts;
     }
 }
