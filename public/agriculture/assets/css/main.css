@@ -2100,19 +2100,37 @@ section,
   color: color-mix(in srgb, var(--default-color), transparent 50%);
 }
 
-.categories-widget ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/*--------------------------------------------------------------
+# Disabled Navigation Links
+--------------------------------------------------------------*/
+.navmenu a.disabled,
+.navmenu li a.disabled,
+.navmenu a.disabled:hover,
+.navmenu a.disabled:focus,
+.navmenu li a.disabled:hover,
+.navmenu li a.disabled:focus,
+a.disabled,
+li a.disabled,
+a.disabled:hover,
+a.disabled:focus,
+li a.disabled:hover,
+li a.disabled:focus {
+  color: #999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  text-decoration: none !important;
+  pointer-events: none !important;
+  background-color: transparent !important;
+  text-decoration-line: none !important;
+  text-decoration-color: transparent !important;
 }
 
-.categories-widget ul li {
-  padding-bottom: 10px;
-}
+/*--------------------------------------------------------------
+# Enhanced Stock & Product Cards Styling
+--------------------------------------------------------------*/
 
-.categories-widget ul li:last-child {
-  padding-bottom: 0;
-}
+
+
 
 .categories-widget ul a {
   color: color-mix(in srgb, var(--default-color), transparent 20%);

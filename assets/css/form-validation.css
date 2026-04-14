@@ -1,0 +1,184 @@
+/**
+ * Styles pour la validation de formulaires
+ */
+
+/* Styles des champs */
+.form-validation .form-control,
+.form-validation .form-select {
+    border: 2px solid #dde0e6;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+}
+
+.form-validation .form-control:focus,
+.form-validation .form-select:focus {
+    border-color: #2E8B57;
+    box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.15);
+    outline: none;
+}
+
+/* Champs invalides */
+.form-validation .form-control.is-invalid,
+.form-validation .form-select.is-invalid {
+    border-color: #e74c3c;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23e74c3c'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath fill='%23e74c3c' d='M5.8 3.6h.4L6 6.9h-.4z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e74c3c'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    animation: slideInError 0.3s ease;
+}
+
+.form-validation .form-control.is-invalid:focus,
+.form-validation .form-select.is-invalid:focus {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.15);
+}
+
+/* Champs valides */
+.form-validation .form-control.is-valid,
+.form-validation .form-select.is-valid {
+    border-color: #27ae60;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2327ae60' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4.6 5.05c-.5.62-1.8.4-2.5-.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    animation: slideInSuccess 0.3s ease;
+}
+
+.form-validation .form-control.is-valid:focus,
+.form-validation .form-select.is-valid:focus {
+    border-color: #27ae60;
+    box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.15);
+}
+
+/* Labels */
+.form-label {
+    color: #2C3E50;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+/* Texte d'aide */
+.form-text {
+    font-size: 0.875rem;
+    color: #7F8C8D;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* Messages d'erreur */
+.invalid-feedback-js {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    display: block;
+    margin-top: 0.5rem;
+    animation: slideInError 0.3s ease;
+}
+
+.invalid-feedback-js i {
+    font-size: 0.9rem;
+}
+
+.invalid-feedback-js span {
+    line-height: 1.5;
+}
+
+/* Animations */
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInSuccess {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Groupe de champs */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group .form-control,
+.form-group .form-select {
+    margin-bottom: 0.5rem;
+}
+
+/* Conteneur pour afficher les erreurs */
+.form-error-summary {
+    background-color: #fadbd8;
+    border: 2px solid #e74c3c;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: none;
+}
+
+.form-error-summary.show {
+    display: block;
+    animation: slideInError 0.3s ease;
+}
+
+.form-error-summary h5 {
+    color: #c0392b;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.form-error-summary ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.form-error-summary li {
+    color: #c0392b;
+    line-height: 1.6;
+}
+
+/* État désactivé */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #ecf0f1;
+    color: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* Boutons */
+.form-validation button[type="submit"] {
+    transition: all 0.3s ease;
+}
+
+.form-validation button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-validation button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-validation .form-control,
+    .form-validation .form-select {
+        font-size: 16px; /* Pas de zoom sur mobile */
+    }
+
+    .invalid-feedback-js {
+        font-size: 0.8rem;
+    }
+}

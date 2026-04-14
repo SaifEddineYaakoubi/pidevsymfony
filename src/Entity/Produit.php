@@ -44,10 +44,10 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le prix unitaire doit être supérieur ou égal à 0.')]
     private ?float $prix_unitaire = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
     #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
-    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
-    private ?int $id_user = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\OneToMany(mappedBy: 'id_produit', targetEntity: Stock::class, cascade: ['persist', 'remove'])]
     private Collection $stocks;
@@ -117,12 +117,29 @@ class Produit
 
     public function getIdUser(): ?int
     {
-        return $this->id_user;
+        return $this->utilisateur?->getIdUser();
     }
 
     public function setIdUser(?int $idUser): self
     {
-        $this->id_user = $idUser;
+        if ($idUser === null) {
+            $this->utilisateur = null;
+        } else {
+            // Cette méthode est gardée pour compatibilité, mais il est préférable d'utiliser setUtilisateur()
+            // Pour l'instant, on ne fait rien car Doctrine gérera la relation
+        }
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }

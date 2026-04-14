@@ -1,0 +1,112 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Admin - Stocks{% endblock %}
+{% block admin_page_title %}Stocks{% endblock %}
+
+{% block admin_body %}
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        .avatar-circle {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(40, 167, 69, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .badge {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .card-header {
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        .text-success {
+            color: #28a745 !important;
+        }
+        .text-warning {
+            color: #ffc107 !important;
+        }
+        .text-danger {
+            color: #dc3545 !important;
+        }
+    </style>
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% set qVal = q ?? app.request.query.get('q') ?? '' %}
+    {% set sortVal = sort ?? app.request.query.get('sort') ?? 'dateEntreeDesc' %}
+    {% set dirVal = dir ?? app.request.query.get('dir') ?? 'DESC' %}
+
+    {# helper macro to build sort links that keep the current search query #}
+    {% macro sort_link(routeName, q, currentSort, currentDir, key, label) %}
+        {% set isActive = (currentSort == key) %}
+        {% set nextDir = (isActive and (currentDir|upper == 'ASC')) ? 'DESC' : 'ASC' %}
+        <a href="{{ path(routeName, { q: q, sort: key, dir: nextDir }) }}" class="text-decoration-none">
+            {{ label }}
+            {% if isActive %}
+                <i class="fas {{ (currentDir|upper == 'ASC') ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
+            {% else %}
+                <i class="fas fa-sort text-muted"></i>
+            {% endif %}
+        </a>
+    {% endmacro %}
+    {% import _self as ui %}
+
+    <div data-controller="crud-search"
+         data-crud-search-url-value="{{ path('app_admin_stocks') }}">
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient-success text-white">
+            <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: 1rem;">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 rounded-circle p-3 mr-3">
+                        <i class="fas fa-warehouse fa-2x text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title mb-1 text-white font-weight-bold">Gestion des Stocks</h3>
+                        <p class="mb-0 text-white-50">Surveillez vos inventaires et dates d'expiration</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <form method="get" action="{{ path(currentRoute) }}" class="d-flex align-items-center mb-0" style="gap: 0.5rem;" onsubmit="return false;">
+                        <input type="hidden" name="sort" value="{{ sortVal }}">
+                        <input type="hidden" name="dir" value="{{ dirVal }}">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="q" value="{{ qVal }}" class="form-control bg-white border-0"
+                                   placeholder="🔍 Rechercher dans les stocks..."
+                                   autocomplete="off"
+                                   data-crud-search-target="input"
+                                   data-action="input->crud-search#search">
+                            <div class="input-group-append">
+                                <button class="btn btn-light border-0" type="submit">
+                                    <i class="fas fa-search text-success"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <a class="btn btn-light btn-sm border-0" href="{{ path(currentRoute) }}" title="Réinitialiser">
+                            <i class="fas fa-undo text-secondary"></i>
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <div data-crud-search-target="results">
+                {% include 'admin/pages/stocks/_results.html.twig' %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

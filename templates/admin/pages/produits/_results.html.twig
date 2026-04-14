@@ -1,0 +1,185 @@
+{# Partial for AJAX: stats + table #}
+
+<div class="mt-3 d-flex flex-wrap align-items-center" style="gap: 1rem;">
+    {% set counts = stats.counts_by_type ?? {} %}
+
+    <!-- Statistiques principales -->
+    <div class="d-flex align-items-center">
+        <i class="fas fa-database text-primary mr-2"></i>
+        <span class="badge badge-primary px-3 py-2">
+            <strong>{{ stats.total_all ?? '?' }}</strong> produits au total
+        </span>
+    </div>
+
+    <div class="d-flex align-items-center">
+        <i class="fas fa-eye text-info mr-2"></i>
+        <span class="badge badge-info px-3 py-2">
+            <strong>{{ stats.total_filtered ?? produits|length }}</strong> affichés
+        </span>
+    </div>
+
+    {% if q is defined and q|trim != '' %}
+        <div class="d-flex align-items-center">
+            <i class="fas fa-filter text-secondary mr-2"></i>
+            <span class="badge badge-light px-3 py-2 border">
+                Filtre : "<strong>{{ q|e }}</strong>"
+            </span>
+        </div>
+    {% endif %}
+
+    <!-- Statistiques par type -->
+    {% if counts is not empty %}
+        <div class="ml-3 d-flex flex-wrap" style="gap: 0.5rem;">
+            {% for type, nb in counts %}
+                {% set typeLower = type|lower %}
+                {% set color = 'secondary' %}
+                {% set icon = 'fas fa-tag' %}
+                {% set customStyle = '' %}
+                {% if typeLower == 'legume' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-leaf' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;' %}
+                {% elseif typeLower == 'fruit' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-apple-alt' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%); color: white;' %}
+                {% elseif typeLower == 'cereale' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-seedling' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: black;' %}
+                {% elseif typeLower == 'viande' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-drumstick-bite' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #dc3545 0%, #8b0000 100%); color: white;' %}
+                {% elseif typeLower == 'laitier' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-cheese' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white;' %}
+                {% elseif typeLower == 'epice' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-pepper-hot' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%); color: white;' %}
+                {% elseif typeLower == 'tubercule' %}
+                    {% set color = 'custom' %}
+                    {% set icon = 'fas fa-carrot' %}
+                    {% set customStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #28a745 100%); color: white;' %}
+                {% endif %}
+                {% if color == 'custom' %}
+                    <span class="badge px-3 py-2" style="{{ customStyle }}">
+                        <i class="{{ icon }} mr-1"></i>{{ type }} <strong>({{ nb }})</strong>
+                    </span>
+                {% else %}
+                    <span class="badge badge-{{ color }} px-3 py-2">
+                        <i class="{{ icon }} mr-1"></i>{{ type }} <strong>({{ nb }})</strong>
+                    </span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="mt-4">
+    <table class="table table-hover table-striped text-nowrap mb-0">
+        <thead class="thead-light">
+        <tr>
+            <th><i class="fas fa-tag mr-2"></i>Nom</th>
+            <th><i class="fas fa-cubes mr-2"></i>Type</th>
+            <th><i class="fas fa-weight mr-2"></i>Unité</th>
+            <th><i class="fas fa-coins mr-2"></i>Prix unitaire</th>
+            <th><i class="fas fa-user mr-2"></i>Ajouté par</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in produits %}
+            <tr class="align-middle">
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle bg-primary text-white mr-3" style="width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
+                            {{ p.nom|first|upper }}
+                        </div>
+                        <strong>{{ p.nom }}</strong>
+                    </div>
+                </td>
+                <td>
+                    {% set typeLower = p.type|lower %}
+                    {% set badgeColor = 'secondary' %}
+                    {% set typeIcon = 'fas fa-tag' %}
+                    {% set customBadgeStyle = '' %}
+                    {% if typeLower == 'legume' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-leaf' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none;' %}
+                    {% elseif typeLower == 'fruit' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-apple-alt' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%); color: white; border: none;' %}
+                    {% elseif typeLower == 'cereale' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-seedling' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: black; border: none;' %}
+                    {% elseif typeLower == 'viande' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-drumstick-bite' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #dc3545 0%, #8b0000 100%); color: white; border: none;' %}
+                    {% elseif typeLower == 'laitier' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-cheese' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white; border: none;' %}
+                    {% elseif typeLower == 'epice' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-pepper-hot' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%); color: white; border: none;' %}
+                    {% elseif typeLower == 'tubercule' %}
+                        {% set badgeColor = 'custom' %}
+                        {% set typeIcon = 'fas fa-carrot' %}
+                        {% set customBadgeStyle = 'background: linear-gradient(135deg, #fd7e14 0%, #28a745 100%); color: white; border: none;' %}
+                    {% endif %}
+                    {% if badgeColor == 'custom' %}
+                        <span class="badge px-2 py-1" style="{{ customBadgeStyle }}">
+                            <i class="{{ typeIcon }} mr-1"></i>{{ p.type }}
+                        </span>
+                    {% else %}
+                        <span class="badge badge-{{ badgeColor }} px-2 py-1">
+                            <i class="{{ typeIcon }} mr-1"></i>{{ p.type }}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge badge-light text-dark px-2 py-1">
+                        <i class="fas fa-balance-scale mr-1"></i>{{ p.unite }}
+                    </span>
+                </td>
+                <td>
+                    <span class="text-success font-weight-bold">
+                        <i class="fas fa-coins mr-1"></i>{{ p.prixUnitaire|number_format(2, ',', ' ') }} DT
+                    </span>
+                </td>
+                <td>
+                    {% if p.utilisateur %}
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle bg-secondary text-white mr-2" style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                                {{ p.utilisateur.nom|first|upper }}{{ p.utilisateur.prenom|first|upper }}
+                            </div>
+                            {{ p.utilisateur.nom }} {{ p.utilisateur.prenom }}
+                        </div>
+                    {% else %}
+                        <span class="text-muted fst-italic">
+                            <i class="fas fa-user-times mr-1"></i>Utilisateur supprimé
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-5">
+                    <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                    <br>
+                    <strong>Aucun produit trouvé</strong>
+                    <br>
+                    <small>Il n'y a actuellement aucun produit dans la base de données.</small>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
