@@ -52,6 +52,8 @@
                      role="button"
                      tabindex="0"
                      data-id="{{ p.id_parcelle }}"
+                     data-lat="{{ p.latitude is not null ? p.latitude : '' }}"
+                     data-lon="{{ p.longitude is not null ? p.longitude : '' }}"
                      data-href="{{ path('agri_parcelle_show', {id: p.id_parcelle}) }}"
                      data-delete-token="{{ csrf_token('delete_parcelle_' ~ p.id_parcelle) }}">
                     <div class="card-body">

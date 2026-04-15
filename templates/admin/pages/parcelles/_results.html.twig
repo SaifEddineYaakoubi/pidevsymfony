@@ -39,14 +39,20 @@
             <td>{{ p.localisation }}</td>
             <td>{{ p.etat }}</td>
             <td>
-                {% set authorName = null %}
-                {% if p.id_user is defined and p.id_user %}
-                    {# If the FK is orphaned, Doctrine may throw an EntityNotFoundException when accessing fields #}
-                    {% set authorName = (p.id_user.nom ?? null) %}
+                {#
+                   In legacy/dirty DBs, parcelle.id_user can point to a missing utilisateur (e.g. id_user=0),
+                   which triggers EntityNotFoundException when Twig tries to access p.id_user.nom.
+                   We therefore only show the author when the relation resolves to a managed entity.
+                #}
+                {% set author = (p.id_user is defined ? p.id_user : null) %}
+                {% set authorId = null %}
+                {% if author %}
+                    {# Utilisateur exposes getIdUser(): use it to know if the relation is valid #}
+                    {% set authorId = author.idUser ?? null %}
                 {% endif %}
 
-                {% if authorName %}
-                    {{ p.id_user.nom }} {{ p.id_user.prenom }}
+                {% if authorId %}
+                    {{ author.nom|default('') }} {{ author.prenom|default('') }}
                 {% else %}
                     <span class="text-muted fst-italic">Utilisateur supprimé</span>
                 {% endif %}

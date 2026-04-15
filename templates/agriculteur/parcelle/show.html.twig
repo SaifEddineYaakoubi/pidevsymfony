@@ -2,6 +2,26 @@
 
 {% block title %}Détails parcelle - {{ parcelle.nom }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <style>
+        #parcelle-show-map {
+            height: 380px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}
+
 {% block agriculteur_body %}
     {% include 'front/partials/_page_title.html.twig' with {
         title: 'Détails parcelle',
@@ -63,6 +83,24 @@
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <strong>Position sur la carte</strong>
+                                    <div class="text-muted small">
+                                        {% if parcelle.latitude is not null and parcelle.longitude is not null %}
+                                            Coordonnées : {{ parcelle.latitude }}, {{ parcelle.longitude }}
+                                        {% else %}
+                                            Coordonnées non définies (carte centrée par défaut)
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="parcelle-show-map"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mt-4 d-flex gap-2">
                             <a class="btn btn-outline-secondary" href="{{ path('agri_parcelle_index') }}">Retour</a>
                             <a class="btn btn-outline-primary" href="{{ path('agri_parcelle_edit', {id: parcelle.id_parcelle}) }}">Modifier</a>
@@ -88,5 +126,43 @@
             </div>
         </div>
     </section>
+
+    <script>
+        (function () {
+            function boot() {
+                const el = document.getElementById('parcelle-show-map');
+                if (!el) return;
+                if (!window.L) {
+                    window.setTimeout(boot, 50);
+                    return;
+                }
+
+                // Prevent double init with Turbo
+                if (el._leaflet_map_initialized) return;
+                el._leaflet_map_initialized = true;
+
+                const lat = {{ (parcelle.latitude is not null ? parcelle.latitude : 36.8065) }};
+                const lon = {{ (parcelle.longitude is not null ? parcelle.longitude : 10.1815) }};
+                const zoom = {{ (parcelle.latitude is not null and parcelle.longitude is not null) ? 14 : 6 }};
+
+                const map = L.map(el).setView([lat, lon], zoom);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                const marker = L.marker([lat, lon]).addTo(map);
+                marker.bindPopup({{ parcelle.nom|json_encode|raw }}).openPopup();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+            document.addEventListener('turbo:load', boot);
+            document.addEventListener('turbo:render', boot);
+        })();
+    </script>
 {% endblock %}
 

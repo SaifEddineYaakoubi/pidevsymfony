@@ -22,8 +22,10 @@ final class Version20260408201033 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE recolte CHANGE date_recolte date_recolte DATE DEFAULT NULL');
         $this->addSql('ALTER TABLE rendement CHANGE id_recolte id_recolte INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE rendement ADD CONSTRAINT FK_922F06F2EAAED84C FOREIGN KEY (id_recolte) REFERENCES recolte (id_recolte)');
-        $this->addSql('CREATE INDEX IDX_922F06F2EAAED84C ON rendement (id_recolte)');
+        // Do NOT add the rendement(id_recolte) foreign key here.
+        // Existing databases may contain orphan rows and/or already have a similar FK,
+        // which would make this migration fail.
+        $this->addSql('CREATE INDEX IF NOT EXISTS IDX_922F06F2EAAED84C ON rendement (id_recolte)');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT NULL');
     }
 
@@ -32,8 +34,8 @@ final class Version20260408201033 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE recolte CHANGE date_recolte date_recolte DATE DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE rendement DROP FOREIGN KEY FK_922F06F2EAAED84C');
-        $this->addSql('DROP INDEX IDX_922F06F2EAAED84C ON rendement');
+        // FK was not created in up(); only drop the index if present.
+        $this->addSql('DROP INDEX IF EXISTS IDX_922F06F2EAAED84C ON rendement');
         $this->addSql('ALTER TABLE rendement CHANGE id_recolte id_recolte INT NOT NULL');
     }
 }

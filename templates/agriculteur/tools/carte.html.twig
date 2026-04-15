@@ -1,0 +1,106 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Carte - AgriCulture{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <style>
+        #leaflet-map {
+            height: 420px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+    </style>
+{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Carte',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Carte' }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+            <div class="agri-crud">
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <form method="get" class="d-flex gap-2 align-items-center flex-wrap" novalidate>
+                            <div class="flex-grow-1">
+                                <label class="form-label mb-1 small text-muted">Rechercher une localisation</label>
+                                <input class="form-control" name="q" value="{{ q }}" placeholder="Ex : Sousse, Tunisie" autocomplete="off">
+                            </div>
+                            <div class="pt-4">
+                                <button class="btn btn-success" type="submit">Localiser</button>
+                            </div>
+                        </form>
+
+                        {% if geo.error is defined and geo.error %}
+                            <div class="alert alert-warning mt-3 mb-0 shadow-sm">
+                                <strong>Note :</strong> {{ geo.error }} (mode {{ geo.source }})
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">Résultat</h6>
+                                <div class="small">
+                                    <div><strong>Nom</strong> : {{ geo.display_name }}</div>
+                                    <div><strong>Latitude</strong> : {{ geo.lat }}</div>
+                                    <div><strong>Longitude</strong> : {{ geo.lon }}</div>
+                                </div>
+                                <hr>
+                                <div class="text-muted small">
+                                    Astuce : vous pouvez réutiliser ces coordonnées pour placer une parcelle.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div id="leaflet-map"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        (function () {
+            const lat = {{ geo.lat|default(36.8065) }};
+            const lon = {{ geo.lon|default(10.1815) }};
+            const title = {{ geo.display_name|default('Localisation')|json_encode|raw }};
+
+            const map = L.map('leaflet-map').setView([lat, lon], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([lat, lon]).addTo(map).bindPopup(title).openPopup();
+        })();
+    </script>
+{% endblock %}
+
