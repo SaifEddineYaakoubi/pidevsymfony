@@ -24,8 +24,7 @@
     {# Main template CSS #}
     <link rel="stylesheet" href="{{ asset(theme ~ '/assets/css/main.css') }}">
 
-    {# CRUD UI CSS (tables, badges, loader overlay) #}
-    <link rel="stylesheet" href="{{ asset('assets/styles/agri_crud.css') }}">
+    {# CRUD UI CSS is imported in assets/app.js and loaded via {{ importmap('app') }} #}
 
     <style>
         /* ===== DASHBOARD MODERN DESIGN ===== */

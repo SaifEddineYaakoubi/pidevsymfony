@@ -2,6 +2,26 @@
 
 {% block title %}Parcelles - AgriCulture{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <style>
+        #parcelles-map {
+            height: 380px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}
+
 {% block agriculteur_body %}
     {% include 'front/partials/_page_title.html.twig' with {
         title: 'Parcelles',
@@ -11,9 +31,13 @@
         ]
     } %}
 
-    <section class="section">
+    <section class="section"
+             data-controller="parcelle-map-weather"
+             data-parcelle-map-weather-weather-url-template-value="{{ path('agri_parcelle_weather', {id: 0})|replace({'0': '__ID__'}) }}"
+             data-parcelle-map-weather-default-lat-value="36.8065"
+             data-parcelle-map-weather-default-lon-value="10.1815"
+             data-parcelle-map-weather-default-zoom-value="6">
         <div class="container">
-
             <div class="agri-crud">
 
             {% for label, messages in app.flashes %}
@@ -81,6 +105,32 @@
                 <div class="agri-crud-loader" aria-hidden="true">
                 </div>
                 {% include 'agriculteur/parcelle/_results.html.twig' %}
+            </div>
+
+            {# Map + weather after CRUD header/results (user request) #}
+            <div class="row g-4 mt-4">
+                <div class="col-12 col-lg-7">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <strong>Carte</strong>
+                            <div class="text-muted small">Cliquez sur une parcelle pour voir sa position</div>
+                        </div>
+                        <div class="card-body">
+                            <div id="parcelles-map" data-parcelle-map-weather-target="map"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <strong>Météo</strong>
+                            <div class="text-muted small" data-parcelle-map-weather-target="weatherTitle">Sélectionnez une parcelle</div>
+                        </div>
+                        <div class="card-body" data-parcelle-map-weather-target="weather">
+                            <div class="text-muted">Sélectionnez une parcelle pour afficher la météo.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             </div>
         </div>

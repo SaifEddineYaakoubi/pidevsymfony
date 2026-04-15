@@ -8,3 +8,6 @@ const app = startStimulusApp();
 import CrudSearchController from './controllers/crud_search_controller.js';
 app.register('crud-search', CrudSearchController);
 
+import ParcelleMapWeatherController from './controllers/parcelle_map_weather_controller.js';
+app.register('parcelle-map-weather', ParcelleMapWeatherController);
+

@@ -6,11 +6,13 @@ use App\Entity\Parcelle;
 use App\Entity\Utilisateur;
 use App\Form\ParcelleType;
 use App\Repository\ParcelleRepository;
+use App\Service\Api\WeatherService;
 use App\Service\Validation\SymfonyEntityValidator;
 use App\Service\Pdf\PdfExporter;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,6 +20,40 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/agriculteur/parcelles', name: 'agri_parcelle_')]
 final class ParcelleCrudController extends AbstractController
 {
+    #[Route('/{id}/weather', name: 'weather', requirements: ['id' => '\\d+'], methods: ['GET'])]
+    public function weather(int $id, ParcelleRepository $repo, WeatherService $weatherService): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $parcelle = $repo->findOneForUser($id, $user);
+        if (!$parcelle) {
+            throw $this->createNotFoundException();
+        }
+
+        $lat = method_exists($parcelle, 'getLatitude') ? $parcelle->getLatitude() : null;
+        $lon = method_exists($parcelle, 'getLongitude') ? $parcelle->getLongitude() : null;
+        if ($lat !== null && $lon !== null) {
+            $weather = $weatherService->getCurrentWeatherByCoordinates((float) $lat, (float) $lon);
+        } else {
+            $weather = $weatherService->getCurrentWeatherByCity((string) $parcelle->getLocalisation());
+        }
+
+        return $this->json([
+            'ok' => true,
+            'parcelle' => [
+                'id' => $parcelle->getId_parcelle(),
+                'nom' => $parcelle->getNom(),
+                'localisation' => $parcelle->getLocalisation(),
+                'latitude' => $lat,
+                'longitude' => $lon,
+            ],
+            'weather' => $weather,
+        ]);
+    }
+
     #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, ParcelleRepository $repo, PdfExporter $pdfExporter): Response
     {

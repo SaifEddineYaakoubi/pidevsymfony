@@ -1,0 +1,80 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Météo - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'Météo',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'Météo' }
+        ]
+    } %}
+
+    <section class="section">
+        <div class="container">
+            <div class="agri-crud">
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <form method="get" class="d-flex gap-2 align-items-center flex-wrap" novalidate>
+                            <div class="flex-grow-1">
+                                <label class="form-label mb-1 small text-muted">Ville</label>
+                                <input class="form-control" name="city" value="{{ city }}" placeholder="Ex: Sousse" autocomplete="off">
+                            </div>
+                            <div class="pt-4">
+                                <button class="btn btn-success" type="submit">Afficher</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if weather.error is defined and weather.error %}
+                    <div class="alert alert-warning shadow-sm">
+                        <strong>Note :</strong> {{ weather.error }} (mode {{ weather.source }})
+                    </div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <div>
+                                        <h5 class="mb-1">{{ weather.city }}</h5>
+                                        <div class="text-muted small">{{ weather.description|default(weather.mainCondition) }}</div>
+                                    </div>
+                                    {% if weather.icon is defined %}
+                                        <img alt="Icon météo" width="64" height="64"
+                                             src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png">
+                                    {% endif %}
+                                </div>
+
+                                <hr>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-dark">{{ weather.temperature|number_format(1, '.', ' ') }} °C</span>
+                                    <span class="badge bg-primary">Humidité: {{ weather.humidity }}%</span>
+                                    <span class="badge bg-info text-dark">Vent: {{ weather.windSpeed|number_format(1, '.', ' ') }} m/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">Conseil agricole</h6>
+                                <div class="p-3 rounded" style="background:#f8faf8; border:1px solid rgba(46,139,87,.15);">
+                                    {{ weather.advice }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+

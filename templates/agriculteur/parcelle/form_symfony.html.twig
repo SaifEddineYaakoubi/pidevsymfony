@@ -2,6 +2,20 @@
 
 {% block title %}{{ mode == 'new' ? 'Ajouter parcelle' : 'Modifier parcelle' }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <style>
+        #parcelle-map {
+            height: 340px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+    </style>
+{% endblock %}
+
 {% block agriculteur_body %}
     {% include 'front/partials/_page_title.html.twig' with {
         title: (mode == 'new' ? 'Ajouter parcelle' : 'Modifier parcelle'),
@@ -39,9 +53,33 @@
 
         <div class="col-md-6">
             {{ form_label(form.localisation) }}
-            {{ form_widget(form.localisation, {attr: {class: 'form-control'}}) }}
+            {{ form_widget(form.localisation, {attr: {class: 'form-control', autocomplete: 'off'}}) }}
             <div class="text-danger small">{{ form_errors(form.localisation) }}</div>
             {% if extraErrors.localisation is defined %}<div class="text-danger small">{{ extraErrors.localisation }}</div>{% endif %}
+        </div>
+
+        {# Hidden fields used by the map #}
+        {{ form_widget(form.latitude) }}
+        {{ form_widget(form.longitude) }}
+
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 align-items-end justify-content-between">
+                        <div class="flex-grow-1">
+                            <label class="form-label mb-1 small text-muted">Rechercher sur la carte</label>
+                            <input id="geoQuery" class="form-control" placeholder="Ex : Sousse, Tunisie" autocomplete="off">
+                            <div class="form-text">Astuce : cliquez sur la carte pour déplacer le marqueur.</div>
+                        </div>
+                        <div>
+                            <button id="btnGeo" class="btn btn-outline-success" type="button">Localiser</button>
+                        </div>
+                    </div>
+
+                    <div id="geoError" class="text-danger small mt-2" style="display:none"></div>
+                    <div id="parcelle-map" class="mt-3"></div>
+                </div>
+            </div>
         </div>
 
         <div class="col-md-6">
@@ -60,5 +98,186 @@
     {{ form_end(form) }}
 </div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        (function () {
+            function boot() {
+                // Safety: avoid crashing if the map container isn't present or Leaflet didn't load.
+                if (!document.getElementById('parcelle-map')) {
+                    return;
+                }
+                if (!window.L) {
+                    // Leaflet may still be loading from CDN (timing). Retry briefly.
+                    window.setTimeout(boot, 50);
+                    return;
+                }
+
+                const container = document.getElementById('parcelle-map');
+                // If Turbo navigates without a full reload, this script can run multiple times.
+                // Avoid initializing Leaflet twice on the same container.
+                if (container && container._leaflet_map_initialized) {
+                    return;
+                }
+                if (container) {
+                    container._leaflet_map_initialized = true;
+                }
+
+            const locInput = document.getElementById('{{ form.localisation.vars.id }}');
+            const latInput = document.getElementById('{{ form.latitude.vars.id }}');
+            const lonInput = document.getElementById('{{ form.longitude.vars.id }}');
+
+            const qInput = document.getElementById('geoQuery');
+            const btn = document.getElementById('btnGeo');
+            const errorBox = document.getElementById('geoError');
+
+            const defaultLat = 36.8065;
+            const defaultLon = 10.1815;
+
+            const initLat = latInput && latInput.value ? parseFloat(latInput.value) : defaultLat;
+            const initLon = lonInput && lonInput.value ? parseFloat(lonInput.value) : defaultLon;
+
+            const map = L.map('parcelle-map').setView([initLat, initLon], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const marker = L.marker([initLat, initLon], { draggable: true }).addTo(map);
+
+            function setLatLon(lat, lon) {
+                if (latInput) latInput.value = String(lat);
+                if (lonInput) lonInput.value = String(lon);
+            }
+
+            async function reverseGeocode(lat, lon) {
+                // Use OpenStreetMap Nominatim reverse geocoding
+                const url = new URL('https://nominatim.openstreetmap.org/reverse');
+                url.searchParams.set('format', 'json');
+                url.searchParams.set('lat', String(lat));
+                url.searchParams.set('lon', String(lon));
+                url.searchParams.set('zoom', '16');
+                url.searchParams.set('addressdetails', '1');
+
+                const res = await fetch(url.toString(), {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!res.ok) throw new Error('reverse geocode failed');
+                return await res.json();
+            }
+
+            let _reverseTimer = null;
+            function updateLocalisationFromLatLon(lat, lon) {
+                if (!locInput) return;
+                window.clearTimeout(_reverseTimer);
+                _reverseTimer = window.setTimeout(async () => {
+                    try {
+                        const data = await reverseGeocode(lat, lon);
+                        if (data && data.display_name) {
+                            locInput.value = data.display_name;
+                        }
+                    } catch (e) {
+                        // ignore reverse geocode errors
+                    }
+                }, 250);
+            }
+
+            function showError(msg) {
+                if (!errorBox) return;
+                errorBox.textContent = msg;
+                errorBox.style.display = msg ? 'block' : 'none';
+            }
+
+            marker.on('dragend', () => {
+                const p = marker.getLatLng();
+                setLatLon(p.lat, p.lng);
+                updateLocalisationFromLatLon(p.lat, p.lng);
+                showError('');
+            });
+
+            map.on('click', (e) => {
+                marker.setLatLng(e.latlng);
+                setLatLon(e.latlng.lat, e.latlng.lng);
+                updateLocalisationFromLatLon(e.latlng.lat, e.latlng.lng);
+                showError('');
+            });
+
+            async function geocode(q) {
+                const url = new URL('{{ path('api_geocode') }}', window.location.origin);
+                url.searchParams.set('q', q);
+                const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error('Erreur réseau');
+                return await res.json();
+            }
+
+            async function doSearch() {
+                const q = (qInput && qInput.value) ? qInput.value.trim() : '';
+                if (!q) {
+                    showError('Veuillez saisir une localisation.');
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = '...';
+                try {
+                    const data = await geocode(q);
+                    if (!data.ok) {
+                        showError(data.error || 'Localisation introuvable');
+                        return;
+                    }
+
+                    const lat = parseFloat(data.lat);
+                    const lon = parseFloat(data.lon);
+                    marker.setLatLng([lat, lon]);
+                    map.setView([lat, lon], 13);
+                    setLatLon(lat, lon);
+
+                    // Fill localisation field with the best display name
+                    if (locInput && data.display_name) {
+                        locInput.value = data.display_name;
+                    }
+
+                    showError('');
+                } catch (e) {
+                    showError('Impossible de géocoder la localisation.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Localiser';
+                }
+            }
+
+            if (btn) btn.addEventListener('click', doSearch);
+            if (qInput) qInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    doSearch();
+                }
+            });
+
+            // Pre-fill query input from localisation field (edit UX)
+            if (qInput && locInput && locInput.value && !qInput.value) {
+                qInput.value = locInput.value;
+            }
+            }
+
+            // Classic load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+
+            // Turbo navigation (Symfony UX Turbo): ensures the map appears without manual reload.
+            document.addEventListener('turbo:load', boot);
+            document.addEventListener('turbo:render', boot);
+        })();
+    </script>
 {% endblock %}
 
