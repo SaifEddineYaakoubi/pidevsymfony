@@ -42,8 +42,39 @@ final class CultureType extends AbstractType
                     return $qb;
                 },
             ])
-            ->add('typeCulture', TextType::class, [
+            ->add('typeCulture', ChoiceType::class, [
                 'property_path' => 'type_culture',
+                'placeholder' => '-- Choisir une culture --',
+                'choices' => [
+                    'Tomate' => 'tomate',
+                    'Carotte' => 'carotte',
+                    'Courgette' => 'courgette',
+                    'Oignon' => 'oignon',
+                    'Ail' => 'ail',
+                    'Salade' => 'salade',
+                    'Haricot' => 'haricot',
+                    'Concombre' => 'concombre',
+                    'Poivron' => 'poivron',
+                    'Piment' => 'piment',
+                    'Aubergine' => 'aubergine',
+                    'Pomme de terre' => 'pomme de terre',
+                    'Blé' => 'blé',
+                    'Maïs' => 'maïs',
+                    'Pastèque' => 'pastèque',
+                    'Melon' => 'melon',
+                    'Olivier' => 'olivier',
+                    'Agrumes' => 'agrumes',
+                ],
+                'choice_attr' => function($choice, $key, $value) {
+                    $durations = [
+                        'tomate' => 80, 'carotte' => 75, 'courgette' => 55, 'oignon' => 115,
+                        'ail' => 165, 'salade' => 50, 'haricot' => 60, 'concombre' => 55,
+                        'poivron' => 80, 'piment' => 80, 'aubergine' => 70, 'pomme de terre' => 95,
+                        'blé' => 165, 'maïs' => 105, 'pastèque' => 90, 'melon' => 80,
+                        'olivier' => 365, 'agrumes' => 365
+                    ];
+                    return ['data-duration' => $durations[$value] ?? 0];
+                },
             ])
             ->add('datePlantation', DateType::class, [
                 'property_path' => 'date_plantation',
@@ -54,16 +85,7 @@ final class CultureType extends AbstractType
                 'property_path' => 'date_recolte_prevue',
                 'widget' => 'single_text',
                 'required' => true,
-            ])
-            ->add('etatCroissance', ChoiceType::class, [
-                'property_path' => 'etat_croissance',
-                'placeholder' => '-- Choisir --',
-                'choices' => [
-                    'Germination' => 'germination',
-                    'Croissance' => 'croissance',
-                    'Floraison' => 'floraison',
-                    'Mature' => 'maturite',
-                ],
+                'attr' => ['readonly' => true],
             ]);
     }
 

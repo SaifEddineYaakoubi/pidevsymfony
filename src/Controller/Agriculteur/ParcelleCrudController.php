@@ -127,17 +127,27 @@ final class ParcelleCrudController extends AbstractController
             $countsByEtat = $repo->countByEtatForUser($user, $q);
         }
 
+        $totalSuperficie = 0.0;
+        foreach ($parcelles as $p) {
+            $totalSuperficie += (float) $p->getSuperficie();
+        }
+        $avgSuperficie = count($parcelles) > 0 ? $totalSuperficie / count($parcelles) : 0;
+
+        $stats = [
+            'total_all' => $totalAll,
+            'total_filtered' => count($parcelles),
+            'counts_by_etat' => $countsByEtat,
+            'total_superficie' => $totalSuperficie,
+            'avg_superficie' => $avgSuperficie,
+        ];
+
         if ($request->isXmlHttpRequest()) {
             return $this->render('agriculteur/parcelle/_results.html.twig', [
                 'parcelles' => $parcelles,
                 'q' => $q,
                 'sort' => $sort,
                 'dir' => $dir,
-                'stats' => [
-                    'total_all' => $totalAll,
-                    'total_filtered' => count($parcelles),
-                    'counts_by_etat' => $countsByEtat,
-                ],
+                'stats' => $stats,
             ]);
         }
 
@@ -146,11 +156,7 @@ final class ParcelleCrudController extends AbstractController
             'q' => $q,
             'sort' => $sort,
             'dir' => $dir,
-            'stats' => [
-                'total_all' => $totalAll,
-                'total_filtered' => count($parcelles),
-                'counts_by_etat' => $countsByEtat,
-            ],
+            'stats' => $stats,
         ]);
     }
 

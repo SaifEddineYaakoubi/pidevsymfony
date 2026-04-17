@@ -2,6 +2,54 @@
 
 {% block title %}Cultures - AgriCulture{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+    <style>
+        /* ── Tab toggle ── */
+        .view-toggle { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+        .view-toggle .btn-toggle {
+            padding: .5rem 1.4rem; border-radius: 8px; font-weight: 600;
+            border: 2px solid #10b981; color: #10b981; background: transparent;
+            cursor: pointer; transition: all .2s;
+        }
+        .view-toggle .btn-toggle.active {
+            background: linear-gradient(135deg,#10b981,#059669); color:#fff; border-color: transparent;
+        }
+
+        /* ── Calendar wrapper ── */
+        #culture-calendar-wrap {
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,0,0,.08); padding: 1.5rem;
+        }
+        #culture-calendar { min-height: 560px; }
+
+        /* FullCalendar overrides */
+        .fc .fc-toolbar-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
+        .fc .fc-button { border-radius: 7px !important; font-size: .85rem !important; }
+        .fc .fc-button-primary { background: linear-gradient(135deg,#10b981,#059669) !important; border: none !important; }
+        .fc-event { border-radius: 5px !important; font-size: .8rem !important; cursor: pointer; }
+
+        /* ── Legend ── */
+        .cal-legend { display:flex; flex-wrap:wrap; gap:.8rem; margin-bottom:1rem; }
+        .cal-legend-item { display:flex; align-items:center; gap:.4rem; font-size:.85rem; font-weight:500; }
+        .cal-legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+
+        /* ── Tooltip / popover ── */
+        #cal-tooltip {
+            position: fixed; z-index: 9999; display: none;
+            background: #1a1a2e; color: #fff;
+            border-radius: 10px; padding: .75rem 1rem;
+            font-size: .83rem; max-width: 260px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.22);
+            pointer-events: none;
+        }
+        #cal-tooltip strong { display: block; margin-bottom: .25rem; font-size: .9rem; }
+        #cal-tooltip .tt-type-plantation { color: #6ee7b7; }
+        #cal-tooltip .tt-type-recolte    { color: #fca5a5; }
+    </style>
+{% endblock %}
+
 {% block agriculteur_body %}
     {% include 'front/partials/_page_title.html.twig' with {
         title: 'Cultures',
@@ -13,190 +61,267 @@
 
     <section class="section">
         <div class="container">
-
             <div class="agri-crud">
 
-            {% for label, messages in app.flashes %}
-                {% for msg in messages %}
-                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                {% for label, messages in app.flashes %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
 
-            <div class="crud-header mb-4"
-                 data-controller="crud-search"
-                 data-crud-search-url-value="{{ path('agri_culture_index') }}">
-                <div class="row g-3 align-items-center">
-                    <div class="col-lg-8">
-                        <form class="d-flex gap-2" method="get">
-                            <input class="form-control"
-                                   name="q"
-                                   value="{{ q }}"
-                                   placeholder="Rechercher (type, état, parcelle)"
-                                   autocomplete="off"
-                                   data-crud-search-target="input"
-                                   data-action="input->crud-search#search">
-                            <input type="hidden" name="sort" value="{{ sort|default('plantation') }}">
-                            <input type="hidden" name="dir" value="{{ dir|default('DESC') }}">
+                {# ── View toggle ── #}
+                <div class="view-toggle">
+                    <button class="btn-toggle active" id="btnViewList" onclick="showView('list')">
+                        <i class="bi bi-list-ul me-1"></i> Liste
+                    </button>
+                    <button class="btn-toggle" id="btnViewCalendar" onclick="showView('calendar')">
+                        <i class="bi bi-calendar3 me-1"></i> Calendrier
+                    </button>
+                </div>
 
-                            {% if q %}
-                                <a class="btn btn-outline-secondary" href="{{ path('agri_culture_index', {sort: sort|default('plantation'), dir: dir|default('DESC')}) }}">Effacer</a>
-                            {% endif %}
-                        </form>
+                {# ══════════════ LIST VIEW ══════════════ #}
+                <div id="view-list">
+                    <div class="crud-header mb-4"
+                         data-controller="crud-search"
+                         data-crud-search-url-value="{{ path('agri_culture_index') }}">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-lg-8">
+                                <form class="d-flex gap-2" method="get">
+                                    <input class="form-control"
+                                           name="q"
+                                           value="{{ q }}"
+                                           placeholder="Rechercher (type, état, parcelle)"
+                                           autocomplete="off"
+                                           data-crud-search-target="input"
+                                           data-action="input->crud-search#search">
+                                    <input type="hidden" name="sort" value="{{ sort|default('plantation') }}">
+                                    <input type="hidden" name="dir" value="{{ dir|default('DESC') }}">
+                                    {% if q %}
+                                        <a class="btn btn-outline-secondary" href="{{ path('agri_culture_index', {sort: sort|default('plantation'), dir: dir|default('DESC')}) }}">Effacer</a>
+                                    {% endif %}
+                                </form>
+                            </div>
+                            <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end">
+                                <a id="btnExportPdf" class="btn btn-outline-success" href="{{ path('agri_culture_export_pdf') }}">Exporter PDF</a>
+                                <a class="btn btn-success" href="{{ path('agri_culture_new') }}">Ajouter</a>
+                                <a id="btnEdit" class="btn btn-outline-primary disabled" href="#">Modifier</a>
+                                <form id="deleteForm" method="post" class="m-0">
+                                    <input type="hidden" name="_token" id="deleteToken" value="">
+                                    <button id="btnDelete" class="btn btn-outline-danger" type="submit" disabled>Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                            <label class="small text-muted align-self-center">Trier par</label>
+                            <select class="form-select form-select-sm" name="sort"
+                                    data-crud-search-target="sort"
+                                    data-action="change->crud-search#sortChanged">
+                                <option value="plantation" {{ (sort|default('plantation')) == 'plantation' ? 'selected' : '' }}>Date plantation</option>
+                                <option value="recolte"    {{ (sort|default('plantation')) == 'recolte'    ? 'selected' : '' }}>Date récolte</option>
+                                <option value="type"       {{ (sort|default('plantation')) == 'type'       ? 'selected' : '' }}>Type culture</option>
+                                <option value="etat"       {{ (sort|default('plantation')) == 'etat'       ? 'selected' : '' }}>État</option>
+                                <option value="parcelle"   {{ (sort|default('plantation')) == 'parcelle'   ? 'selected' : '' }}>Parcelle</option>
+                            </select>
+                            <select class="form-select form-select-sm" name="dir"
+                                    data-crud-search-target="dir"
+                                    data-action="change->crud-search#sortChanged">
+                                <option value="ASC"  {{ (dir|default('DESC')) == 'ASC'  ? 'selected' : '' }}>↑</option>
+                                <option value="DESC" {{ (dir|default('DESC')) == 'DESC' ? 'selected' : '' }}>↓</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end">
-                        <a id="btnExportPdf" class="btn btn-outline-success" href="{{ path('agri_culture_export_pdf') }}">Exporter PDF</a>
-                        <a class="btn btn-success" href="{{ path('agri_culture_new') }}">Ajouter</a>
-                        <a id="btnEdit" class="btn btn-outline-primary disabled" href="#">Modifier</a>
-                        <form id="deleteForm" method="post" class="m-0">
-                            <input type="hidden" name="_token" id="deleteToken" value="">
-                            <button id="btnDelete" class="btn btn-outline-danger" type="submit" disabled>Supprimer</button>
-                        </form>
+
+                    <div class="agri-crud-results" data-crud-search-target="results">
+                        <div class="agri-crud-loader" aria-hidden="true"></div>
+                        {% include 'agriculteur/culture/_results.html.twig' %}
                     </div>
-                </div>
+                </div>{# /view-list #}
 
-                <div class="mt-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
-                    <label class="small text-muted align-self-center">Trier par</label>
-                    <select class="form-select form-select-sm"
-                            name="sort"
-                            data-crud-search-target="sort"
-                            data-action="change->crud-search#sortChanged">
-                        <option value="plantation" {{ (sort|default('plantation')) == 'plantation' ? 'selected' : '' }}>Date plantation</option>
-                        <option value="recolte" {{ (sort|default('plantation')) == 'recolte' ? 'selected' : '' }}>Date récolte</option>
-                        <option value="type" {{ (sort|default('plantation')) == 'type' ? 'selected' : '' }}>Type culture</option>
-                        <option value="etat" {{ (sort|default('plantation')) == 'etat' ? 'selected' : '' }}>État</option>
-                        <option value="parcelle" {{ (sort|default('plantation')) == 'parcelle' ? 'selected' : '' }}>Parcelle</option>
-                    </select>
-                    <select class="form-select form-select-sm"
-                            name="dir"
-                            data-crud-search-target="dir"
-                            data-action="change->crud-search#sortChanged">
-                        <option value="ASC" {{ (dir|default('DESC')) == 'ASC' ? 'selected' : '' }}>↑</option>
-                        <option value="DESC" {{ (dir|default('DESC')) == 'DESC' ? 'selected' : '' }}>↓</option>
-                    </select>
-                </div>
-            </div>
+                {# ══════════════ CALENDAR VIEW ══════════════ #}
+                <div id="view-calendar" style="display:none;">
+                    <div id="culture-calendar-wrap">
 
-            {# Stats moved into results partial so AJAX updates them too #}
+                        {# Legend #}
+                        <div class="cal-legend mb-3">
+                            <span class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:#10b981;"></span> Plantation
+                            </span>
+                            <span class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:#6f42c1;"></span> Récolte — Germination
+                            </span>
+                            <span class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:#198754;"></span> Récolte — Croissance
+                            </span>
+                            <span class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:#fd7e14;"></span> Récolte — Floraison
+                            </span>
+                            <span class="cal-legend-item">
+                                <span class="cal-legend-dot" style="background:#dc3545;"></span> Récolte — Mature
+                            </span>
+                        </div>
 
-            <div class="agri-crud-results" data-crud-search-target="results">
-                <div class="agri-crud-loader" aria-hidden="true">
-                </div>
-                {% include 'agriculteur/culture/_results.html.twig' %}
-            </div>
-            </div>
+                        <div id="culture-calendar"></div>
+                    </div>
+                </div>{# /view-calendar #}
+
+            </div>{# /agri-crud #}
         </div>
     </section>
 
+    {# Tooltip element #}
+    <div id="cal-tooltip"></div>
+
+    {# ── Scripts ── #}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <script>
-        (function() {
-            const btnExportPdf = document.getElementById('btnExportPdf');
-            const btnEdit = document.getElementById('btnEdit');
-            const btnDelete = document.getElementById('btnDelete');
-            const deleteForm = document.getElementById('deleteForm');
-            const deleteToken = document.getElementById('deleteToken');
-            const results = document.querySelector('[data-crud-search-target="results"]');
+    /* ===== View toggle ===== */
+    var calInitialized = window.calInitialized || false;
+    var calendar = window.calendar || null;
 
-            // Build export URL from current UI state (works with AJAX search/sort)
-            if (btnExportPdf) {
-                btnExportPdf.addEventListener('click', (e) => {
-                    e.preventDefault();
+    function showView(view) {
+        document.getElementById('view-list').style.display     = view === 'list'     ? '' : 'none';
+        document.getElementById('view-calendar').style.display = view === 'calendar' ? '' : 'none';
+        document.getElementById('btnViewList').classList.toggle('active',     view === 'list');
+        document.getElementById('btnViewCalendar').classList.toggle('active', view === 'calendar');
 
-                    const qEl = document.querySelector('[data-crud-search-target="input"]');
-                    const sortEl = document.querySelector('[data-crud-search-target="sort"]');
-                    const dirEl = document.querySelector('[data-crud-search-target="dir"]');
+        if (view === 'calendar' && !calInitialized) {
+            initCalendar();
+            calInitialized = true;
+        }
+    }
 
-                    const url = new URL(btnExportPdf.getAttribute('href'), window.location.origin);
-                    if (qEl && qEl.value.trim() !== '') url.searchParams.set('q', qEl.value.trim());
-                    if (sortEl && sortEl.value) url.searchParams.set('sort', sortEl.value);
-                    if (dirEl && dirEl.value) url.searchParams.set('dir', dirEl.value);
+    /* ===== FullCalendar init ===== */
+    function initCalendar() {
+        const el      = document.getElementById('culture-calendar');
+        const tooltip = document.getElementById('cal-tooltip');
+        const eventsUrl = '{{ path('agri_culture_calendar_events') }}';
 
-                    window.location.href = url.toString();
+        calendar = new FullCalendar.Calendar(el, {
+            locale: 'fr',
+            initialView: 'dayGridMonth',
+            height: 'auto',
+            headerToolbar: {
+                left:   'prev,next today',
+                center: 'title',
+                right:  'dayGridMonth,timeGridWeek,listMonth'
+            },
+            buttonText: {
+                today:     "Aujourd'hui",
+                month:     'Mois',
+                week:      'Semaine',
+                list:      'Liste'
+            },
+            events: eventsUrl,
+            eventDidMount: function(info) {
+                /* Show tooltip on hover */
+                info.el.addEventListener('mouseenter', (e) => {
+                    const p = info.event.extendedProps;
+                    const typeLabel = p.type === 'plantation'
+                        ? '<span class="tt-type-plantation">🌱 Plantation</span>'
+                        : '<span class="tt-type-recolte">🌾 Récolte prévue</span>';
+                    const etatMap = {germination:'Germination',croissance:'Croissance',floraison:'Floraison',maturite:'Mature'};
+                    tooltip.innerHTML = `
+                        <strong>${p.culture}</strong>
+                        ${typeLabel}<br>
+                        📍 Parcelle : ${p.parcelle}<br>
+                        📊 État : ${etatMap[p.etat] || p.etat}
+                    `;
+                    tooltip.style.display = 'block';
                 });
+                info.el.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.clientX + 14) + 'px';
+                    tooltip.style.top  = (e.clientY + 14) + 'px';
+                });
+                info.el.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+            },
+            eventClick: function(info) {
+                const url = info.event.extendedProps.url;
+                if (url) window.location.href = url;
             }
+        });
 
-            function clearSelection() {
-                results.querySelectorAll('.agri-culture-card').forEach(el => el.classList.remove('is-selected'));
-            }
+        calendar.render();
+    }
 
-            function setSelected(row) {
-                clearSelection();
-                row.classList.add('is-selected');
-                const selectedId = row.dataset.id;
+    /* ===== List view: existing selection + search logic ===== */
+    (function() {
+        const btnExportPdf = document.getElementById('btnExportPdf');
+        const btnEdit      = document.getElementById('btnEdit');
+        const btnDelete    = document.getElementById('btnDelete');
+        const deleteForm   = document.getElementById('deleteForm');
+        const deleteToken  = document.getElementById('deleteToken');
+        const results      = document.querySelector('[data-crud-search-target="results"]');
+        if (!results) return;
 
-                btnEdit.classList.remove('disabled');
-                btnEdit.href = '{{ path('agri_culture_edit', {'id': '0'}) }}'.replace('/0', '/' + selectedId);
-
-                btnDelete.disabled = false;
-                deleteForm.action = '{{ path('agri_culture_delete', {'id': '0'}) }}'.replace('/0/delete', '/' + selectedId + '/delete');
-                deleteToken.value = row.dataset.deleteToken;
-            }
-
-            results.addEventListener('click', (e) => {
-                const card = e.target.closest('.agri-culture-card[data-id]');
-                if (!card) return;
-                setSelected(card);
+        if (btnExportPdf) {
+            btnExportPdf.addEventListener('click', (e) => {
+                e.preventDefault();
+                const qEl   = document.querySelector('[data-crud-search-target="input"]');
+                const sortEl= document.querySelector('[data-crud-search-target="sort"]');
+                const dirEl = document.querySelector('[data-crud-search-target="dir"]');
+                const url = new URL(btnExportPdf.getAttribute('href'), window.location.origin);
+                if (qEl   && qEl.value.trim())  url.searchParams.set('q',    qEl.value.trim());
+                if (sortEl && sortEl.value)      url.searchParams.set('sort', sortEl.value);
+                if (dirEl  && dirEl.value)       url.searchParams.set('dir',  dirEl.value);
+                window.location.href = url.toString();
             });
+        }
 
-            // Open details on double click on the row
-            results.addEventListener('dblclick', (e) => {
-                const card = e.target.closest('.agri-culture-card[data-id][data-href]');
-                if (!card) return;
-                const href = card.dataset.href;
-                if (href) window.location.href = href;
-            });
+        function clearSelection() {
+            results.querySelectorAll('.agri-culture-card').forEach(el => el.classList.remove('is-selected'));
+        }
+        function setSelected(row) {
+            clearSelection();
+            row.classList.add('is-selected');
+            const id = row.dataset.id;
+            btnEdit.classList.remove('disabled');
+            btnEdit.href = '{{ path('agri_culture_edit', {'id': '0'}) }}'.replace('/0', '/' + id);
+            btnDelete.disabled = false;
+            deleteForm.action  = '{{ path('agri_culture_delete', {'id': '0'}) }}'.replace('/0/delete', '/' + id + '/delete');
+            deleteToken.value  = row.dataset.deleteToken;
+        }
 
-            document.addEventListener('crud:results-updated', () => {
-                btnEdit.classList.add('disabled');
-                btnEdit.href = '#';
-                btnDelete.disabled = true;
-                deleteToken.value = '';
-                deleteForm.action = '';
-            });
-        })();
-    </script>
+        results.addEventListener('click',   (e) => { const c = e.target.closest('.agri-culture-card[data-id]'); if (c) setSelected(c); });
+        results.addEventListener('dblclick', (e) => { const c = e.target.closest('.agri-culture-card[data-id][data-href]'); if (c && c.dataset.href) window.location.href = c.dataset.href; });
+        document.addEventListener('crud:results-updated', () => {
+            btnEdit.classList.add('disabled'); btnEdit.href = '#';
+            btnDelete.disabled = true; deleteToken.value = ''; deleteForm.action = '';
+        });
+    })();
 
-    {# Fallback: if Stimulus is not running for some reason, still do live search #}
-    <script>
-        (function() {
-            const wrapper = document.querySelector('[data-controller="crud-search"]');
-            const input = document.querySelector('[data-crud-search-target="input"]');
-            const sort = document.querySelector('[data-crud-search-target="sort"]');
-            const dir = document.querySelector('[data-crud-search-target="dir"]');
-            const results = document.querySelector('[data-crud-search-target="results"]');
-            if (!wrapper || !input || !results) return;
+    /* ===== AJAX live search (fallback if Stimulus not running) ===== */
+    (function() {
+        const wrapper = document.querySelector('[data-controller="crud-search"]');
+        const input   = document.querySelector('[data-crud-search-target="input"]');
+        const sort    = document.querySelector('[data-crud-search-target="sort"]');
+        const dir     = document.querySelector('[data-crud-search-target="dir"]');
+        const results = document.querySelector('[data-crud-search-target="results"]');
+        if (!wrapper || !input || !results) return;
 
-            let timer = null;
-            async function doSearch() {
-                const q = input.value || '';
-                const url = new URL(wrapper.getAttribute('data-crud-search-url-value'), window.location.origin);
-                url.searchParams.set('q', q);
-                if (sort) url.searchParams.set('sort', sort.value);
-                if (dir) url.searchParams.set('dir', dir.value);
-                const loader = results.querySelector('.agri-crud-loader');
-                results.classList.add('is-loading');
-                try {
-                    const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                    if (!res.ok) {
-                        return;
-                    }
-                    results.innerHTML = await res.text();
-                    if (loader) results.prepend(loader);
-                    document.dispatchEvent(new CustomEvent('crud:results-updated'));
-                } catch (e) {
-                    // ignore network errors
-                } finally {
-                    results.classList.remove('is-loading');
-                }
-            }
+        let timer = null;
+        async function doSearch() {
+            const url = new URL(wrapper.getAttribute('data-crud-search-url-value'), window.location.origin);
+            url.searchParams.set('q', input.value || '');
+            if (sort) url.searchParams.set('sort', sort.value);
+            if (dir)  url.searchParams.set('dir',  dir.value);
+            const loader = results.querySelector('.agri-crud-loader');
+            results.classList.add('is-loading');
+            try {
+                const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) return;
+                results.innerHTML = await res.text();
+                if (loader) results.prepend(loader);
+                document.dispatchEvent(new CustomEvent('crud:results-updated'));
+            } catch(e) {}
+            finally { results.classList.remove('is-loading'); }
+        }
 
-            input.addEventListener('input', () => {
-                window.clearTimeout(timer);
-                timer = window.setTimeout(doSearch, 250);
-            });
-
-            if (sort) sort.addEventListener('change', doSearch);
-            if (dir) dir.addEventListener('change', doSearch);
-        })();
+        input.addEventListener('input', () => { window.clearTimeout(timer); timer = window.setTimeout(doSearch, 250); });
+        if (sort) sort.addEventListener('change', doSearch);
+        if (dir)  dir.addEventListener('change',  doSearch);
+    })();
     </script>
 {% endblock %}
-
