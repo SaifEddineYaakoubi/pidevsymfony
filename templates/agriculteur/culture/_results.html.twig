@@ -33,10 +33,31 @@
     {% set total = stats.total_filtered ?? cultures|length %}
     {% set counts = stats.counts_by_etat ?? {} %}
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-        <div class="small text-muted">Statistiques des cultures</div>
-        <div class="small text-muted">Répartition des états</div>
+    <div class="row g-3 mb-4">
+        <!-- Stat: Nombre total -->
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded text-center">
+                <div class="h3 mb-0 fw-bold">{{ total }}</div>
+                <div class="text-muted small">Cultures (filtrées)</div>
+            </div>
+        </div>
+        <!-- Stat: Cultures matures -->
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded text-center" style="border-left: 4px solid #dc3545;">
+                <div class="h3 mb-0 fw-bold text-danger">{{ counts.maturite ?? 0 }}</div>
+                <div class="text-muted small">À Récolter (Matures)</div>
+            </div>
+        </div>
+        <!-- Stat: Alertes -->
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded text-center" style="border-left: 4px solid #ffc107;">
+                <div class="h3 mb-0 fw-bold text-warning">{{ alerts is defined ? (alerts|length) : 0 }}</div>
+                <div class="text-muted small">Alertes Récoltes Imminentes</div>
+            </div>
+        </div>
     </div>
+
+    <div class="small text-muted mb-2">Répartition des états</div>
 
 
 

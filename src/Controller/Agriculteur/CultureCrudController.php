@@ -13,6 +13,7 @@ use App\Service\Validation\SymfonyEntityValidator;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +21,73 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/agriculteur/cultures', name: 'agri_culture_')]
 final class CultureCrudController extends AbstractController
 {
+    #[Route('/calendar/events', name: 'calendar_events', methods: ['GET'])]
+    public function calendarEvents(CultureRepository $repo): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        $cultures = $isAdmin
+            ? $repo->searchByQuery(null, null, null)
+            : $repo->searchByQueryForUser($user, null, null, null);
+
+        $etatColors = [
+            'germination' => '#6f42c1',
+            'croissance'  => '#198754',
+            'floraison'   => '#fd7e14',
+            'maturite'    => '#dc3545',
+        ];
+
+        $events = [];
+        foreach ($cultures as $culture) {
+            $color = $etatColors[$culture->getEtatCroissance()] ?? '#6c757d';
+            $parcelleNom = $culture->getParcelle() ? $culture->getParcelle()->getNom() : '—';
+
+            // Plantation event
+            if ($culture->getDatePlantation()) {
+                $events[] = [
+                    'id'              => 'plantation_' . $culture->getId_culture(),
+                    'title'           => '🌱 ' . $culture->getTypeCulture() . ' (' . $parcelleNom . ')',
+                    'start'           => $culture->getDatePlantation()->format('Y-m-d'),
+                    'backgroundColor' => '#10b981',
+                    'borderColor'     => '#059669',
+                    'textColor'       => '#ffffff',
+                    'extendedProps'   => [
+                        'type'      => 'plantation',
+                        'culture'   => $culture->getTypeCulture(),
+                        'parcelle'  => $parcelleNom,
+                        'etat'      => $culture->getEtatCroissance(),
+                        'url'       => $this->generateUrl('agri_culture_show', ['id' => $culture->getId_culture()]),
+                    ],
+                ];
+            }
+
+            // Récolte prévue event
+            if ($culture->getDateRecoltePrevue()) {
+                $events[] = [
+                    'id'              => 'recolte_' . $culture->getId_culture(),
+                    'title'           => '🌾 ' . $culture->getTypeCulture() . ' (' . $parcelleNom . ')',
+                    'start'           => $culture->getDateRecoltePrevue()->format('Y-m-d'),
+                    'backgroundColor' => $color,
+                    'borderColor'     => $color,
+                    'textColor'       => '#ffffff',
+                    'extendedProps'   => [
+                        'type'      => 'recolte',
+                        'culture'   => $culture->getTypeCulture(),
+                        'parcelle'  => $parcelleNom,
+                        'etat'      => $culture->getEtatCroissance(),
+                        'url'       => $this->generateUrl('agri_culture_show', ['id' => $culture->getId_culture()]),
+                    ],
+                ];
+            }
+        }
+
+        return $this->json($events);
+    }
+
     #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, CultureRepository $repo, PdfExporter $pdfExporter): Response
     {
@@ -93,11 +161,25 @@ final class CultureCrudController extends AbstractController
         if ($isAdmin) {
             $cultures = $repo->searchByQuery($q, $sort, $dir);
             $totalAll = count($repo->searchByQuery(null, null, null));
-            $countsByEtat = $repo->countByEtatCroissance($q);
         } else {
             $cultures = $repo->searchByQueryForUser($user, $q, $sort, $dir);
             $totalAll = count($repo->searchByQueryForUser($user, null, null, null));
-            $countsByEtat = $repo->countByEtatCroissanceForUser($user, $q);
+        }
+
+        // Calcul dynamique des états pour être 100% synchronisé avec l'affichage (qui utilise PostLoad)
+        $countsByEtat = [
+            'germination' => 0,
+            'croissance' => 0,
+            'floraison' => 0,
+            'maturite' => 0
+        ];
+        foreach ($cultures as $c) {
+            $etat = $c->getEtatCroissance();
+            if (isset($countsByEtat[$etat])) {
+                $countsByEtat[$etat]++;
+            } else {
+                $countsByEtat[$etat] = 1;
+            }
         }
 
         // Alerts module: harvest due soon (< 7 days)
@@ -152,11 +234,20 @@ final class CultureCrudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            // Mettre à jour l'état de croissance automatiquement avant la validation
+            $culture->updateEtatCroissanceAuto();
+            
             $errors = $validator->validate($culture);
             if ($form->isValid() && $errors === []) {
                 // Ownership guard: the selected parcelle must belong to the current user.
                 if ($culture->getParcelle() === null || $culture->getParcelle()->getId_user() !== $user) {
                     throw $this->createAccessDeniedException();
+                }
+
+                $parcelle = $culture->getParcelle();
+                if ($parcelle->getEtat() === 'repos') {
+                    $parcelle->setEtat('active');
+                    $em->persist($parcelle);
                 }
 
                 $em->persist($culture);
@@ -202,15 +293,24 @@ final class CultureCrudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            // Mettre à jour l'état de croissance automatiquement avant la validation
+            $culture->updateEtatCroissanceAuto();
+            
             $errors = $validator->validate($culture);
             if ($form->isValid() && $errors === []) {
                 // Safety: never flush if required fields are missing (prevents SQL NOT NULL violations)
                 if ($culture->getParcelle() === null || $culture->getTypeCulture() === '' || $culture->getDatePlantation() === null || $culture->getDateRecoltePrevue() === null || $culture->getEtatCroissance() === '') {
                     $this->addFlash('error', 'Certains champs obligatoires sont manquants.');
                 } else {
-                $em->flush();
-                $this->addFlash('success', 'Culture modifiée avec succès.');
-                return $this->redirectToRoute('agri_culture_index');
+                    $parcelle = $culture->getParcelle();
+                    if ($parcelle && $parcelle->getEtat() === 'repos') {
+                        $parcelle->setEtat('active');
+                        $em->persist($parcelle);
+                    }
+
+                    $em->flush();
+                    $this->addFlash('success', 'Culture modifiée avec succès.');
+                    return $this->redirectToRoute('agri_culture_index');
                 }
             }
 

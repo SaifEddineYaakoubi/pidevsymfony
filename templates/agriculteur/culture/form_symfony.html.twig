@@ -31,7 +31,7 @@
 
         <div class="col-md-6">
             {{ form_label(form.typeCulture) }}
-            {{ form_widget(form.typeCulture, {attr: {class: 'form-control'}}) }}
+            {{ form_widget(form.typeCulture, {attr: {class: 'form-select'}}) }}
             <div class="text-danger small">{{ form_errors(form.typeCulture) }}</div>
             {% if extraErrors.type_culture is defined %}<div class="text-danger small">{{ extraErrors.type_culture }}</div>{% endif %}
         </div>
@@ -50,12 +50,7 @@
             {% if extraErrors.date_recolte_prevue is defined %}<div class="text-danger small">{{ extraErrors.date_recolte_prevue }}</div>{% endif %}
         </div>
 
-        <div class="col-md-6">
-            {{ form_label(form.etatCroissance) }}
-            {{ form_widget(form.etatCroissance, {attr: {class: 'form-select'}}) }}
-            <div class="text-danger small">{{ form_errors(form.etatCroissance) }}</div>
-            {% if extraErrors.etat_croissance is defined %}<div class="text-danger small">{{ extraErrors.etat_croissance }}</div>{% endif %}
-        </div>
+
 
         <div class="col-12 d-flex gap-2">
             <button class="btn btn-success" type="submit">Enregistrer</button>
@@ -66,5 +61,46 @@
     {{ form_end(form) }}
 </div>
 </section>
+
+<script>
+    (function() {
+        // Obtenir les identifiants générés par Symfony
+        const typeSelect = document.getElementById('{{ form.typeCulture.vars.id }}');
+        const plantationInput = document.getElementById('{{ form.datePlantation.vars.id }}');
+        const recolteInput = document.getElementById('{{ form.dateRecoltePrevue.vars.id }}');
+
+        function updateRecolteDate() {
+            if (!typeSelect || !plantationInput || !recolteInput) return;
+
+            const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+            if (!selectedOption) return;
+            
+            const duration = parseInt(selectedOption.getAttribute('data-duration') || 0, 10);
+            const plantationDateStr = plantationInput.value;
+
+            if (duration > 0 && plantationDateStr) {
+                const plantationDate = new Date(plantationDateStr);
+                plantationDate.setDate(plantationDate.getDate() + duration);
+                
+                // Formatage YYYY-MM-DD pour le champ de type date
+                const yyyy = plantationDate.getFullYear();
+                const mm = String(plantationDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(plantationDate.getDate()).padStart(2, '0');
+                
+                recolteInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        }
+
+        if (typeSelect) {
+            typeSelect.addEventListener('change', updateRecolteDate);
+            // Empêcher l'utilisateur de taper n'importe quoi si c'est un select "transformé"
+        }
+        if (plantationInput) {
+            plantationInput.addEventListener('change', updateRecolteDate);
+            // S'assurer que le blur fonctionne aussi pour le datepicker natif
+            plantationInput.addEventListener('blur', updateRecolteDate);
+        }
+    })();
+</script>
 {% endblock %}
 

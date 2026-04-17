@@ -12,6 +12,9 @@
                 {# Parcelles / Cultures (CRUD) #}
                 <li><a href="{{ path('agri_parcelle_index') }}" class="{{ app.request.attributes.get('_route') starts with 'agri_parcelle_' ? 'active' : '' }}">Parcelles</a></li>
                 <li><a href="{{ path('agri_culture_index') }}" class="{{ app.request.attributes.get('_route') starts with 'agri_culture_' ? 'active' : '' }}">Cultures</a></li>
+                
+                {# IA Prédictions #}
+                <li><a href="{{ path('agri_ia_index') }}" class="{{ app.request.attributes.get('_route') starts with 'agri_ia_' ? 'active' : '' }}">Stratégie de cultures</a></li>
 
                 {# Recoltes / Rendements / Archives (CRUD) #}
                 <li><a href="{{ path('app_recolte_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_recolte_' ? 'active' : '' }}">Recoltes</a></li>

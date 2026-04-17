@@ -1,0 +1,352 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+{% block title %}IA Prédictions — SmartFarm{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+    /* ═══════════════════════════════════════
+       IA DASHBOARD — Premium Design
+    ═══════════════════════════════════════ */
+    :root {
+        --ia-primary: #6366f1;
+        --ia-secondary: #8b5cf6;
+        --ia-success: #10b981;
+        --ia-warn: #f59e0b;
+        --ia-danger: #ef4444;
+        --ia-dark: #1e1b4b;
+    }
+
+    .ia-hero {
+        background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 30px -5px rgba(4, 120, 87, 0.3), 0 8px 10px -5px rgba(4, 120, 87, 0.2);
+    }
+    .ia-hero::before {
+        content: '';
+        position: absolute; top: -100px; right: -50px;
+        width: 350px; height: 350px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    }
+    .ia-hero::after {
+        content: '🌿';
+        position: absolute; bottom: -60px; right: 5%;
+        font-size: 18rem;
+        opacity: 0.15;
+        transform: rotate(-15deg);
+        pointer-events: none;
+        line-height: 1;
+    }
+    .ia-hero h1 { font-size:2.2rem; font-weight:800; letter-spacing:-.5px; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .ia-hero p  { opacity:0.9; font-size:1.1rem; max-width:600px; line-height: 1.6; }
+    .ia-badge-ai {
+        display:inline-flex; align-items:center; gap:.5rem;
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 50px;
+        padding: .35rem .9rem;
+        font-size: .82rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(4px);
+    }
+    .ia-badge-ai .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #4ade80;
+        animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+        0%,100% { opacity:1; transform:scale(1); }
+        50%      { opacity:.5; transform:scale(.7); }
+    }
+
+    /* ── Score global gauge ── */
+    .score-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        padding: 2rem;
+        text-align: center;
+    }
+    .gauge-wrap { position:relative; width:160px; height:160px; margin:0 auto 1rem; }
+    .gauge-circle {
+        width:160px; height:160px;
+        border-radius:50%;
+        background: conic-gradient(var(--gc,#10b981) 0% var(--pct,0%), #e9ecef var(--pct,0%) 100%);
+        display:flex; align-items:center; justify-content:center;
+        transition: background 1s ease;
+    }
+    .gauge-inner {
+        width:120px; height:120px; border-radius:50%;
+        background:#fff;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .gauge-score { font-size:2rem; font-weight:800; line-height:1; }
+    .gauge-label { font-size:.75rem; color:#6b7280; font-weight:600; }
+
+    /* ── Prediction cards ── */
+    .pred-card {
+        background:#fff; border-radius:14px;
+        box-shadow:0 2px 12px rgba(0,0,0,.07);
+        padding:1.5rem; height:100%;
+        border-left: 4px solid var(--pc, #6366f1);
+        transition: transform .2s, box-shadow .2s;
+    }
+    .pred-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.13); }
+    .pred-type { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; opacity:.6; }
+    .pred-title { font-size:1.1rem; font-weight:700; margin:.25rem 0 .75rem; }
+
+    .risque-bar { height:6px; border-radius:3px; background:#e9ecef; overflow:hidden; margin:.5rem 0; }
+    .risque-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+
+    .confiance-stars { color:#f59e0b; font-size:1.1rem; }
+
+    /* ── Section titles ── */
+    .section-title {
+        display:flex; align-items:center; gap:.75rem;
+        font-size:1.2rem; font-weight:700; color:#1e1b4b;
+        margin-bottom:1.25rem;
+    }
+    .section-title .icon-box {
+        width:36px; height:36px; border-radius:9px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.1rem;
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color:#fff;
+    }
+
+    /* ── Rotation card ── */
+    .rotation-card {
+        background:#fff; border-radius:14px;
+        box-shadow:0 2px 12px rgba(0,0,0,.07);
+        padding:1.25rem;
+    }
+    .rotation-pill {
+        display:inline-flex; align-items:center; gap:.3rem;
+        background: linear-gradient(135deg,#ede9fe,#ddd6fe);
+        color:#4c1d95;
+        border-radius:50px;
+        padding:.3rem .8rem;
+        font-size:.82rem;
+        font-weight:600;
+        margin:.2rem;
+    }
+
+    /* ── Seasonal chips ── */
+    .season-chip {
+        background: linear-gradient(135deg,#d1fae5,#a7f3d0);
+        color:#065f46;
+        border-radius:10px;
+        padding:.7rem 1rem;
+        font-weight:600; font-size:.9rem;
+        display:flex; align-items:center; gap:.5rem;
+        box-shadow:0 1px 6px rgba(16,185,129,.15);
+    }
+    .season-chip .dur { font-size:.75rem; opacity:.7; }
+
+    /* ── Weather mini ── */
+    .weather-mini {
+        background: linear-gradient(135deg,#1d4ed8,#1e40af);
+        border-radius:14px; color:#fff;
+        padding:1.25rem 1.5rem;
+    }
+    .weather-temp { font-size:2.5rem; font-weight:800; line-height:1; }
+
+    /* ── Chart ── */
+    .chart-card {
+        background:#fff; border-radius:14px;
+        box-shadow:0 2px 12px rgba(0,0,0,.07);
+        padding:1.5rem;
+    }
+
+    /* ── No data ── */
+    .no-data-box {
+        background: linear-gradient(135deg,#f5f3ff,#ede9fe);
+        border-radius:14px; padding:3rem 2rem; text-align:center;
+    }
+    .no-data-box .nd-icon { font-size:4rem; margin-bottom:1rem; }
+    </style>
+{% endblock %}
+
+{% block agriculteur_body %}
+    {% set p = predictions %}
+
+    {% include 'front/partials/_page_title.html.twig' with {
+        title: 'IA Prédictions',
+        breadcrumbs: [
+            { label: 'Home', route: 'app_agriculteur_home' },
+            { label: 'IA Prédictions' }
+        ]
+    } %}
+
+    <section class="section">
+    <div class="container">
+
+    {# ═══ HERO ═══ #}
+    <div class="ia-hero mb-4">
+        <div class="ia-badge-ai"><span class="dot"></span> Moteur IA actif · Analyse en temps réel</div>
+        <h1>🤖 Stratégies de cultures intelligentes</h1>
+        <p>Basées sur vos {{ p.parcelles_count }} parcelles et {{ p.cultures_count }} cultures actives, voici vos recommandations personnalisées.</p>
+    </div>
+
+    {% if not p.has_data %}
+        {# ── Pas de données ── #}
+        <div class="no-data-box">
+            <div class="nd-icon">🌱</div>
+            <h4 class="fw-700">Aucune donnée disponible</h4>
+            <p class="text-muted">L'IA a besoin de vos parcelles et cultures pour générer des prédictions. Commencez à ajouter des données !</p>
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <a href="{{ path('agri_culture_new') }}"   class="btn btn-success">+ Ajouter une culture</a>
+                <a href="{{ path('agri_parcelle_new') }}"    class="btn btn-outline-success">+ Ajouter une parcelle</a>
+            </div>
+        </div>
+    {% else %}
+
+    <div class="row g-4">
+
+        {# ═══ COL 1 : Score + Météo ═══ #}
+        <div class="col-lg-3">
+
+            {# Score global #}
+            <div class="score-card mb-4">
+                <div class="section-title justify-content-center"><span class="icon-box">📊</span> Score global</div>
+                <div class="gauge-wrap">
+                    <div class="gauge-circle"
+                         style="--pct:{{ p.global_score.score }}%; --gc:{{ p.global_score.color }};">
+                        <div class="gauge-inner">
+                            <span class="gauge-score" style="color:{{ p.global_score.color }}">{{ p.global_score.score }}</span>
+                            <span class="gauge-label">/100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="fw-700 mb-1" style="color:{{ p.global_score.color }}">{{ p.global_score.label }}</div>
+                <p class="text-muted small">{{ p.global_score.message }}</p>
+            </div>
+
+
+
+            {# Saison actuelle #}
+            <div class="score-card">
+                <div class="section-title"><span class="icon-box">🌿</span> À planter ce mois</div>
+                {% if p.seasonal_recs %}
+                    <div class="d-flex flex-column gap-2">
+                    {% for rec in p.seasonal_recs %}
+                        <div class="season-chip">
+                            <span>{{ rec.emoji }} {{ rec.culture }}</span>
+                            <span class="dur ms-auto">{{ rec.duree[0] }}-{{ rec.duree[1] }}j</span>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small">Aucune culture particulièrement recommandée ce mois-ci.</p>
+                {% endif %}
+            </div>
+
+        </div>{# /col-lg-3 #}
+
+        {# ═══ COL 2 : Prédictions par culture + Graphique ═══ #}
+        <div class="col-lg-9">
+
+            {# Cultures actives #}
+            {% if p.culture_predictions %}
+            <div class="section-title"><span class="icon-box">🌾</span> Analyse par culture active</div>
+            <div class="row g-3 mb-4">
+            {% for cp in p.culture_predictions %}
+                {% set urgenceColor = {
+                    'depasse': '#dc2626',
+                    'urgent':  '#f59e0b',
+                    'proche':  '#3b82f6',
+                    'normal':  '#10b981'
+                }[cp.urgence] ?? '#6c757d' %}
+                {% set risqueColor = {
+                    'élevé':  '#ef4444',
+                    'modéré': '#f59e0b',
+                    'faible': '#10b981'
+                }[cp.risque_label] ?? '#6c757d' %}
+
+                <div class="col-md-6 col-xl-4">
+                    <div class="pred-card" style="--pc:{{ urgenceColor }}">
+                        <div class="pred-type">Culture active</div>
+                        <div class="pred-title">{{ cp.type }}</div>
+
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <span class="badge" style="background:{{ urgenceColor }};color:#fff;">
+                                {% if cp.jours_recolte is not null %}
+                                    {% if cp.urgence == 'depasse' %}⚠️ Récolte dépassée
+                                    {% elseif cp.urgence == 'urgent' %}🔴 {{ cp.jours_recolte }}j restants
+                                    {% elseif cp.urgence == 'proche' %}🟡 {{ cp.jours_recolte }}j restants
+                                    {% else %}✅ {{ cp.jours_recolte }}j restants{% endif %}
+                                {% else %}📅 Date inconnue{% endif %}
+                            </span>
+                            <span class="badge bg-secondary">{{ {
+                                'germination':'🌱 Germination',
+                                'croissance':'🌿 Croissance',
+                                'floraison':'🌸 Floraison',
+                                'maturite':'🌾 Mature'
+                            }[cp.etat] ?? cp.etat }}</span>
+                        </div>
+
+                        {# Risque #}
+                        <div class="small text-muted mb-1">Risque : <strong style="color:{{ risqueColor }}">{{ cp.risque_label|capitalize }}</strong></div>
+                        <div class="risque-bar">
+                            <div class="risque-fill" style="width:{{ cp.risque_score }}%;background:{{ risqueColor }};"></div>
+                        </div>
+
+                        {# Rendement estimé #}
+                        {% if cp.rendement_estime is not null %}
+                        <div class="small text-muted mt-2">
+                            📈 Rendement estimé : <strong>{{ cp.rendement_estime }} tonnes</strong>
+                        </div>
+                        {% endif %}
+
+                        <hr class="my-2">
+                        <p class="small mb-1 text-muted">{{ cp.etat_conseil }}</p>
+                        <p class="small mb-0" style="color:#4c1d95;font-weight:500;">{{ cp.conseil }}</p>
+
+                        <div class="mt-2">
+                            <a href="{{ path('agri_culture_show', {id: cp.culture.id_culture}) }}"
+                               class="btn btn-sm btn-outline-primary">Voir la culture</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+
+            {# Rotations par parcelle #}
+            {% if p.parcelle_recs %}
+            <div class="section-title"><span class="icon-box">🔄</span> Recommandations de rotation par parcelle</div>
+            <div class="row g-3">
+            {% for rec in p.parcelle_recs %}
+                <div class="col-md-6">
+                    <div class="rotation-card">
+                        <div class="fw-700 mb-1">📍 {{ rec.parcelle.nom }}</div>
+                        {% if rec.last_culture %}
+                        <div class="small text-muted mb-2">Dernière culture enregistrée : <strong>{{ rec.last_culture|capitalize }}</strong></div>
+                        {% endif %}
+                        <div class="mb-2">
+                            {% for sug in rec.suggestions %}
+                                <span class="rotation-pill">🌱 {{ sug|capitalize }}</span>
+                            {% endfor %}
+                        </div>
+                        <p class="small text-muted mb-0">{{ rec.conseil }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>{# /col-lg-9 #}
+    </div>{# /row #}
+
+    {% endif %}{# /has_data #}
+
+    </div>{# /container #}
+    </section>
+
+{% endblock %}

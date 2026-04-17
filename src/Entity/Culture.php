@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity]
+#[ORM\HasLifecycleCallbacks]
 #[Assert\Callback('validateDates')]
 class Culture
 {
@@ -54,6 +55,7 @@ class Culture
     public function __construct()
     {
         $this->recoltes = new ArrayCollection();
+        $this->etat_croissance = 'germination';
     }
 
     public function getId_culture(): ?int
@@ -198,6 +200,49 @@ class Culture
             }
     
             return $this;
+        }
+
+        #[ORM\PostLoad]
+        #[ORM\PrePersist]
+        #[ORM\PreUpdate]
+        public function updateEtatCroissanceAuto(): void
+        {
+            if (!$this->date_plantation || !$this->date_recolte_prevue) {
+                return;
+            }
+
+            $now = new \DateTime();
+            
+            // Si la date de plantation est dans le futur
+            if ($now < $this->date_plantation) {
+                $this->etat_croissance = 'germination';
+                return;
+            }
+
+            $totalDays = (int) $this->date_plantation->diff($this->date_recolte_prevue)->format('%r%a');
+            if ($totalDays <= 0) {
+                $this->etat_croissance = 'maturite';
+                return;
+            }
+
+            $daysElapsed = (int) $this->date_plantation->diff($now)->format('%r%a');
+
+            if ($daysElapsed < 0) {
+                $this->etat_croissance = 'germination';
+                return;
+            }
+
+            $progress = $daysElapsed / $totalDays;
+
+            if ($progress < 0.20) {
+                $this->etat_croissance = 'germination';
+            } elseif ($progress < 0.60) {
+                $this->etat_croissance = 'croissance';
+            } elseif ($progress < 0.90) {
+                $this->etat_croissance = 'floraison';
+            } else {
+                $this->etat_croissance = 'maturite';
+            }
         }
 
         public function validateDates(ExecutionContextInterface $context): void
