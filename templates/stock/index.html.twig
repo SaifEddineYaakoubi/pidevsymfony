@@ -13,12 +13,16 @@
                 <a href="{{ path('stock_export_pdf') }}" class="btn btn-lg rounded-3 shadow-sm" style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); color: white; border: none;">
                     <i class="bi bi-file-pdf me-2"></i>Exporter PDF
                 </a>
+                <a href="{{ path('app_stock_alert_interface') }}" class="btn btn-lg rounded-3 shadow-sm" style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); color: white; border: none;">
+                    <i class="bi bi-bell me-2"></i>🚨 Alertes Stock
+                </a>
                 <a href="{{ path('stock_new') }}" class="btn btn-lg rounded-3 shadow-sm" style="background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%); color: white; border: none;">
                     <i class="bi bi-plus-circle me-2"></i>Ajouter du stock
                 </a>
             </div>
         </div>
 
+        <!-- Panneau d'alertes -->
         {% if app.request.query.get('export') %}
             <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
                 <i class="bi bi-check-circle me-2"></i>
@@ -123,7 +127,7 @@
         const stockFilterForm = document.getElementById('stock-filter-form');
         const stockSearch = document.getElementById('stock-search');
 
-        if (stockFilterForm) {
+        if (stockFilterForm && stockSearch) {
             stockSearch.addEventListener('input', () => {
                 clearTimeout(window.stockSearchTimeout);
                 window.stockSearchTimeout = setTimeout(() => stockFilterForm.submit(), 300);
@@ -134,7 +138,6 @@
             });
         }
 
-        // Export PDF handler
         document.addEventListener('click', function(e) {
             if (e.target.closest('a[href*="stock_export_pdf"]') || e.target.closest('a[href*="/stock/crud/export-pdf"]')) {
                 setTimeout(function() {
@@ -151,5 +154,5 @@
                 }, 300);
             }
         });
-    </script>
+
 {% endblock %}

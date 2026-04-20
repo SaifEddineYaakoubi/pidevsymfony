@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Stock;
 use App\Entity\Produit;
+use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -56,15 +57,6 @@ class StockType extends AbstractType
                 'placeholder' => '-- Sélectionnez un produit --',
                 'error_bubbling' => false,
                 'help' => 'Choisissez le produit à stocker',
-            ])
-            ->add('id_user', NumberType::class, [
-                'label' => 'ID utilisateur',
-                'required' => true,
-                'attr' => [
-                    'min' => '1',
-                    'placeholder' => 'ID utilisateur',
-                    'inputmode' => 'numeric',
-                ],
             ])
         ;
     }

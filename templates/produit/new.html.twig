@@ -3,6 +3,35 @@
 {% block title %}Ajouter un Produit{% endblock %}
 
 {% block agriculteur_body %}
+    <style>
+        .price-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 4px solid #2E8B57;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .price-item {
+            display: inline-block;
+            margin-right: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-label {
+            font-size: 0.85rem;
+            color: #666;
+            display: block;
+            font-weight: 500;
+        }
+
+        .price-value {
+            font-size: 1.2rem;
+            color: #2E8B57;
+            font-weight: bold;
+        }
+    </style>
+
     <div class="container section py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -13,12 +42,16 @@
                     <div class="card-body p-5">
                         {{ form_start(form, {'attr': {'class': 'form-validation'}}) }}
 
-                        <div class="row g-4">
+                        <div class="row g-4" style="align-items: flex-end;">
                             <div class="col-md-6">
                                 {{ form_label(form.nom, 'Nom du produit', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: Tomate rouge', 'required': 'required'}}) }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: Tomate rouge', 'required': 'required', 'id': 'product_name'}}) }}
                                 <small class="form-text text-muted">{{ form_help(form.nom) }}</small>
                             </div>
+                        </div>
+
+                        <!-- Autres champs du formulaire -->
+                        <div class="row g-4">
                             <div class="col-md-6">
                                 {{ form_label(form.type, 'Type/Catégorie', {'label_attr': {'class': 'form-label'}}) }}
                                 {{ form_widget(form.type, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: Légume, Fruit', 'required': 'required'}}) }}
@@ -51,4 +84,5 @@
             </div>
         </div>
     </div>
+
 {% endblock %}

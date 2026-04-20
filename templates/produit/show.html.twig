@@ -1,40 +1,537 @@
 {% extends 'front/base_stock.html.twig' %}
 
-{% block title %}Détail du Produit{% endblock %}
+{% block title %}Détail du produit - {{ produit.nom }}{% endblock %}
 
 {% block agriculteur_body %}
+    <style>
+        .image-skeleton {
+            width: 100%;
+            max-height: 350px;
+            min-height: 250px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            border-radius: 1rem;
+            animation: shimmer 1.4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+
     <div class="container section py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-sm rounded-4">
-                    <div class="card-header" style="background: linear-gradient(135deg, #2E8B57 0%, #32CD32 100%); color: white;">
-                        <h3 class="mb-0"><span style="font-size: 1.5em; margin-right: 10px;">{{ produit.icon }}</span>{{ produit.nom }}</h3>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h2 class="fw-bold mb-1">{{ produit.nom }}</h2>
+                        {% if stockQuantity > stockLimit %}
+                            <span class="badge bg-success">🟢 Stock OK</span>
+                        {% else %}
+                            <span class="badge bg-danger">🔴 Stock faible</span>
+                        {% endif %}
                     </div>
-                    <div class="card-body">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-4 text-muted">Icône</dt>
-                            <dd class="col-sm-8"><span style="font-size: 3em;">{{ produit.icon }}</span></dd>
+                    <div class="card-body pt-3">
+                        <dl class="row mb-4">
+                            <dt class="col-sm-5 text-muted">Prix unitaire</dt>
+                            <dd class="col-sm-7">{{ produit.prixUnitaire }} {{ produit.unite }}</dd>
 
-                            <dt class="col-sm-4 text-muted">ID produit</dt>
-                            <dd class="col-sm-8">{{ produit.idProduit }}</dd>
+                            <dt class="col-sm-5 text-muted">Catégorie</dt>
+                            <dd class="col-sm-7">{{ produit.type }}</dd>
 
-                            <dt class="col-sm-4 text-muted">Type</dt>
-                            <dd class="col-sm-8">{{ produit.type }}</dd>
+                            <dt class="col-sm-5 text-muted">Quantité totale</dt>
+                            <dd class="col-sm-7">{{ stockQuantity|number_format(0, ',', ' ') }}</dd>
 
-                            <dt class="col-sm-4 text-muted">Unité</dt>
-                            <dd class="col-sm-8">{{ produit.unite }}</dd>
-
-                            <dt class="col-sm-4 text-muted">Prix unitaire</dt>
-                            <dd class="col-sm-8">{{ produit.prixUnitaire }} DT</dd>
+                            <dt class="col-sm-5 text-muted">Description</dt>
+                            <dd class="col-sm-7">{{ produit.description|default('Description non disponible') }}</dd>
                         </dl>
 
-                        <div class="mt-4 d-flex justify-content-between">
-                            <a href="{{ path('produit_index') }}" class="btn" style="background-color: #DEB887; color: #8B4513; border: none;">Retour</a>
-                            <a href="{{ path('produit_edit', {'id_produit': produit.idProduit}) }}" class="btn" style="background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%); color: white; border: none;">Modifier</a>
+                        <!-- Prix du marché -->
+                        <div class="border-top pt-3 mb-3">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-chart-line"></i> Prix du marché (USDA AMS - per kg)
+                            </h6>
+                            <div id="market-price-loading" class="text-center py-2">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <small class="text-muted d-block">Recherche des prix...</small>
+                            </div>
+                            <div id="market-price-content" class="d-none">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Prix min (DT/kg)</small>
+                                        <span id="prix-min" class="fw-bold text-success">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Prix max (DT/kg)</small>
+                                        <span id="prix-max" class="fw-bold text-danger">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Prix moyen (DT/kg)</small>
+                                        <span id="prix-moyen" class="fw-bold text-primary">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Unité</small>
+                                        <span id="prix-unite" class="fw-bold">-</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Marché: <span id="prix-marche">-</span> |
+                                        Date: <span id="prix-date">-</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div id="market-price-error" class="d-none text-center py-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Prix non disponible pour ce produit
+                                </small>
+                            </div>
                         </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ path('produit_edit', {'id_produit': produit.idProduit}) }}" class="btn btn-warning">Modifier</a>
+                            <a href="{{ path('produit_index') }}" class="btn btn-secondary">Retour</a>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#nutritionModal">
+                                🥗 Voir Nutrition
+                            </button>
+                            {{ include('produit/_delete_form.html.twig') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm rounded-4 h-100">
+                    
+                    <div class="card-body d-flex flex-column align-items-center text-center">
+                        <div id="unsplash-image-wrapper" class="w-100 mb-3">
+                            <div id="image-skeleton" class="image-skeleton"></div>
+                            <img id="product-image" src="" alt="Photo du produit" class="img-fluid rounded-4 shadow-sm d-none" style="max-height:350px; object-fit:cover; width:100%;">
+                            <div id="image-error" class="d-none py-5 text-muted">
+                                <div class="fs-1">🥦</div>
+                                <div>Image non disponible</div>
+                            </div>
+                        </div>
+                        <p id="image-credit" class="small text-muted"></p>
+                        <button id="refresh-image" type="button" class="btn btn-outline-primary">🔄 Actualiser l'image</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal Nutrition -->
+    <div class="modal fade" id="nutritionModal" tabindex="-1" aria-labelledby="nutritionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nutritionModalLabel">🥗 Valeurs Nutritionnelles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nutrition-loading" class="text-center py-4">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p class="mt-2">Recherche des données nutritionnelles...</p>
+                    </div>
+
+                    <div id="nutrition-content" class="d-none">
+                        <h6 class="text-center mb-4">
+                            <strong id="nutrition-product-name"></strong> — pour <span id="nutrition-portion"></span>
+                        </h6>
+
+                        <div class="nutrition-items">
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🔥 Calories</span>
+                                    <span id="nutrition-calories-value">0 kcal</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-calories-bar" class="progress-bar bg-danger" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🥩 Protéines</span>
+                                    <span id="nutrition-proteines-value">0 g</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-proteines-bar" class="progress-bar bg-primary" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🍞 Glucides</span>
+                                    <span id="nutrition-glucides-value">0 g</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-glucides-bar" class="progress-bar bg-warning" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🧈 Lipides</span>
+                                    <span id="nutrition-lipides-value">0 g</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-lipides-bar" class="progress-bar bg-info" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🌿 Fibres</span>
+                                    <span id="nutrition-fibres-value">0 g</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-fibres-bar" class="progress-bar bg-success" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🍬 Sucres</span>
+                                    <span id="nutrition-sucres-value">0 g</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-sucres-bar" class="progress-bar bg-secondary" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🧂 Sodium</span>
+                                    <span id="nutrition-sodium-value">0 mg</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-sodium-bar" class="progress-bar bg-light text-dark" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🍊 Vitamine C</span>
+                                    <span id="nutrition-vitamine-c-value">0 mg</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-vitamine-c-bar" class="progress-bar" style="background-color: #ff8c00; width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🩸 Fer</span>
+                                    <span id="nutrition-fer-value">0 mg</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-fer-bar" class="progress-bar bg-dark" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>🦴 Calcium</span>
+                                    <span id="nutrition-calcium-value">0 mg</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="nutrition-calcium-bar" class="progress-bar bg-info" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-4">
+                            <h6>💡 Conseil nutritionnel</h6>
+                            <p id="nutrition-advice" class="mb-0"></p>
+                        </div>
+                    </div>
+
+                    <div id="nutrition-error" class="d-none text-center py-4">
+                        <div class="text-muted">
+                            <div class="fs-1">🥗</div>
+                            <div>Données nutritionnelles non disponibles pour ce produit</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const produitImageUrl = '{{ path('produit_image', {'id_produit': produit.idProduit}) }}';
+        const produitRefreshUrl = '{{ path('produit_refresh_image', {'id_produit': produit.idProduit}) }}';
+        const produitNutritionUrl = '{{ path('produit_nutrition', {'id_produit': produit.idProduit}) }}';
+        const imageSkeleton = document.getElementById('image-skeleton');
+        const productImage = document.getElementById('product-image');
+        const imageError = document.getElementById('image-error');
+        const imageCredit = document.getElementById('image-credit');
+        const refreshButton = document.getElementById('refresh-image');
+
+        // Éléments de la modal nutrition
+        const nutritionModal = document.getElementById('nutritionModal');
+        const nutritionLoading = document.getElementById('nutrition-loading');
+        const nutritionContent = document.getElementById('nutrition-content');
+        const nutritionError = document.getElementById('nutrition-error');
+        const nutritionProductName = document.getElementById('nutrition-product-name');
+        const nutritionPortion = document.getElementById('nutrition-portion');
+        const nutritionAdvice = document.getElementById('nutrition-advice');
+
+        const showSkeleton = () => {
+            imageSkeleton.classList.remove('d-none');
+            productImage.classList.add('d-none');
+            imageError.classList.add('d-none');
+            imageCredit.textContent = '';
+        };
+
+        const showError = (message = '') => {
+            imageSkeleton.classList.add('d-none');
+            productImage.classList.add('d-none');
+            imageError.classList.remove('d-none');
+            imageCredit.textContent = '';
+            imageError.querySelector('div:last-child').textContent = message || 'Image non disponible';
+        };
+
+        const showImage = () => {
+            imageSkeleton.classList.add('d-none');
+            imageError.classList.add('d-none');
+            productImage.classList.remove('d-none');
+            productImage.classList.add('fade-in');
+        };
+
+        async function loadImage(url) {
+            showSkeleton();
+            productImage.classList.remove('fade-in');
+            productImage.onload = showImage;
+            productImage.onerror = showError;
+
+            try {
+                const response = await fetch(url, {
+                    cache: 'no-store',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+
+                const data = await response.json();
+                if (!data.imageUrl) {
+                    showError(data?.message || 'Aucune image trouvée');
+                    return;
+                }
+
+                imageCredit.innerHTML = data.photographer
+                    ? `Photo par <a href="${data.photographerUrl ?? '#'}" target="_blank" rel="noopener noreferrer">${data.photographer}</a> sur Pexels`
+                    : 'Photo sur Pexels';
+
+                productImage.src = data.imageUrl;
+            } catch (error) {
+                console.error(error);
+                showError(error.message || 'Erreur lors de la récupération de l’image');
+            }
+        }
+
+        // Fonctions pour la modal nutrition
+        const showNutritionLoading = () => {
+            nutritionLoading.classList.remove('d-none');
+            nutritionContent.classList.add('d-none');
+            nutritionError.classList.add('d-none');
+        };
+
+        const showNutritionContent = () => {
+            nutritionLoading.classList.add('d-none');
+            nutritionContent.classList.remove('d-none');
+            nutritionError.classList.add('d-none');
+        };
+
+        const showNutritionError = () => {
+            nutritionLoading.classList.add('d-none');
+            nutritionContent.classList.add('d-none');
+            nutritionError.classList.remove('d-none');
+        };
+
+        const animateProgressBar = (element, percentage) => {
+            element.style.width = '0%';
+            setTimeout(() => {
+                element.style.width = percentage + '%';
+            }, 100);
+        };
+
+        const generateNutritionAdvice = (data) => {
+            const advice = [];
+
+            if (data.calories < 50) {
+                advice.push('Faible en calories ✅');
+            }
+            if (data.fibres > 2) {
+                advice.push('Riche en fibres ✅');
+            }
+            if (data.vitamine_c > 10) {
+                advice.push('Bonne source de Vitamine C ✅');
+            }
+            if (data.proteines > 10) {
+                advice.push('Bonne source de protéines ✅');
+            }
+            if (data.lipides < 1) {
+                advice.push('Faible en matières grasses ✅');
+            }
+            if (data.sucres < 5) {
+                advice.push('Faible en sucres ✅');
+            }
+
+            return advice.length > 0 ? advice.join(' • ') : 'Valeurs nutritionnelles équilibrées pour une alimentation saine.';
+        };
+
+        async function loadNutrition() {
+            showNutritionLoading();
+
+            try {
+                const response = await fetch(produitNutritionUrl, {
+                    cache: 'no-store',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showNutritionError();
+                    return;
+                }
+
+                // Remplir les données
+                nutritionProductName.textContent = data.nom;
+                nutritionPortion.textContent = data.portion;
+
+                // Valeurs nutritionnelles
+                document.getElementById('nutrition-calories-value').textContent = data.calories + ' kcal';
+                document.getElementById('nutrition-proteines-value').textContent = data.proteines + ' g';
+                document.getElementById('nutrition-glucides-value').textContent = data.glucides + ' g';
+                document.getElementById('nutrition-lipides-value').textContent = data.lipides + ' g';
+                document.getElementById('nutrition-fibres-value').textContent = data.fibres + ' g';
+                document.getElementById('nutrition-sucres-value').textContent = data.sucres + ' g';
+                document.getElementById('nutrition-sodium-value').textContent = data.sodium + ' mg';
+                document.getElementById('nutrition-vitamine-c-value').textContent = data.vitamine_c + ' mg';
+                document.getElementById('nutrition-fer-value').textContent = data.fer + ' mg';
+                document.getElementById('nutrition-calcium-value').textContent = data.calcium + ' mg';
+
+                // Barres de progression (pourcentages normalisés)
+                animateProgressBar(document.getElementById('nutrition-calories-bar'), Math.min(data.calories / 5, 100));
+                animateProgressBar(document.getElementById('nutrition-proteines-bar'), Math.min(data.proteines * 10, 100));
+                animateProgressBar(document.getElementById('nutrition-glucides-bar'), Math.min(data.glucides * 2.5, 100));
+                animateProgressBar(document.getElementById('nutrition-lipides-bar'), Math.min(data.lipides * 10, 100));
+                animateProgressBar(document.getElementById('nutrition-fibres-bar'), Math.min(data.fibres * 8, 100));
+                animateProgressBar(document.getElementById('nutrition-sucres-bar'), Math.min(data.sucres * 4, 100));
+                animateProgressBar(document.getElementById('nutrition-sodium-bar'), Math.min(data.sodium / 10, 100));
+                animateProgressBar(document.getElementById('nutrition-vitamine-c-bar'), Math.min(data.vitamine_c * 7, 100));
+                animateProgressBar(document.getElementById('nutrition-fer-bar'), Math.min(data.fer * 33, 100));
+                animateProgressBar(document.getElementById('nutrition-calcium-bar'), Math.min(data.calcium, 100));
+
+                // Conseil nutritionnel
+                nutritionAdvice.textContent = generateNutritionAdvice(data);
+
+                showNutritionContent();
+            } catch (error) {
+                console.error(error);
+                showNutritionError();
+            }
+        }
+
+        // Événements
+        document.addEventListener('DOMContentLoaded', () => {
+            loadImage(produitImageUrl);
+            loadMarketPrices();
+        });
+        refreshButton?.addEventListener('click', () => loadImage(produitRefreshUrl));
+
+        // Événement pour la modal nutrition
+        nutritionModal?.addEventListener('show.bs.modal', loadNutrition);
+
+        // Fonctions pour les prix du marché
+        const marketPriceLoading = document.getElementById('market-price-loading');
+        const marketPriceContent = document.getElementById('market-price-content');
+        const marketPriceError = document.getElementById('market-price-error');
+        const produitPrixMarcheUrl = '{{ path('produit_prix_marche', {'id_produit': produit.idProduit}) }}';
+
+        const showMarketPriceLoading = () => {
+            marketPriceLoading.classList.remove('d-none');
+            marketPriceContent.classList.add('d-none');
+            marketPriceError.classList.add('d-none');
+        };
+
+        const showMarketPriceContent = () => {
+            marketPriceLoading.classList.add('d-none');
+            marketPriceContent.classList.remove('d-none');
+            marketPriceError.classList.add('d-none');
+        };
+
+        const showMarketPriceError = () => {
+            marketPriceLoading.classList.add('d-none');
+            marketPriceContent.classList.add('d-none');
+            marketPriceError.classList.remove('d-none');
+        };
+
+        async function loadMarketPrices() {
+            showMarketPriceLoading();
+
+            try {
+                const response = await fetch(produitPrixMarcheUrl, {
+                    cache: 'no-store',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'not_found') {
+                    showMarketPriceError();
+                    return;
+                }
+
+                // Conversion euro vers DT (1 EUR ≈ 3.3 DT)
+                const tauxConversion = 3.3;
+                const prixMinDT = (parseFloat(data.prix_min) * tauxConversion).toFixed(2);
+                const prixMaxDT = (parseFloat(data.prix_max) * tauxConversion).toFixed(2);
+                const prixMoyenDT = (parseFloat(data.prix_moyen) * tauxConversion).toFixed(2);
+
+                // Remplir les données
+                document.getElementById('prix-min').textContent = prixMinDT + ' DT';
+                document.getElementById('prix-max').textContent = prixMaxDT + ' DT';
+                document.getElementById('prix-moyen').textContent = prixMoyenDT + ' DT';
+                document.getElementById('prix-unite').textContent = data.unite;
+                document.getElementById('prix-marche').textContent = data.marche;
+                document.getElementById('prix-date').textContent = data.date;
+
+                showMarketPriceContent();
+            } catch (error) {
+                console.error('Erreur lors du chargement des prix du marché:', error);
+                showMarketPriceError();
+            }
+        }
+
+    </script>
 {% endblock %}

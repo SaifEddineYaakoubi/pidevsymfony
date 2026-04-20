@@ -1,0 +1,3 @@
+# Configuration des services pour l'environnement de développement
+services:
+    # Il n'y a pas de service ResendMailService dans cette application.

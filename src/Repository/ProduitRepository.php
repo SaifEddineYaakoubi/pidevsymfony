@@ -21,7 +21,7 @@ class ProduitRepository extends ServiceEntityRepository
             'type' => 'p.type',
             'unite' => 'p.unite',
             'prixUnitaire' => 'p.prix_unitaire',
-            'idUser' => 'p.id_user',
+            'idUser' => 'u.email', // Tri par email de l'utilisateur
         ];
 
         $searchFields = [

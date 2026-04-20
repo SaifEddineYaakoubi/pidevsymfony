@@ -109,4 +109,34 @@
         </div>
     </div>
     </div>
+
+    <script>
+        const sendStockAlertsButton = document.getElementById('send-stock-alerts');
+        if (sendStockAlertsButton) {
+            sendStockAlertsButton.addEventListener('click', async () => {
+                const url = '{{ path('app_stock_test_brevo_alert') }}';
+                sendStockAlertsButton.disabled = true;
+                sendStockAlertsButton.innerHTML = 'Envoi en cours…';
+
+                try {
+                    const response = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur réseau');
+                    }
+
+                    const data = await response.json();
+                    alert(`Résultat : ${data.status}\nAlertes envoyées : ${data.alerts_sent.length}`);
+                } catch (error) {
+                    alert('Échec de l’envoi : ' + error.message);
+                } finally {
+                    sendStockAlertsButton.disabled = false;
+                    sendStockAlertsButton.innerHTML = '<i class="fas fa-envelope text-success"></i> Envoyer alertes stock';
+                }
+            });
+        }
+    </script>
 {% endblock %}
