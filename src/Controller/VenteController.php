@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Vente;
-use App\Entity\Utilisateur;
-use App\Form\VenteType;
+use App\Repository\ProduitRepository;
+use App\Repository\VenteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +15,13 @@ use Dompdf\Options;
 #[Route('/vente')]
 final class VenteController extends AbstractController
 {
+    public function __construct(
+        private readonly VenteRepository $venteRepository,
+        private readonly ProduitRepository $produitRepository,
+        private readonly EntityManagerInterface $entityManager
+    )
+    {
+    }
     #[Route(name: 'app_vente_index', methods: ['GET'])]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -72,6 +78,8 @@ final class VenteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($vente);
             $entityManager->flush();
+            // TODO: Implement stock checking logic here
+            // $this->stockService->checkAllStocks();
 
             $this->addFlash('success', 'La vente a été créée avec succès.');
             return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);
@@ -144,6 +152,8 @@ final class VenteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            // TODO: Implement stock checking logic here
+            // $this->stockService->checkAllStocks();
 
             $this->addFlash('success', 'La vente a été modifiée avec succès.');
             return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);

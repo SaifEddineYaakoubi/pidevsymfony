@@ -122,7 +122,9 @@ final class AdminController extends AbstractController
     #[Route('/admin/stocks', name: 'app_admin_stocks', methods: ['GET'])]
     public function stocks(Request $request, StockRepository $stockRepository): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STOCK')) {
+            throw $this->createAccessDeniedException('Accès refusé.');
+        }
 
         $q = $request->query->getString('q');
         $sort = $request->query->getString('sort') ?: 'dateEntreeDesc';

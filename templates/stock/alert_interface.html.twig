@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Interface d'Alertes Stock - Agrifarm{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-bell"></i> Interface d'Alertes de Stock
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Information :</strong> Cette interface permet d'envoyer des alertes par email
+                        pour tous les produits dont le stock est inférieur ou égal au seuil configuré ({{ app.request.server.get('STOCK_SEUIL', 5) }} kg).
+                    </div>
+
+                    <!-- Statistiques des stocks -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Stocks Totaux</h5>
+                                    <h3 class="text-primary" id="totalStocks">...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-warning">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Stocks Faibles</h5>
+                                    <h3 class="text-white" id="lowStocks">...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Seuil</h5>
+                                    <h3 class="text-white">{{ app.request.server.get('STOCK_SEUIL', 5) }} kg</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button id="btnAlerte" class="btn btn-success btn-lg" onclick="envoyerAlertes()">
+                            <i class="fas fa-paper-plane"></i> 🚀 Envoyer les alertes de stock
+                        </button>
+                        <a href="{{ path('app_stock_test_mail_simple') }}" class="btn btn-warning btn-lg ml-2">
+                            <i class="fas fa-envelope"></i> 📧 Test Email
+                        </a>
+                        <button id="btnRefresh" class="btn btn-outline-primary btn-lg ml-2" onclick="chargerStatistiques()">
+                            <i class="fas fa-sync-alt"></i> Actualiser
+                        </button>
+                    </div>
+
+                    <div id="resultat" class="mt-4 p-3 rounded" style="display:none;"></div>
+
+                    <!-- Détails des erreurs -->
+                    <div id="detailsErreurs" class="mt-3" style="display:none;">
+                        <h5><i class="fas fa-exclamation-triangle text-danger"></i> Détails des erreurs :</h5>
+                        <div id="listeErreurs" class="alert alert-danger"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let statistiquesChargees = false;
+
+async function chargerStatistiques() {
+    try {
+        const response = await fetch('/stock/statistics', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        document.getElementById('totalStocks').textContent = data.totalStocks;
+        document.getElementById('lowStocks').textContent = data.lowStocks;
+
+        statistiquesChargees = true;
+    } catch(e) {
+        console.error('Erreur lors du chargement des statistiques:', e);
+    }
+}
+
+async function envoyerAlertes() {
+    const btn = document.getElementById('btnAlerte');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const resultat = document.getElementById('resultat');
+    const detailsErreurs = document.getElementById('detailsErreurs');
+    const listeErreurs = document.getElementById('listeErreurs');
+
+    // Désactiver les boutons
+    btn.disabled = true;
+    btnRefresh.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ⏳ Envoi en cours...';
+
+    // Masquer les résultats précédents
+    resultat.style.display = 'none';
+    detailsErreurs.style.display = 'none';
+
+    try {
+        const response = await fetch('/stock/send-alerts', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+            if (data.alertes > 0) {
+                resultat.style.background = '#d4edda';
+                resultat.style.color = '#155724';
+                resultat.style.border = '1px solid #c3e6cb';
+                resultat.innerHTML = '<i class="fas fa-check-circle"></i> ✅ ' + data.message +
+                    '<br><strong>Produits concernés :</strong> ' +
+                    (data.produits ? data.produits.join(', ') : 'Aucun produit spécifié');
+
+                // Recharger les statistiques après envoi réussi
+                setTimeout(() => chargerStatistiques(), 1000);
+            } else {
+                resultat.style.background = '#cce5ff';
+                resultat.style.color = '#004085';
+                resultat.style.border = '1px solid #b3d7ff';
+                resultat.innerHTML = '<i class="fas fa-info-circle"></i> ℹ️ ' + data.message;
+            }
+        } else {
+            // Erreur côté serveur
+            resultat.style.background = '#f8d7da';
+            resultat.style.color = '#721c24';
+            resultat.style.border = '1px solid #f5c6cb';
+            resultat.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ❌ Erreur : ' + data.message;
+
+            // Afficher les détails d'erreur si disponibles
+            if (data.details) {
+                listeErreurs.innerHTML = '<pre>' + JSON.stringify(data.details, null, 2) + '</pre>';
+                detailsErreurs.style.display = 'block';
+            }
+        }
+    } catch(e) {
+        // Erreur réseau ou parsing JSON
+        resultat.style.background = '#f8d7da';
+        resultat.style.color = '#721c24';
+        resultat.style.border = '1px solid #f5c6cb';
+
+        if (e.message.includes('Unexpected token')) {
+            resultat.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ❌ Erreur serveur : La réponse du serveur n\'est pas au format attendu. Vérifiez les logs du serveur.';
+        } else {
+            resultat.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ❌ Erreur réseau : ' + e.message;
+        }
+
+        // Afficher les détails techniques
+        listeErreurs.innerHTML = '<strong>Détails techniques :</strong><br><pre>' + e.stack + '</pre>';
+        detailsErreurs.style.display = 'block';
+    }
+
+    // Réactiver les boutons
+    resultat.style.display = 'block';
+    btn.disabled = false;
+    btnRefresh.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> 🚀 Envoyer les alertes de stock';
+}
+
+// Charger les statistiques au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    chargerStatistiques();
+});
+</script>
+{% endblock %}
