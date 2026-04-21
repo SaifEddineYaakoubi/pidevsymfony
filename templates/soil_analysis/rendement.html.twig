@@ -1,0 +1,252 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Impact du Sol sur Rendement #{{ rendement.id_rendement }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>📊 Impact du Sol sur le Rendement</h1>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> Cette analyse corrèle la qualité du sol avec le rendement obtenu pour la récolte du <strong>{{ recolte.date_recolte|date('d/m/Y') }}</strong>
+</div>
+
+<div class="row mt-4">
+    <!-- Productivité Réelle vs Potentielle -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-chart-bar"></i> Productivité Réelle vs Potentielle
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Productivité Réelle</h5>
+                        <h3 class="text-primary">{{ yield_analysis.actual_vs_potential.actual|number_format(2, '.', '') }} kg/m²</h3>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Potentiel du Sol</h5>
+                        <h3 class="text-success">{{ yield_analysis.actual_vs_potential.potential|number_format(2, '.', '') }} kg/m²</h3>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <p><strong>Efficacité:</strong></p>
+                    <p class="h5">{{ yield_analysis.actual_vs_potential.efficiency }}</p>
+                    {% set efficiency = yield_analysis.actual_vs_potential.efficiency|replace('%', '')|trim|float %}
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-{% if efficiency >= 80 %}success{% elseif efficiency >= 60 %}warning{% else %}danger{% endif %}"
+                             style="width: {{ efficiency > 100 ? 100 : efficiency }}%">
+                            {{ efficiency > 100 ? '>100%' : efficiency|round(1) ~ '%' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corrélation Sol/Rendement -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-link"></i> Corrélation Sol - Rendement
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ yield_analysis.correlation }}</p>
+                <hr>
+                <div>
+                    <p><strong>Score Qualité du Sol:</strong></p>
+                    <p class="h5">
+                        <span class="badge bg-{% if yield_analysis.soil_quality_score >= 75 %}success{% elseif yield_analysis.soil_quality_score >= 50 %}warning{% else %}danger{% endif %}">
+                            {{ yield_analysis.soil_quality_score }}/100
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Facteurs Limitants -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-exclamation-triangle"></i> Facteurs Limitants
+            </div>
+            <div class="card-body">
+                {% set limiting_factors = yield_analysis.soil_factors_affecting_yield|default([]) %}
+                {% if limiting_factors is empty %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> Aucun facteur limitant détecté. Le sol offre un potentiel optimal pour cette culture.
+                    </div>
+                {% else %}
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nutrient</th>
+                                <th>Niveau</th>
+                                <th>Status</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for factor in limiting_factors %}
+                                <tr>
+                                    <td><strong>{{ factor.nutrient }}</strong></td>
+                                    <td>{{ factor.level }}</td>
+                                    <td><span class="badge bg-danger">{{ factor.status }}</span></td>
+                                    <td><span class="badge bg-danger">{{ factor.impact }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommandations pour Améliorer le Rendement -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <i class="fas fa-lightbulb"></i> Recommandations pour Améliorer le Rendement
+            </div>
+            <div class="card-body">
+                {% set improvements = yield_analysis.recommendations_to_improve|default([]) %}
+                {% if improvements is empty %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Le sol a un profil optimal. Maintenez les pratiques actuelles.
+                    </div>
+                {% else %}
+                    <div class="accordion" id="accordionImprovements">
+                        {% for idx, improvement in improvements %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button {% if idx > 0 %}collapsed{% endif %}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ idx }}">
+                                        <strong>{{ improvement.action }}</strong>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ idx }}"
+                                     class="accordion-collapse collapse {% if idx == 0 %}show{% endif %}"
+                                     data-bs-parent="#accordionImprovements">
+                                    <div class="accordion-body">
+                                        <p><strong>Augmentation du rendement attendue:</strong> {{ improvement.expected_yield_increase }}</p>
+                                        <p><strong>Estimation de coût:</strong> {{ improvement.cost_estimate }}</p>
+                                        <p><strong>ROI estimé:</strong> {{ improvement.roi_estimate }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analyse Détaillée NPK -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">Azote (N)</div>
+            <div class="card-body">
+                {% set n_data = yield_analysis.recommendations_to_improve|first.nitrogen|default({}) %}
+                <p class="text-muted">Les carences en azote affectent:</p>
+                <ul class="small">
+                    <li>Croissance végétale</li>
+                    <li>Production de biomasse</li>
+                    <li>Qualité protéique</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">Phosphore (P)</div>
+            <div class="card-body">
+                <p class="text-muted">Le phosphore influence:</p>
+                <ul class="small">
+                    <li>Développement racinaire</li>
+                    <li>Fructification</li>
+                    <li>Métabolisme énergétique</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">Potassium (K)</div>
+            <div class="card-body">
+                <p class="text-muted">Le potassium assure:</p>
+                <ul class="small">
+                    <li>Régulation hydrique</li>
+                    <li>Résistance aux stress</li>
+                    <li>Qualité des fruits</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prédictions Futures -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-crystal-ball"></i> Prédictions & Potentiel Futur
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Potentiel de Rendement Détectable</h5>
+                        <h4 class="text-success">
+                            <strong>{{ (yield_analysis.predicted_yield_potential)|number_format(2, '.', '') }} kg/m²</strong>
+                        </h4>
+                        <p class="text-muted small">Basé sur la qualité actuelle du sol</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Recommandation Principale</h5>
+                        {% if yield_analysis.actual_vs_potential.efficiency|replace('%', '')|trim|float < 80 %}
+                            <div class="alert alert-warning">
+                                <strong>⚠️ Optimiser fertilisation</strong><br>
+                                <small>Votre rendement est inférieur au potentiel du sol. Appliquez les recommandations pour améliorer de 10-15%.</small>
+                            </div>
+                        {% elseif yield_analysis.actual_vs_potential.efficiency|replace('%', '')|trim|float >= 80 and yield_analysis.actual_vs_potential.efficiency|replace('%', '')|trim|float <= 100 %}
+                            <div class="alert alert-info">
+                                <strong>✓ Performance Optimale</strong><br>
+                                <small>Votre rendement correspond bien au potentiel du sol. Maintenez vos pratiques.</small>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <strong>🌟 Rendement Exceptionnel</strong><br>
+                                <small>Vous exploitez parfaitement le potentiel de votre sol. Excellent travail!</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <a href="{{ path('app_rendement_show', {'idRendement': rendement.id_rendement}) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour au rendement
+        </a>
+        <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-primary">
+            <i class="fas fa-leaf"></i> Voir la récolte
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+

@@ -12,6 +12,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\SoilAnalysisService;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\HuggingFaceService;
+use App\Service\PredictionExporterService;
 
 #[Route('/recolte')]
 class RecolteController extends AbstractController
@@ -102,7 +106,12 @@ class RecolteController extends AbstractController
 
         $recoltes = $qb->getQuery()->getResult();
 
+<<<<<<< Updated upstream
         // Get rendements for each recolte
+=======
+
+        // Get rendements for each recolte (map recolteId => productivite)
+>>>>>>> Stashed changes
         $rendements = [];
         foreach ($recoltes as $recolte) {
             $rendement = $entityManager->getRepository(Rendement::class)->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
@@ -142,7 +151,7 @@ class RecolteController extends AbstractController
     }
 
     #[Route('/{id_recolte}', name: 'app_recolte_show', methods: ['GET'])]
-    public function show(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager): Response
+    public function show(int $id_recolte, RecolteRepository $recolteRepository, EntityManagerInterface $entityManager, SoilAnalysisService $soilService): Response
     {
         $recolte = $recolteRepository->find($id_recolte);
 
@@ -151,9 +160,15 @@ class RecolteController extends AbstractController
         }
 
         $rendement = $entityManager->getRepository(Rendement::class)->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
+
+        // Récupérer l'analyse du sol pour cette récolte
+        $soilAnalysis = $soilService->getSoilAnalysisForRecolte($recolte);
+
         return $this->render('recolte/show.html.twig', [
             'recolte' => $recolte,
             'rendement' => $rendement,
+            'soil_analysis' => $soilAnalysis,
+            'json_pretty' => json_encode($soilAnalysis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ]);
     }
 
@@ -288,6 +303,7 @@ class RecolteController extends AbstractController
         ]);
     }
 
+<<<<<<< Updated upstream
 
     private function calculateRendement(Recolte $recolte, EntityManagerInterface $entityManager): void
     {
@@ -317,4 +333,65 @@ class RecolteController extends AbstractController
         $entityManager->persist($rendement);
         $entityManager->flush();
     }
+=======
+    #[Route('/api/predict', name: 'api_predict', methods: ['POST'])]
+    public function predict(Request $request, HuggingFaceService $huggingFaceService, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !isset($data['surface'], $data['quantite'], $data['typeCulture'])) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $prediction = $huggingFaceService->predict($data);
+
+        if (isset($prediction['error'])) {
+            return new JsonResponse($prediction, 500);
+        }
+
+        // Optionnel : Mettre à jour l'entité Recolte (supposé ID fourni)
+        if (isset($data['recolteId'])) {
+            $recolte = $entityManager->getRepository(Recolte::class)->find($data['recolteId']);
+            if ($recolte) {
+                $recolte->setPredictionRendement($prediction['predictionRendement']);
+                $recolte->setScoreQualite($prediction['scoreQualite']);
+                $entityManager->flush();
+            }
+        }
+
+        return new JsonResponse($prediction);
+    }
+
+    #[Route('/export-csv/{id_recolte}', name: 'app_recolte_export_csv', methods: ['GET'])]
+    public function exportCsv(int $id_recolte, RecolteRepository $recolteRepository, PredictionExporterService $exporterService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        error_log("Export CSV demandé pour récolte ID: $id_recolte par utilisateur: " . $user->getIdUser());
+
+        $recolte = $recolteRepository->findOneForUser($id_recolte, $user);
+
+        if (!$recolte) {
+            error_log("Récolte ID $id_recolte non trouvée pour l'utilisateur " . $user->getIdUser());
+            throw $this->createNotFoundException('Récolte non trouvée');
+        }
+
+        error_log("Récolte trouvée: " . $recolte->getIdRecolte() . ", culture: " . ($recolte->getIdCulture() ? $recolte->getIdCulture()->getIdCulture() : 'null'));
+
+        try {
+            error_log("Appel du service PredictionExporterService");
+            $response = $exporterService->generatePredictionCsv($recolte);
+            error_log("Service appelé avec succès, réponse status: " . $response->getStatusCode());
+            return $response;
+        } catch (\Exception $e) {
+            error_log("Erreur dans le contrôleur exportCsv: " . $e->getMessage());
+            $this->addFlash('error', 'Erreur lors de la génération du CSV: ' . $e->getMessage());
+            return $this->redirectToRoute('app_recolte_show', ['id_recolte' => $id_recolte]);
+        }
+    }
+
+>>>>>>> Stashed changes
 }

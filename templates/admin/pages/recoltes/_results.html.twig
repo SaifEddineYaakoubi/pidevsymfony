@@ -1,0 +1,89 @@
+{# Partial returned for AJAX: table + pagination #}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Type Culture</th>
+                <th>Localisation</th>
+                <th>Quantité (kg)</th>
+                <th>Qualité</th>
+                <th>Date Récolte</th>
+                <th>Agriculteur</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recolte in recoltes %}
+                <tr>
+                    <td>{{ recolte.id_recolte }}</td>
+                    <td>
+                        <strong>{{ recolte.type_culture }}</strong>
+                    </td>
+                    <td>{{ recolte.localisation }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ recolte.quantite }} kg</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{{
+                            recolte.qualite == 'excellente' ? 'success' :
+                            (recolte.qualite == 'bonne' ? 'primary' :
+                            (recolte.qualite == 'moyenne' ? 'warning' :
+                            (recolte.qualite == 'mauvaise' ? 'danger' : 'secondary')))
+                        }}">
+                            {{ recolte.qualite|capitalize }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if recolte.date_recolte %}
+                            {{ recolte.date_recolte|date('d/m/Y') }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">ID: {{ recolte.id_user }}</small>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}"
+                               class="btn btn-outline-primary btn-sm"
+                               title="Voir détails">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ path('app_soil_recolte', {'id_recolte': recolte.id_recolte}) }}"
+                               class="btn btn-outline-info btn-sm"
+                               title="Analyser sol">
+                                <i class="fas fa-earth"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <br>
+                        Aucune récolte trouvée
+                        {% if q %}
+                            pour "<strong>{{ q }}</strong>"
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# Pagination #}
+{% if recoltes|length > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted small">
+            Affichage de {{ recoltes|length }} récolte(s)
+            {% if q %}
+                pour "<strong>{{ q }}</strong>"
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

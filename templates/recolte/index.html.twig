@@ -34,6 +34,7 @@
             </select>
         </div>
 
+<<<<<<< Updated upstream
         <!-- Boutons -->
         <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
             <button type="submit" class="btn" style="background: #4A7C2F;">🔍 Rechercher</button>
@@ -49,6 +50,18 @@
         <span style="color: #666;">({{ recoltes|length }} résultat{{ recoltes|length > 1 ? 's' : '' }})</span>
     </div>
 {% endif %}
+=======
+            function clearSelection() {
+                const cards = document.querySelectorAll('.agri-card');
+                cards.forEach(card => card.classList.remove('is-selected'));
+            }
+
+            function setSelected(card) {
+                clearSelection();
+                card.classList.add('is-selected');
+                const selectedId = card.dataset.id;
+                if (!selectedId) return;
+>>>>>>> Stashed changes
 
 <table class="table">
     <thead>
@@ -101,6 +114,7 @@
     </tbody>
 </table>
 
+<<<<<<< Updated upstream
 <script>
 // Recherche en temps réel (optionnel - amélioration UX)
 document.addEventListener('DOMContentLoaded', function() {
@@ -121,6 +135,33 @@ document.addEventListener('DOMContentLoaded', function() {
     sortSelect.addEventListener('change', function() {
         form.submit();
     });
+=======
+                btnDelete.disabled = false;
+                deleteForm.action = '{{ path('app_recolte_delete', {'id_recolte': 0}) }}'.replace('/0', '/' + selectedId);
+                deleteToken.value = card.dataset.deleteToken || '';
+            }
+
+            if (results) {
+                results.addEventListener('click', (e) => {
+                    // Don't trigger selection if clicking on buttons or links
+                    if (e.target.closest('a, button, form')) return;
+
+                    const card = e.target.closest('.agri-card[data-id]');
+                    if (!card) return;
+                    setSelected(card);
+                });
+
+                results.addEventListener('dblclick', (e) => {
+                    // Don't trigger navigation if clicking on buttons or links
+                    if (e.target.closest('a, button, form')) return;
+
+                    const card = e.target.closest('.agri-card[data-id][data-href]');
+                    if (!card) return;
+                    const href = card.dataset.href;
+                    if (href) window.location.href = href;
+                });
+            }
+>>>>>>> Stashed changes
 
     // Animation pour les résultats
     const resultsDiv = document.querySelector('[style*="e8f5e8"]');

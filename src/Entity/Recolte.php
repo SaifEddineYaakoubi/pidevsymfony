@@ -16,6 +16,12 @@ class Recolte
     private int $id_recolte;
 
     #[ORM\Column(type: "float")]
+<<<<<<< Updated upstream
+=======
+    #[Assert\NotNull(message: 'La quantité est obligatoire.')]
+    #[Assert\Positive(message: 'La quantité doit être strictement supérieure à 0.')]
+    #[Assert\GreaterThan(0, message: 'La quantité doit être supérieure à 0.')]
+>>>>>>> Stashed changes
     private float $quantite;
 
     #[ORM\Column(type: "date", nullable: true)]
@@ -37,15 +43,23 @@ class Recolte
     #[ORM\Column(type: "integer")]
     private int $id_user;
 
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $predictionRendement = null;
+
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $scoreQualite = null;
+
     public function __construct()
     {
         $this->quantite = 0.0;
         $this->date_recolte = null;
-        $this->qualite = '';
+        $this->qualite = null;
         $this->id_culture = null;
-        $this->type_culture = '';
-        $this->localisation = '';
+        $this->type_culture = null;
+        $this->localisation = null;
         $this->id_user = 0;
+        $this->predictionRendement = null;
+        $this->scoreQualite = null;
     }
 
     public function getId_recolte()
@@ -126,6 +140,26 @@ class Recolte
     public function setId_user($value)
     {
         $this->id_user = $value;
+    }
+
+    public function getPredictionRendement()
+    {
+        return $this->predictionRendement;
+    }
+
+    public function setPredictionRendement($value)
+    {
+        $this->predictionRendement = $value;
+    }
+
+    public function getScoreQualite()
+    {
+        return $this->scoreQualite;
+    }
+
+    public function setScoreQualite($value)
+    {
+        $this->scoreQualite = $value;
     }
 
     public function getDateRecolte()

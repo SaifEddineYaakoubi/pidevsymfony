@@ -1,0 +1,264 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Analyse du Sol - Récolte #{{ recolte.id_recolte }}{% endblock %}
+
+{% block agriculteur_body %}
+
+<h1>🌍 Analyse du Sol - Récolte du {{ recolte.date_recolte|date('d/m/Y') }}</h1>
+
+<div class="row mt-4">
+    <!-- Localisation et Type Culture -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-leaf"></i> Informations Récolte
+            </div>
+            <div class="card-body">
+                <p><strong>Type de culture:</strong> {{ recolte.type_culture }}</p>
+                <p><strong>Localisation:</strong> {{ recolte.localisation }}</p>
+                <p><strong>Quantité:</strong> {{ recolte.quantite }} kg</p>
+                <p><strong>Qualité:</strong>
+                    <span class="badge bg-{% if recolte.qualite == 'excellente' %}success{% elseif recolte.qualite == 'bonne' %}primary{% elseif recolte.qualite == 'moyenne' %}warning{% else %}danger{% endif %}">
+                        {{ recolte.qualite }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Qualité du Sol -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-check-circle"></i> Score Qualité du Sol
+            </div>
+            <div class="card-body text-center">
+                {% set soil_quality = soil_analysis.soil_quality_score|default(0) %}
+                <h3 class="mb-3">
+                    <span class="badge bg-{% if soil_quality >= 75 %}success{% elseif soil_quality >= 50 %}warning{% else %}danger{% endif %}">
+                        {{ soil_quality }}/100
+                    </span>
+                </h3>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar bg-{% if soil_quality >= 75 %}success{% elseif soil_quality >= 50 %}warning{% else %}danger{% endif %}"
+                         role="progressbar"
+                         style="width: {{ soil_quality }}%"
+                         aria-valuenow="{{ soil_quality }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ soil_quality }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Données NPK et Propriétés du Sol -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-flask"></i> Azote (N)
+            </div>
+            <div class="card-body">
+                <h4>{{ soil_analysis.npk.nitrogen|default(0) }} ppm</h4>
+                {% set n_status = soil_analysis.recommendations.nitrogen.status|default('OPTIMAL') %}
+                <p>Status: <span class="badge bg-{% if n_status == 'DEFICIENT' %}danger{% elseif n_status == 'EXCESS' %}warning{% else %}success{% endif %}">{{ n_status }}</span></p>
+                <p class="text-muted small">{{ soil_analysis.recommendations.nitrogen.recommended_action|default('') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-flask"></i> Phosphore (P)
+            </div>
+            <div class="card-body">
+                <h4>{{ soil_analysis.npk.phosphorus|default(0) }} ppm</h4>
+                {% set p_status = soil_analysis.recommendations.phosphorus.status|default('OPTIMAL') %}
+                <p>Status: <span class="badge bg-{% if p_status == 'DEFICIENT' %}danger{% elseif p_status == 'EXCESS' %}warning{% else %}success{% endif %}">{{ p_status }}</span></p>
+                <p class="text-muted small">{{ soil_analysis.recommendations.phosphorus.recommended_action|default('') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-flask"></i> Potassium (K)
+            </div>
+            <div class="card-body">
+                <h4>{{ soil_analysis.npk.potassium|default(0) }} ppm</h4>
+                {% set k_status = soil_analysis.recommendations.potassium.status|default('OPTIMAL') %}
+                <p>Status: <span class="badge bg-{% if k_status == 'DEFICIENT' %}danger{% elseif k_status == 'EXCESS' %}warning{% else %}success{% endif %}">{{ k_status }}</span></p>
+                <p class="text-muted small">{{ soil_analysis.recommendations.potassium.recommended_action|default('') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- pH, Humidité, Type de Sol -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-tint"></i> pH du Sol
+            </div>
+            <div class="card-body text-center">
+                <h4>{{ soil_analysis.ph|default(0) }}</h4>
+                {% set ph = soil_analysis.ph|default(0) %}
+                {% if ph >= 6 and ph <= 7 %}
+                    <p class="text-success"><strong>Optimal</strong></p>
+                {% elseif ph >= 5.5 and ph <= 7.5 %}
+                    <p class="text-warning"><strong>Acceptable</strong></p>
+                {% else %}
+                    <p class="text-danger"><strong>À corriger</strong></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-water"></i> Humidité
+            </div>
+            <div class="card-body text-center">
+                <h4>{{ soil_analysis.humidity|default(0) }}%</h4>
+                {% set humidity = soil_analysis.humidity|default(0) %}
+                {% if humidity >= 40 and humidity <= 60 %}
+                    <p class="text-success"><strong>Optimal</strong></p>
+                {% elseif humidity >= 30 and humidity <= 70 %}
+                    <p class="text-warning"><strong>Acceptable</strong></p>
+                {% else %}
+                    <p class="text-danger"><strong>Critique</strong></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-layer-group"></i> Type de Sol
+            </div>
+            <div class="card-body text-center">
+                <h5>{{ soil_analysis.soil_type|default('Unknown') }}</h5>
+                <p class="text-muted">Classe de sol</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-leaf"></i> Matière Organique
+            </div>
+            <div class="card-body text-center">
+                <h4>{{ soil_analysis.organic_matter|default(0) }}%</h4>
+                <p class="text-muted">Contenu du sol</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compatibilité du Sol avec la Culture -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-check"></i> Compatibilité Sol - Culture
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Convenance du sol:</strong></p>
+                        <p>
+                            <span class="badge bg-{% if soil_analysis.harvest_compatibility.overall_suitability == 'EXCELLENT' %}success{% elseif soil_analysis.harvest_compatibility.overall_suitability == 'GOOD' %}primary{% else %}warning{% endif %}">
+                                {{ soil_analysis.harvest_compatibility.overall_suitability|default('UNKNOWN') }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Type de sol:</strong></p>
+                        <p><span class="badge bg-info">{{ soil_analysis.harvest_compatibility.soil_type_match|default('FAIR') }}</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>pH optimal:</strong></p>
+                        <p><span class="badge bg-info">{{ soil_analysis.harvest_compatibility.pH_match|default('SUBOPTIMAL') }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommandations de Fertilisation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <i class="fas fa-lightbulb"></i> Recommandations de Fertilisation
+            </div>
+            <div class="card-body">
+                {% set recommendations = soil_analysis.recommendations|default({}) %}
+                {% if recommendations is empty %}
+                    <p class="text-muted">Aucune donnée disponible</p>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nutrient</th>
+                                    <th>Status</th>
+                                    <th>Niveau</th>
+                                    <th>Recommandation</th>
+                                    <th>Priorité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for nutrient, data in recommendations %}
+                                    <tr>
+                                        <td><strong>{{ nutrient|capitalize }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-{% if data.status == 'DEFICIENT' %}danger{% elseif data.status == 'EXCESS' %}warning{% else %}success{% endif %}">
+                                                {{ data.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ data.level|default('N/A') }}</td>
+                                        <td>{{ data.recommended_action|default('-') }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if data.priority == 'HIGH' %}danger{% elseif data.priority == 'MEDIUM' %}warning{% else %}secondary{% endif %}">
+                                                {{ data.priority|default('LOW') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <a href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour à la récolte
+        </a>
+        {% set rendement = rendement_for_recolte|default(null) %}
+        {% if rendement %}
+            <a href="{{ path('app_soil_rendement', {'idRendement': rendement.id_rendement}) }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Voir impact sur rendement
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

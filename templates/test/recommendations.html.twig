@@ -1,0 +1,160 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Test - Recommandations Fertilisation{% endblock %}
+
+{% block agriculteur_body %}
+
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <i class="fas fa-flask"></i> <strong>Mode Test</strong> - Exemples de recommandations de fertilisation
+    </div>
+
+    <h1>🧪 Test - Recommandations Fertilisation</h1>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <i class="fas fa-lightbulb"></i> Plan d'Action de Fertilisation
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nutrient</th>
+                                <th>Status</th>
+                                <th>Niveau</th>
+                                <th>Recommandation</th>
+                                <th>Priorité</th>
+                                <th>Impact Attendu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in recommendations %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ rec.nutrient }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if rec.status == 'DEFICIENT' %}danger{% elseif rec.status == 'EXCESS' %}warning{% else %}success{% endif %}">
+                                            {{ rec.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <code>{{ rec.level }} ppm</code>
+                                    </td>
+                                    <td>
+                                        <small>{{ rec.recommended_action }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if rec.priority == 'HIGH' %}danger{% elseif rec.priority == 'MEDIUM' %}warning{% else %}secondary{% endif %}">
+                                            {{ rec.priority }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ rec.expected_increase }}</strong>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Détails Nutriments -->
+    <div class="row mt-4">
+        {% for rec in recommendations %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-{% if rec.status == 'DEFICIENT' %}danger{% elseif rec.status == 'EXCESS' %}warning{% else %}success{% endif %} text-white">
+                        {{ rec.nutrient }}
+                    </div>
+                    <div class="card-body">
+                        <h5>Status: <span class="badge bg-{% if rec.status == 'DEFICIENT' %}danger{% elseif rec.status == 'EXCESS' %}warning{% else %}success{% endif %}">{{ rec.status }}</span></h5>
+
+                        <div class="mt-3">
+                            <p><strong>Niveau Actuel:</strong> {{ rec.level }} ppm</p>
+                            {% if rec.status == 'DEFICIENT' %}
+                                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Apport nécessaire</p>
+                            {% elseif rec.status == 'EXCESS' %}
+                                <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> Réduction recommandée</p>
+                            {% else %}
+                                <p class="text-success"><i class="fas fa-check-circle"></i> Niveau optimal</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-3">
+                            <p><strong>Action:</strong></p>
+                            <p class="small">{{ rec.recommended_action }}</p>
+                        </div>
+
+                        <div class="mt-3">
+                            <p><strong>Impact:</strong> <span class="badge bg-info">{{ rec.expected_increase }}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Guide d'Application -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-book"></i> Guide d'Application
+                </div>
+                <div class="card-body">
+                    <h5>1. Azote (N) - Élément Mobile</h5>
+                    <ul>
+                        <li>Déficient (&lt; 30 ppm): Ajouter 50-100 kg/ha</li>
+                        <li>Optimal (30-60 ppm): Maintenir apports actuels</li>
+                        <li>Excès (&gt; 60 ppm): Réduire ou arrêter apports</li>
+                    </ul>
+
+                    <hr>
+
+                    <h5>2. Phosphore (P) - Élément Fixe</h5>
+                    <ul>
+                        <li>Déficient (&lt; 20 ppm): Ajouter 30-50 kg/ha</li>
+                        <li>Optimal (20-40 ppm): Maintenance annuelle</li>
+                        <li>Excès (&gt; 40 ppm): Réduction graduelle</li>
+                    </ul>
+
+                    <hr>
+
+                    <h5>3. Potassium (K) - Élément Mobile</h5>
+                    <ul>
+                        <li>Déficient (&lt; 150 ppm): Ajouter 50-100 kg/ha</li>
+                        <li>Optimal (150-300 ppm): Maintenance régulière</li>
+                        <li>Excès (&gt; 300 ppm): Réduction progressive</li>
+                    </ul>
+
+                    <hr>
+
+                    <h5>ROI Estimé (Retour sur Investissement)</h5>
+                    <div class="alert alert-success">
+                        <p><strong>Augmentation de rendement attendue:</strong> 10-15%</p>
+                        <p><strong>Coût moyen:</strong> 50-100€/ha</p>
+                        <p><strong>Bénéfice:</strong> 500-2000€/ha (selon culture)</p>
+                        <p><strong>Délai ROI:</strong> 1-2 saisons</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retour -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <a href="{{ path('app_agriculteur_home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

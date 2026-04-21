@@ -1,0 +1,324 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Rendement - API AgroAPI{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-flask"></i> Test Impact Sol sur Rendement #{{ rendement.id_rendement }}
+                        </h3>
+                        <a href="{{ path('test_soil_index') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Infos Rendement & Récolte -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Informations Rendement</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>ID Rendement:</th>
+                                    <td>#{{ rendement.id_rendement }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Productivité:</th>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {{ rendement.productivite|number_format(2, '.', '') }} kg/m²
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Quantité Totale:</th>
+                                    <td>{{ rendement.quantite_totale }} kg</td>
+                                </tr>
+                                <tr>
+                                    <th>Surface:</th>
+                                    <td>{{ rendement.surface_exploitee }} m²</td>
+                                </tr>
+                                <tr>
+                                    <th>Date Récolte:</th>
+                                    <td>{{ recolte.date_recolte|date('d/m/Y H:i') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Récolte Associée</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>ID Récolte:</th>
+                                    <td>#{{ recolte.id_recolte }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Type Culture:</th>
+                                    <td><strong>{{ recolte.type_culture }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Localisation:</th>
+                                    <td>{{ recolte.localisation }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quantité:</th>
+                                    <td>
+                                        <span class="badge bg-info">{{ recolte.quantite }} kg</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date Récolte:</th>
+                                    <td>{{ recolte.date_recolte|date('d/m/Y') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Résultats API -->
+                    <h5 class="mb-3">Résultat Analyse - Impact du Sol sur Rendement</h5>
+
+                    {% if yield_analysis.error is defined and yield_analysis.error %}
+                        <div class="alert alert-danger">
+                            <h6>
+                                <i class="fas fa-exclamation-circle"></i> Erreur lors de l'appel API
+                            </h6>
+                            <p class="mb-2">
+                                <strong>Message:</strong> {{ yield_analysis.message }}
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                <strong>Timestamp:</strong> {{ yield_analysis.timestamp }}
+                            </p>
+                        </div>
+                    {% else %}
+                        <!-- Indicateur source des données -->
+                        {% if yield_analysis.api_source is defined %}
+                            <div class="alert alert-{{ yield_analysis.api_source == 'live' ? 'success' : 'warning' }} mb-3">
+                                <i class="fas fa-{{ yield_analysis.api_source == 'live' ? 'check-circle' : 'flask' }}"></i>
+                                <strong>Données {{ yield_analysis.api_source == 'live' ? 'réelles' : 'de test' }}</strong>
+                                {% if yield_analysis.api_source == 'test' %}
+                                    - L'API AgroAPI n'est pas configurée ou indisponible. Les données affichées sont simulées pour démonstration.
+                                    {% if yield_analysis.region_profile is defined %}
+                                        <br><small><i class="fas fa-map-marker-alt"></i> <strong>Région détectée:</strong> {{ yield_analysis.region_profile|replace({'_': ' '})|title }}</small>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Comparaison Productivité -->
+                        {% if yield_analysis.actual_vs_potential is defined %}
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Productivité Réelle</h6>
+                                            <div class="display-4 text-primary">
+                                                {{ yield_analysis.productivity|number_format(2, '.', '') }}
+                                            </div>
+                                            <small class="text-muted">kg/m²</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Potentiel Sol</h6>
+                                            <div class="display-4 text-success">
+                                                {{ yield_analysis.predicted_yield_potential|number_format(2, '.', '') }}
+                                            </div>
+                                            <small class="text-muted">kg/m²</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Efficacité</h6>
+                                            <div class="display-4 text-info">
+                                                {{ yield_analysis.actual_vs_potential.efficiency }}
+                                            </div>
+                                            <small class="text-muted">d'exploitation</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Facteurs Limitants -->
+                        {% if yield_analysis.soil_factors_affecting_yield is defined and yield_analysis.soil_factors_affecting_yield|length > 0 %}
+                            <div class="card mb-4">
+                                <div class="card-header bg-warning">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-exclamation"></i> Facteurs Limitants
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        {% for factor in yield_analysis.soil_factors_affecting_yield %}
+                                            <li class="list-group-item">
+                                                <strong>{{ factor.nutrient }}</strong>
+                                                <p class="mb-1">Niveau actuel: {{ factor.level }} - Statut: {{ factor.status }}</p>
+                                                <small class="text-muted">
+                                                    Impact: {{ factor.impact }}
+                                                </small>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Plan d'Amélioration -->
+                        {% if yield_analysis.recommendations_to_improve is defined and yield_analysis.recommendations_to_improve|length > 0 %}
+                            <div class="card mb-4">
+                                <div class="card-header bg-success">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-arrow-up"></i> Plan d'Amélioration
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <h6>Gain Potentiel Estimé</h6>
+                                            <div class="display-5 text-success">
+                                                +15%
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Productivité Cible</h6>
+                                            <div class="display-5 text-info">
+                                                {{ yield_analysis.predicted_yield_potential|number_format(2, '.', '') }} kg/m²
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h6 class="mt-4">Actions à Entreprendre</h6>
+                                    <ol class="mb-0">
+                                        {% for recommendation in yield_analysis.recommendations_to_improve %}
+                                            <li>
+                                                <strong>{{ recommendation.action }}</strong>
+                                                <p class="mb-1">{{ recommendation.expected_yield_increase }} de gain attendu</p>
+                                                <small class="text-muted">
+                                                    Coût: {{ recommendation.cost_estimate }}
+                                                </small>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- ROI Estimé -->
+                        {% if yield_analysis.actual_vs_potential is defined %}
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Analyse Performance</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <h6>Rendement Réel</h6>
+                                            <div class="h5">{{ yield_analysis.actual_vs_potential.actual|number_format(2, '.', '') }} kg/m²</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>Rendement Potentiel</h6>
+                                            <div class="h5 text-success">{{ yield_analysis.actual_vs_potential.potential|number_format(2, '.', '') }} kg/m²</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>Efficacité</h6>
+                                            <div class="h5 text-info">{{ yield_analysis.actual_vs_potential.efficiency }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            <strong>Corrélation:</strong> {{ yield_analysis.correlation }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- JSON Brut -->
+                        <div class="mt-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-code"></i> Données JSON Brutes
+                                    </h6>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-light btn-sm" onclick="copyJsonToClipboard()" title="Copier dans le presse-papiers">
+                                            <i class="fas fa-copy"></i> Copier
+                                        </button>
+                                        <button class="btn btn-light btn-sm" onclick="toggleJsonFormat()" title="Basculer format">
+                                            <i class="fas fa-expand"></i> Format
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <pre id="jsonContainer" class="bg-dark text-light p-3 mb-0 rounded-0" style="font-size: 0.85em; line-height: 1.4; max-height: 400px; overflow-y: auto;">
+<code class="language-json" id="jsonCode">{{ json_pretty }}</code>
+</pre>
+                                </div>
+                                <div class="card-footer bg-light text-muted small">
+                                    <i class="fas fa-info-circle"></i>
+                                    Données brutes retournées par l'API AgroAPI.
+                                    <span class="float-end">
+                                        <i class="fas fa-clock"></i> Mis à jour: {{ "now"|date('H:i:s') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                        function copyJsonToClipboard() {
+                            const jsonText = document.getElementById('jsonCode').textContent;
+                            navigator.clipboard.writeText(jsonText).then(function() {
+                                // Feedback visuel
+                                const btn = event.target.closest('button');
+                                const originalHtml = btn.innerHTML;
+                                btn.innerHTML = '<i class="fas fa-check"></i> Copié!';
+                                btn.classList.remove('btn-light');
+                                btn.classList.add('btn-success');
+
+                                setTimeout(() => {
+                                    btn.innerHTML = originalHtml;
+                                    btn.classList.remove('btn-success');
+                                    btn.classList.add('btn-light');
+                                }, 2000);
+                            });
+                        }
+
+                        function toggleJsonFormat() {
+                            const container = document.getElementById('jsonContainer');
+                            const isCompact = container.classList.contains('compact');
+
+                            if (isCompact) {
+                                container.classList.remove('compact');
+                                container.style.maxHeight = '400px';
+                                // Recharger le JSON complet
+                                location.reload();
+                            } else {
+                                container.classList.add('compact');
+                                container.style.maxHeight = '200px';
+                                // Recharger le JSON compact
+                                location.reload();
+                            }
+                        }
+                        </script>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-clock"></i> Données en cache pendant 24h
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

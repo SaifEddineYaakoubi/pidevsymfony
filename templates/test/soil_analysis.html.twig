@@ -1,0 +1,157 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Test - Analyse du Sol{% endblock %}
+
+{% block agriculteur_body %}
+
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <i class="fas fa-flask"></i> <strong>Mode Test</strong> - Données simulées pour vérifier le fonctionnement
+    </div>
+
+    <h1>🧪 Test - Analyse du Sol</h1>
+
+    <!-- Score Qualité -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-check-circle"></i> Score Qualité du Sol
+                </div>
+                <div class="card-body text-center">
+                    {% set soil_quality = soil_analysis.soil_quality|default(0) %}
+                    <h3 class="mb-3">
+                        <span class="badge bg-success">
+                            {{ soil_quality }}/100
+                        </span>
+                    </h3>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success"
+                             style="width: {{ soil_quality }}%"
+                             role="progressbar">
+                            {{ soil_quality }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle"></i> Informations
+                </div>
+                <div class="card-body">
+                    <p><strong>Type de Sol:</strong> {{ soil_analysis.soil_type }}</p>
+                    <p><strong>pH:</strong> {{ soil_analysis.ph }}</p>
+                    <p><strong>Humidité:</strong> {{ soil_analysis.humidity }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NPK -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Azote (N)</div>
+                <div class="card-body text-center">
+                    <h4>{{ soil_analysis.npk.nitrogen }} ppm</h4>
+                    <span class="badge bg-success">OPTIMAL</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Phosphore (P)</div>
+                <div class="card-body text-center">
+                    <h4>{{ soil_analysis.npk.phosphorus }} ppm</h4>
+                    <span class="badge bg-success">OPTIMAL</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Potassium (K)</div>
+                <div class="card-body text-center">
+                    <h4>{{ soil_analysis.npk.potassium }} ppm</h4>
+                    <span class="badge bg-success">OPTIMAL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommandations -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <i class="fas fa-lightbulb"></i> Recommandations
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nutrient</th>
+                                <th>Status</th>
+                                <th>Niveau</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nutrient, data in soil_analysis.recommendations %}
+                                <tr>
+                                    <td><strong>{{ nutrient }}</strong></td>
+                                    <td><span class="badge bg-{{ data.status == 'OPTIMAL' ? 'success' : 'warning' }}">{{ data.status }}</span></td>
+                                    <td>{{ data.level }}</td>
+                                    <td><small>{{ data.recommended_action }}</small></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compatibilité -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-check"></i> Compatibilité Sol - Culture
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <p><strong>Type Sol</strong></p>
+                            <span class="badge bg-success" style="font-size: 1.2em; padding: 0.8em;">{{ soil_analysis.harvest_compatibility.soil_type_match }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>pH</strong></p>
+                            <span class="badge bg-success" style="font-size: 1.2em; padding: 0.8em;">{{ soil_analysis.harvest_compatibility.pH_match }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Convenance Globale</strong></p>
+                            <span class="badge bg-success" style="font-size: 1.2em; padding: 0.8em;">{{ soil_analysis.harvest_compatibility.overall_suitability }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <a href="{{ path('app_agriculteur_home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
