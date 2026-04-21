@@ -6,6 +6,7 @@ use App\Entity\Rendement;
 use App\Entity\Utilisateur;
 use App\Form\RendementType;
 use App\Repository\RendementRepository;
+use App\Service\SoilAnalysisService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -73,7 +74,7 @@ class RendementController extends AbstractController
     }
 
     #[Route('/{idRendement}', name: 'app_rendement_show', methods: ['GET'])]
-    public function show(int $idRendement, RendementRepository $rendementRepository): Response
+    public function show(int $idRendement, RendementRepository $rendementRepository, SoilAnalysisService $soilService): Response
     {
         $user = $this->getUser();
         if (!$user instanceof Utilisateur) {
@@ -87,6 +88,7 @@ class RendementController extends AbstractController
 
         return $this->render('rendement/show.html.twig', [
             'rendement' => $rendement,
+            'yield_analysis' => $soilService->analyzeImpactOnYield($rendement),
         ]);
     }
 

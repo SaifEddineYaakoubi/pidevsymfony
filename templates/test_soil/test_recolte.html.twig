@@ -102,16 +102,10 @@
                         </div>
                     {% else %}
                         <!-- Indicateur source des données -->
-                        {% if soil_analysis.api_source is defined %}
-                            <div class="alert alert-{{ soil_analysis.api_source == 'live' ? 'success' : 'warning' }} mb-3">
-                                <i class="fas fa-{{ soil_analysis.api_source == 'live' ? 'check-circle' : 'flask' }}"></i>
-                                <strong>Données {{ soil_analysis.api_source == 'live' ? 'réelles' : 'de test' }}</strong>
-                                {% if soil_analysis.api_source == 'test' %}
-                                    - L'API AgroAPI n'est pas configurée ou indisponible. Les données affichées sont simulées pour démonstration.
-                                    {% if soil_analysis.region_profile is defined %}
-                                        <br><small><i class="fas fa-map-marker-alt"></i> <strong>Région détectée:</strong> {{ soil_analysis.region_profile|replace({'_': ' '})|title }}</small>
-                                    {% endif %}
-                                {% endif %}
+                        {% if soil_analysis.api_source is defined and soil_analysis.api_source == 'live' %}
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Données réelles</strong> - Données récupérées depuis l'API AgroAPI.
                             </div>
                         {% endif %}
 

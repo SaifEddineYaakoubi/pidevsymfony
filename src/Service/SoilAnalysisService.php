@@ -55,10 +55,24 @@ class SoilAnalysisService
                         'phosphorus' => $soilData['phosphorus'] ?? 0,
                         'potassium' => $soilData['potassium'] ?? 0,
                     ],
+                    // Aliases for test_recolte template
+                    'npk_analysis' => [
+                        'nitrogen' => $soilData['nitrogen'] ?? 0,
+                        'phosphorus' => $soilData['phosphorus'] ?? 0,
+                        'potassium' => $soilData['potassium'] ?? 0,
+                    ],
                     'ph' => $soilData['ph'] ?? 0,
                     'humidity' => $soilData['humidity'] ?? 0,
                     'soil_type' => $soilData['soil_type'] ?? 'Unknown',
                     'soil_quality' => $this->calculateSoilQuality($soilData),
+                    'score_global' => $this->calculateSoilQuality($soilData),
+                    // Aliases for test_recolte template
+                    'soil_properties' => [
+                        'ph' => $soilData['ph'] ?? 0,
+                        'humidity' => $soilData['humidity'] ?? 0,
+                        'organic_matter' => $soilData['organic_matter'] ?? 0,
+                        'soil_type' => $soilData['soil_type'] ?? 'Unknown',
+                    ],
                     'recommendations' => $this->generateRecommendations($soilData, $recolte),
                     'harvest_compatibility' => $this->analyzeCompatibilityWithHarvest($soilData, $recolte),
                     'api_source' => $soilData['api_source'] ?? 'unknown',

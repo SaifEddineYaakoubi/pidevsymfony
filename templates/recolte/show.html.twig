@@ -279,7 +279,7 @@ hr {
     <a href="{{ path('test_soil_test_recolte', {'id_recolte': recolte.id_recolte}) }}" class="btn-modern info">
         <i class="fas fa-flask"></i> Analyse Sol
     </a>
-    <button type="button" class="btn-modern info" onclick="testHuggingFaceAPI()">
+    <button type="button" class="btn-modern info" onclick="document.getElementById('hf-test-section').style.display = document.getElementById('hf-test-section').style.display === 'none' ? 'block' : 'none'">
         <i class="fas fa-brain"></i> Test IA
     </button>
     <a href="{{ path('app_recolte_export_csv', {'id_recolte': recolte.id_recolte}) }}" class="btn-modern primary">
