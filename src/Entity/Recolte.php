@@ -10,7 +10,6 @@ use App\Entity\Culture;
 #[ORM\Entity]
 class Recolte
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
@@ -31,7 +30,7 @@ class Recolte
     #[Assert\Choice(choices: ['excellente','bonne','moyenne','mauvaise'], message: 'Qualité invalide.')]
     private ?string $qualite = null;
 
-        #[ORM\ManyToOne(targetEntity: Culture::class, inversedBy: "recoltes")]
+    #[ORM\ManyToOne(targetEntity: Culture::class, inversedBy: "recoltes")]
     #[ORM\JoinColumn(name: 'id_culture', referencedColumnName: 'id_culture', nullable: true, onDelete: 'CASCADE')]
     private ?Culture $id_culture;
 
@@ -159,7 +158,6 @@ class Recolte
     public function setDateRecolte($value)
     {
         $this->setDate_recolte($value);
-
         return $this;
     }
 
@@ -171,7 +169,6 @@ class Recolte
     public function setTypeCulture($value)
     {
         $this->setType_culture($value);
-
         return $this;
     }
 
@@ -183,7 +180,6 @@ class Recolte
     public function setIdRecolte($value)
     {
         $this->setId_recolte($value);
-
         return $this;
     }
 
@@ -195,7 +191,6 @@ class Recolte
     public function setIdCulture($value)
     {
         $this->setId_culture($value);
-
         return $this;
     }
 
@@ -207,7 +202,6 @@ class Recolte
     public function setIdUser($value)
     {
         $this->setId_user($value);
-
         return $this;
     }
 }

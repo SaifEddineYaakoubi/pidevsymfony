@@ -1,0 +1,131 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Admin - Récoltes{% endblock %}
+{% block admin_page_title %}Récoltes{% endblock %}
+
+{% block admin_body %}
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% set qVal = q ?? app.request.query.get('q') ?? '' %}
+    {% set sortVal = sort ?? app.request.query.get('sort') ?? 'date_recolte' %}
+    {% set dirVal = dir ?? app.request.query.get('dir') ?? 'DESC' %}
+
+    {# helper macro to build sort links that keep the current search query #}
+    {% macro sort_link(routeName, q, currentSort, currentDir, key, label) %}
+        {% set isActive = (currentSort == key) %}
+        {% set nextDir = (isActive and (currentDir|upper == 'ASC')) ? 'DESC' : 'ASC' %}
+        <a href="{{ path(routeName, { q: q, sort: key, dir: nextDir }) }}" class="text-decoration-none">
+            {{ label }}
+            {% if isActive %}
+                <i class="fas {{ (currentDir|upper == 'ASC') ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
+            {% else %}
+                <i class="fas fa-sort text-muted"></i>
+            {% endif %}
+        </a>
+    {% endmacro %}
+    {% import _self as ui %}
+
+    <div data-controller="crud-search"
+         data-crud-search-url-value="{{ path('app_admin_recoltes') }}">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: .75rem;">
+                <h3 class="card-title mb-0">Liste des récoltes</h3>
+
+                <form method="get" action="{{ path(currentRoute) }}" class="d-flex align-items-center" style="gap: .5rem;" onsubmit="return false;">
+                    <input type="hidden" name="sort" value="{{ sortVal }}">
+                    <input type="hidden" name="dir" value="{{ dirVal }}">
+                    <div class="input-group input-group-sm" style="width: 320px;">
+                        <input type="text" name="q" value="{{ qVal }}" class="form-control" placeholder="Rechercher (type culture, localisation, qualité)…"
+                               autocomplete="off"
+                               data-crud-search-target="input"
+                               data-action="input->crud-search#search">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ path(currentRoute) }}" title="Réinitialiser">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body">
+            {# Statistics Cards #}
+            <div class="row mb-4">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ stats.total_filtered }}</h3>
+                            <p>Total récoltes</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    </div>
+                </div>
+
+                {% set excellente = stats.counts_by_qualite.Excellente ?? stats.counts_by_qualite.excellente ?? 0 %}
+                {% set bonne = stats.counts_by_qualite.Bonne ?? stats.counts_by_qualite.bonne ?? 0 %}
+                {% set moyenne = stats.counts_by_qualite.Moyenne ?? stats.counts_by_qualite.moyenne ?? 0 %}
+                {% set mauvaise = stats.counts_by_qualite.Mauvaise ?? stats.counts_by_qualite.mauvaise ?? 0 %}
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ excellente }}</h3>
+                            <p>Excellente</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ bonne }}</h3>
+                            <p>Bonne</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-thumbs-up"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ moyenne + mauvaise }}</h3>
+                            <p>Moyenne/Mauvaise</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Sort Controls #}
+            <div class="mb-3">
+                <label class="form-label">Trier par:</label>
+                <div class="btn-group btn-group-sm" role="group">
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'date_recolte', 'Date récolte') }}
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'quantite', 'Quantité') }}
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'type_culture', 'Culture') }}
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'qualite', 'Qualité') }}
+                </div>
+            </div>
+
+            {# Results Container #}
+            <div class="agri-crud-results" data-crud-search-target="results">
+                <div class="agri-crud-loader" aria-hidden="true"></div>
+                {% include 'admin/pages/recoltes/_results.html.twig' %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

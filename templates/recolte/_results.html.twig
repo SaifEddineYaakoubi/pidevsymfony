@@ -6,31 +6,76 @@
     {% set sumQte = stats.sum_quantite ?? 0 %}
     {% set lastDate = stats.last_date ?? null %}
 
-    {% set excellente = counts.excellente ?? 0 %}
-    {% set bonne = counts.bonne ?? 0 %}
-    {% set moyenne = counts.moyenne ?? 0 %}
-    {% set faible = counts.faible ?? 0 %}
+    {% set excellente = counts.Excellente ?? counts.excellente ?? 0 %}
+    {% set bonne = counts.Bonne ?? counts.bonne ?? 0 %}
+    {% set moyenne = counts.Moyenne ?? counts.moyenne ?? 0 %}
+    {% set mauvaise = counts.Mauvaise ?? counts.mauvaise ?? 0 %}
 
-    <div class="agri-stats-top mb-2">
-        <div class="agri-stats-title">Statistiques des récoltes</div>
-        <div class="agri-stats-title">Répartition des qualités</div>
-    </div>
 
 
     <div class="agri-progress mt-3" aria-hidden="true" title="Répartition">
-        {% set qualites = ['excellente','bonne','moyenne','faible'] %}
+        {% set qualites = ['Excellente','Bonne','Moyenne','Mauvaise'] %}
         {% for ql in qualites %}
             {% set count = counts[ql] ?? 0 %}
             {% set percent = (total > 0 ? ((count / total) * 100) : 0) %}
-            <div class="agri-progress__seg agri-progress__seg--{{ ql }}" style="width: {{ percent }}%"></div>
+            <div class="agri-progress__seg agri-progress__seg--{{ ql|lower }}" style="width: {{ percent }}%"></div>
         {% endfor %}
     </div>
 
     <div class="agri-stats-badges justify-content-end mt-2">
-        <span class="badge text-bg-success">Excellente: {{ excellente }}</span>
-        <span class="badge text-bg-primary">Bonne: {{ bonne }}</span>
-        <span class="badge text-bg-warning">Moyenne: {{ moyenne }}</span>
-        <span class="badge text-bg-danger">Faible: {{ faible }}</span>
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="card h-100 quality-card" style="background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(40, 167, 69, 0.12)) !important; border: 2px solid #198754;">
+                    <div class="card-body text-center">
+                        <div class="quality-icon mb-2">
+                            <i class="fas fa-star text-success" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title text-success mb-1">Excellente</h5>
+                        <h3 class="mb-0 text-success fw-bold">{{ excellente }}</h3>
+                        <small class="text-muted">récoltes</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="card h-100 quality-card" style="background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(0, 123, 255, 0.12)) !important; border: 2px solid #0d6efd;">
+                    <div class="card-body text-center">
+                        <div class="quality-icon mb-2">
+                            <i class="fas fa-thumbs-up text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title text-primary mb-1">Bonne</h5>
+                        <h3 class="mb-0 text-primary fw-bold">{{ bonne }}</h3>
+                        <small class="text-muted">récoltes</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="card h-100 quality-card" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.12)) !important; border: 2px solid #ffc107;">
+                    <div class="card-body text-center">
+                        <div class="quality-icon mb-2">
+                            <i class="fas fa-minus text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title text-warning mb-1">Moyenne</h5>
+                        <h3 class="mb-0 text-warning fw-bold">{{ moyenne }}</h3>
+                        <small class="text-muted">récoltes</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="card h-100 quality-card" style="background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.12)) !important; border: 2px solid #dc3545;">
+                    <div class="card-body text-center">
+                        <div class="quality-icon mb-2">
+                            <i class="fas fa-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title text-danger mb-1">Faible</h5>
+                        <h3 class="mb-0 text-danger fw-bold">{{ mauvaise }}</h3>
+                        <small class="text-muted">récoltes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

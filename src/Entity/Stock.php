@@ -36,8 +36,7 @@ class Stock
     private ?Produit $id_produit = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
-    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: true)]
     private ?Utilisateur $id_user = null;
 
     #[Assert\Callback]

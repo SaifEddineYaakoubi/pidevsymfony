@@ -1,0 +1,116 @@
+{# Partial returned for AJAX: table + pagination #}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Récolte</th>
+                <th>Quantité Totale (kg)</th>
+                <th>Surface (m²)</th>
+                <th>Productivité (kg/m²)</th>
+                <th>Classe</th>
+                <th>Agriculteur</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rendement in rendements %}
+                <tr>
+                    <td>{{ rendement.id_rendement }}</td>
+                    <td>
+                        {% if rendement.id_recolte %}
+                            <strong>{{ rendement.id_recolte.typeCulture ?? 'N/A' }}</strong><br>
+                            <small class="text-muted">
+                                {{ rendement.id_recolte.dateRecolte ? rendement.id_recolte.dateRecolte|date('d/m/Y') : 'Date inconnue' }}
+                            </small>
+                        {% else %}
+                            <span class="text-muted">Non associé</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ rendement.quantite_totale }} kg</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ rendement.surface_exploitee }} m²</span>
+                    </td>
+                    <td>
+                        <h5 class="mb-0">
+                            <span class="badge bg-{{
+                                rendement.productivite < 1 ? 'danger' :
+                                (rendement.productivite < 2 ? 'warning' :
+                                (rendement.productivite < 3 ? 'primary' : 'success'))
+                            }}">
+                                {{ rendement.productivite|number_format(2, '.', '') }} kg/m²
+                            </span>
+                        </h5>
+                    </td>
+                    <td>
+                        {% set productivite = rendement.productivite %}
+                        <span class="badge bg-{{
+                            productivite < 1 ? 'danger' :
+                            (productivite >= 1 and productivite < 2 ? 'warning' :
+                            (productivite >= 2 and productivite < 3 ? 'primary' : 'success'))
+                        }}">
+                            {% if productivite < 1 %}
+                                Faible
+                            {% elseif productivite >= 1 and productivite < 2 %}
+                                Moyen
+                            {% elseif productivite >= 2 and productivite < 3 %}
+                                Bon
+                            {% else %}
+                                Élevé
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if rendement.id_recolte %}
+                            <small class="text-muted">ID: {{ rendement.id_recolte.id_user }}</small>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{{ path('app_rendement_show', {'idRendement': rendement.id_rendement}) }}"
+                               class="btn btn-outline-primary btn-sm"
+                               title="Voir détails">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if rendement.id_recolte %}
+                                <a href="{{ path('app_soil_rendement', {'idRendement': rendement.id_rendement}) }}"
+                                   class="btn btn-outline-info btn-sm"
+                                   title="Analyser impact sol">
+                                    <i class="fas fa-earth"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <br>
+                        Aucun rendement trouvé
+                        {% if q %}
+                            pour "<strong>{{ q }}</strong>"
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# Pagination #}
+{% if rendements|length > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted small">
+            Affichage de {{ rendements|length }} rendement(s)
+            {% if q %}
+                pour "<strong>{{ q }}</strong>"
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

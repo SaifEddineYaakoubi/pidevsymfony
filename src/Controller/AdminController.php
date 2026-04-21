@@ -6,6 +6,8 @@ use App\Repository\CultureRepository;
 use App\Repository\ParcelleRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\StockRepository;
+use App\Repository\RecolteRepository;
+use App\Repository\RendementRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,7 +68,6 @@ final class AdminController extends AbstractController
 
         $cultures = $cultureRepository->searchByQuery($q, $sort, $dir);
         $countsByEtat = $cultureRepository->countByEtatCroissance($q);
-
         $totalAll = $cultureRepository->count([]);
 
         $viewData = [
@@ -155,5 +156,70 @@ final class AdminController extends AbstractController
 
         return $this->render('admin/pages/stocks.html.twig', $viewData);
     }
-}
 
+    #[Route('/admin/recoltes', name: 'app_admin_recoltes', methods: ['GET'])]
+    public function recoltes(Request $request, RecolteRepository $recolteRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $q = $request->query->getString('q');
+        $sort = $request->query->getString('sort') ?: 'date';
+        $dir = strtoupper($request->query->getString('dir') ?: 'DESC');
+        $dir = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+
+        $recoltes = $recolteRepository->searchByQuery($q, $sort, $dir);
+        $countsByQualite = $recolteRepository->countByQualite($q);
+        $totalAll = $recolteRepository->count([]);
+
+        $viewData = [
+            'recoltes' => $recoltes,
+            'q' => $q,
+            'sort' => $sort,
+            'dir' => $dir,
+            'stats' => [
+                'total_all' => $totalAll,
+                'total_filtered' => count($recoltes),
+                'counts_by_qualite' => $countsByQualite,
+            ],
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('admin/pages/recoltes/_results.html.twig', $viewData);
+        }
+
+        return $this->render('admin/pages/recoltes.html.twig', $viewData);
+    }
+
+    #[Route('/admin/rendements', name: 'app_admin_rendements', methods: ['GET'])]
+    public function rendements(Request $request, RendementRepository $rendementRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $q = $request->query->getString('q');
+        $sort = $request->query->getString('sort') ?: 'productivite';
+        $dir = strtoupper($request->query->getString('dir') ?: 'DESC');
+        $dir = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+
+        $rendements = $rendementRepository->searchByQuery($q, $sort, $dir);
+        $countsByClass = $rendementRepository->countByClass($q);
+        $totalAll = $rendementRepository->count([]);
+
+        $viewData = [
+            'rendements' => $rendements,
+            'q' => $q,
+            'sort' => $sort,
+            'dir' => $dir,
+            'stats' => [
+                'total_all' => $totalAll,
+                'total_filtered' => count($rendements),
+                'counts_by_class' => $countsByClass,
+            ],
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('admin/pages/rendements/_results.html.twig', $viewData);
+        }
+
+        return $this->render('admin/pages/rendements.html.twig', $viewData);
+    }
+}

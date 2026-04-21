@@ -6,12 +6,23 @@
     <div class="container section py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
+
+                {# Flash messages #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show mb-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
                 <div class="card shadow-sm rounded-4 border-0 overflow-hidden">
                     <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #D4A574 0%, #C19A6B 100%);">
                         <h3 class="mb-0 text-white fw-bold"><i class="bi bi-pencil-square me-2"></i>Modifier le stock</h3>
                     </div>
                     <div class="card-body p-5">
-                        {{ form_start(form, {'attr': {'class': 'form-validation'}}) }}
+                        {{ form_start(form, {'attr': {'class': 'form-validation', 'data-turbo': 'false'}}) }}
 
                         <div class="row g-4">
                             <div class="col-md-6">
@@ -34,10 +45,7 @@
                                 {{ form_widget(form.date_expiration, {'attr': {'class': 'form-control form-control-lg rounded-3', 'required': 'required'}}) }}
                                 <small class="form-text text-muted">{{ form_help(form.date_expiration) }}</small>
                             </div>
-                            <div class="col-12">
-                                {{ form_label(form.id_user, 'ID utilisateur', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.id_user, {'attr': {'class': 'form-control form-control-lg rounded-3', 'required': 'required'}}) }}
-                            </div>
+
                         </div>
 
                         <div class="mt-5 d-flex justify-content-between gap-3">
