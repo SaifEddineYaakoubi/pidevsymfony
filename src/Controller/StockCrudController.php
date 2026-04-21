@@ -87,7 +87,7 @@ class StockCrudController extends AbstractController
                 ->setParameter('produit', $stock->getIdProduit())
                 ->setParameter('dateEntree', $stock->getDateEntree())
                 ->setParameter('dateExpiration', $stock->getDateExpiration())
-                ->setParameter('user', $stock->getIdUser())
+                ->setParameter('user', $stock->getUtilisateur())
                 ->getQuery()
                 ->getOneOrNullResult();
 
@@ -161,12 +161,20 @@ class StockCrudController extends AbstractController
         if (!$stock) {
             throw $this->createNotFoundException('Stock not found');
         }
+
+        // Sauvegarde l'utilisateur avant que le formulaire ne le réinitialise
+        $utilisateur = $stock->getUtilisateur();
+
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Restaure l'utilisateur (non présent dans le formulaire)
+            if ($stock->getUtilisateur() === null) {
+                $stock->setUtilisateur($utilisateur);
+            }
             $em->flush();
-
+            $this->addFlash('success', 'Stock modifié avec succès.');
             return $this->redirectToRoute('stock_index');
         }
 

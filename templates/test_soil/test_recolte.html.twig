@@ -1,0 +1,319 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Récolte - API AgroAPI{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-flask"></i> Test Analyse Récolte #{{ recolte.id_recolte }}
+                        </h3>
+                        <a href="{{ path('test_soil_index') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Infos Récolte -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Informations Récolte</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>ID:</th>
+                                    <td>#{{ recolte.id_recolte }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Type Culture:</th>
+                                    <td><strong>{{ recolte.type_culture }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Localisation:</th>
+                                    <td>{{ recolte.localisation }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quantité:</th>
+                                    <td>
+                                        <span class="badge bg-info">{{ recolte.quantite }} kg</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Qualité:</th>
+                                    <td>
+                                        <span class="badge bg-{{
+                                            recolte.qualite == 'excellente' ? 'success' :
+                                            (recolte.qualite == 'bonne' ? 'primary' :
+                                            (recolte.qualite == 'moyenne' ? 'warning' :
+                                            (recolte.qualite == 'mauvaise' ? 'danger' : 'secondary')))
+                                        }}">
+                                            {{ recolte.qualite|capitalize }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date Récolte:</th>
+                                    <td>{{ recolte.date_recolte|date('d/m/Y H:i') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Résumé des Données</h5>
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle"></i>
+                                L'API AgroAPI va analyser la localisation et retourner les données du sol.
+                            </div>
+                            <a href="{{ path('test_soil_api_test_recolte', {'id_recolte': recolte.id_recolte}) }}"
+                               class="btn btn-info btn-sm" target="_blank">
+                                <i class="fas fa-code"></i> Voir réponse JSON brute
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Résultats API -->
+                    <h5 class="mb-3">Résultat Analyse AgroAPI</h5>
+
+                    {% if soil_analysis.error is defined and soil_analysis.error %}
+                        <div class="alert alert-danger">
+                            <h6>
+                                <i class="fas fa-exclamation-circle"></i> Erreur lors de l'appel API
+                            </h6>
+                            <p class="mb-2">
+                                <strong>Message:</strong> {{ soil_analysis.message }}
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                <strong>Timestamp:</strong> {{ soil_analysis.timestamp }}
+                            </p>
+
+                            <div class="mt-3">
+                                <p class="mb-2"><strong>Diagnostic:</strong></p>
+                                <ul class="small mb-0">
+                                    <li>Vérifiez que <code>AGRO_API_KEY</code> est configurée dans <code>.env</code></li>
+                                    <li>Vérifiez la connexion Internet</li>
+                                    <li>Consultez les logs: <code>var/log/dev.log</code></li>
+                                    <li>Essayez: <code>php bin/console cache:clear</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Indicateur source des données -->
+                        {% if soil_analysis.api_source is defined %}
+                            <div class="alert alert-{{ soil_analysis.api_source == 'live' ? 'success' : 'warning' }} mb-3">
+                                <i class="fas fa-{{ soil_analysis.api_source == 'live' ? 'check-circle' : 'flask' }}"></i>
+                                <strong>Données {{ soil_analysis.api_source == 'live' ? 'réelles' : 'de test' }}</strong>
+                                {% if soil_analysis.api_source == 'test' %}
+                                    - L'API AgroAPI n'est pas configurée ou indisponible. Les données affichées sont simulées pour démonstration.
+                                    {% if soil_analysis.region_profile is defined %}
+                                        <br><small><i class="fas fa-map-marker-alt"></i> <strong>Région détectée:</strong> {{ soil_analysis.region_profile|replace({'_': ' '})|title }}</small>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Score Global -->
+                        {% if soil_analysis.score_global is defined %}
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Score Global</h6>
+                                            <div class="display-4 text-primary">
+                                                {{ soil_analysis.score_global }}<span class="h6">/100</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-title">pH</h6>
+                                            <div class="display-5">
+                                                {{ soil_analysis.soil_properties.ph|number_format(1) }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {% if soil_analysis.soil_properties.ph >= 6 and soil_analysis.soil_properties.ph <= 7.5 %}
+                                                    <span class="badge bg-success">Optimal</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">À ajuster</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Humidité</h6>
+                                            <div class="display-5">
+                                                {{ soil_analysis.soil_properties.humidity|number_format(1) }}%
+                                            </div>
+                                            <small class="text-muted">
+                                                {% if soil_analysis.soil_properties.humidity >= 40 and soil_analysis.soil_properties.humidity <= 60 %}
+                                                    <span class="badge bg-success">Optimal</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">À ajuster</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Matière Organique</h6>
+                                            <div class="display-5">
+                                                {{ soil_analysis.soil_properties.organic_matter|number_format(1) }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Analyse NPK -->
+                        {% if soil_analysis.npk_analysis is defined %}
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Analyse NPK</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <h6>Azote (N): {{ soil_analysis.npk_analysis.nitrogen }} ppm</h6>
+                                            <div class="progress">
+                                                {% set nitrogenWidth = (soil_analysis.npk_analysis.nitrogen / 2)|round(0) %}
+                                                <div class="progress-bar bg-primary" style="width: {{ nitrogenWidth > 100 ? 100 : nitrogenWidth }}%"></div>
+                                            </div>
+                                            <small class="text-muted">Recommandé: 50 ppm</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>Phosphore (P): {{ soil_analysis.npk_analysis.phosphorus }} ppm</h6>
+                                            <div class="progress">
+                                                {% set phosphorusWidth = (soil_analysis.npk_analysis.phosphorus / 2)|round(0) %}
+                                                <div class="progress-bar bg-success" style="width: {{ phosphorusWidth > 100 ? 100 : phosphorusWidth }}%"></div>
+                                            </div>
+                                            <small class="text-muted">Recommandé: 30 ppm</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>Potassium (K): {{ soil_analysis.npk_analysis.potassium }} ppm</h6>
+                                            <div class="progress">
+                                                {% set potassiumWidth = (soil_analysis.npk_analysis.potassium / 3)|round(0) %}
+                                                <div class="progress-bar bg-warning" style="width: {{ potassiumWidth > 100 ? 100 : potassiumWidth }}%"></div>
+                                            </div>
+                                            <small class="text-muted">Recommandé: 200 ppm</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Recommandations -->
+                        {% if soil_analysis.recommendations is defined and soil_analysis.recommendations|length > 0 %}
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Recommandations</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        {% for key, rec in soil_analysis.recommendations %}
+                                            <li class="list-group-item">
+                                                <strong>
+                                                    {% if key == 'nitrogen' %}Azote (N){% elseif key == 'phosphorus' %}Phosphore (P){% elseif key == 'potassium' %}Potassium (K){% elseif key == 'ph' %}pH du sol{% else %}{{ key|capitalize }}{% endif %}
+                                                </strong>
+                                                <p class="mb-0 mt-1">{{ rec.recommended_action }}</p>
+                                                <small class="text-muted">Priorité:
+                                                    <span class="badge bg-{{ rec.priority == 'HIGH' ? 'danger' : (rec.priority == 'MEDIUM' ? 'warning' : 'info') }}">
+                                                        {{ rec.priority|upper }}
+                                                    </span>
+                                                </small>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- JSON Brut -->
+                        <div class="mt-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-code"></i> Données JSON Brutes
+                                    </h6>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-light btn-sm" onclick="copyJsonToClipboard()" title="Copier dans le presse-papiers">
+                                            <i class="fas fa-copy"></i> Copier
+                                        </button>
+                                        <button class="btn btn-light btn-sm" onclick="toggleJsonFormat()" title="Basculer format">
+                                            <i class="fas fa-expand"></i> Format
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <pre id="jsonContainer" class="bg-dark text-light p-3 mb-0 rounded-0" style="font-size: 0.85em; line-height: 1.4; max-height: 400px; overflow-y: auto;">
+<code class="language-json" id="jsonCode">{{ json_pretty }}</code>
+</pre>
+                                </div>
+                                <div class="card-footer bg-light text-muted small">
+                                    <i class="fas fa-info-circle"></i>
+                                    Données brutes retournées par l'API AgroAPI.
+                                    <span class="float-end">
+                                        <i class="fas fa-clock"></i> Mis à jour: {{ "now"|date('H:i:s') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                        function copyJsonToClipboard() {
+                            const jsonText = document.getElementById('jsonCode').textContent;
+                            navigator.clipboard.writeText(jsonText).then(function() {
+                                // Feedback visuel
+                                const btn = event.target.closest('button');
+                                const originalHtml = btn.innerHTML;
+                                btn.innerHTML = '<i class="fas fa-check"></i> Copié!';
+                                btn.classList.remove('btn-light');
+                                btn.classList.add('btn-success');
+
+                                setTimeout(() => {
+                                    btn.innerHTML = originalHtml;
+                                    btn.classList.remove('btn-success');
+                                    btn.classList.add('btn-light');
+                                }, 2000);
+                            });
+                        }
+
+                        function toggleJsonFormat() {
+                            const container = document.getElementById('jsonContainer');
+                            const isCompact = container.classList.contains('compact');
+
+                            if (isCompact) {
+                                container.classList.remove('compact');
+                                container.style.maxHeight = '400px';
+                                // Recharger le JSON complet
+                                location.reload();
+                            } else {
+                                container.classList.add('compact');
+                                container.style.maxHeight = '200px';
+                                // Recharger le JSON compact
+                                location.reload();
+                            }
+                        }
+                        </script>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-clock"></i> Données en cache pendant 24h
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -25,17 +25,15 @@ class RecolteController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        // Récupérer toutes les récoltes avec leurs dates
         $recoltes = $entityManager->getRepository(Recolte::class)->findBy(
             ['id_user' => $user->getIdUser()],
             ['date_recolte' => 'DESC']
         );
 
-        // Traiter les statistiques par mois en PHP
         $statsParMois = [];
         foreach ($recoltes as $recolte) {
             if ($recolte->getDateRecolte()) {
-                $mois = (int)$recolte->getDateRecolte()->format('m'); // Extraire le mois (01-12)
+                $mois = (int)$recolte->getDateRecolte()->format('m');
                 if (!isset($statsParMois[$mois])) {
                     $statsParMois[$mois] = 0;
                 }
@@ -43,10 +41,8 @@ class RecolteController extends AbstractController
             }
         }
 
-        // Trier par nombre décroissant
         arsort($statsParMois);
 
-        // Transformer les données pour le graphique
         $labels = [];
         $data = [];
         $statistiques = [];
@@ -107,7 +103,6 @@ class RecolteController extends AbstractController
             }
         }
 
-        // If this is an AJAX (XMLHttpRequest) request, return only the results partial
         if ($request->isXmlHttpRequest()) {
             return $this->render('recolte/_results.html.twig', [
                 'recoltes' => $recoltes,
@@ -144,9 +139,6 @@ class RecolteController extends AbstractController
             $entityManager->persist($recolte);
             $entityManager->flush();
 
-            // Rendement calculation is now handled separately in RendementController
-            // $this->calculateRendement($recolte, $entityManager);
-
             return $this->redirectToRoute('app_recolte_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -171,6 +163,7 @@ class RecolteController extends AbstractController
         }
 
         $rendement = $entityManager->getRepository(Rendement::class)->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
+
         return $this->render('recolte/show.html.twig', [
             'recolte' => $recolte,
             'rendement' => $rendement,
@@ -196,9 +189,6 @@ class RecolteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            // Rendement calculation is now handled separately in RendementController
-            // $this->calculateRendement($recolte, $entityManager);
 
             return $this->redirectToRoute('app_recolte_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -255,7 +245,6 @@ class RecolteController extends AbstractController
                 $surface = $parcelle->getSuperficie();
                 $quantite = $recolte->getQuantite();
 
-                // Calcul du rendement : productivité = quantité / surface
                 $productivite = $surface > 0 ? $quantite / $surface : 0;
 
                 $calculation = [
@@ -265,7 +254,6 @@ class RecolteController extends AbstractController
                     'productivite_formatted' => number_format($productivite, 2),
                 ];
 
-                // Chercher ou créer le rendement
                 $rendementRepository = $entityManager->getRepository(Rendement::class);
                 $rendement = $rendementRepository->findOneBy(['id_recolte' => $recolte->getId_recolte()]);
             }
@@ -300,7 +288,6 @@ class RecolteController extends AbstractController
                 return $this->redirectToRoute('app_recolte_delete_confirm', ['id_recolte' => $recolte->getIdRecolte()]);
             }
 
-            // Créer l'archive
             $archive = new Recolte_archive();
             $archive->setId_recolte_original($recolte->getIdRecolte());
             $archive->setQuantite($recolte->getQuantite());
@@ -313,8 +300,6 @@ class RecolteController extends AbstractController
             $archive->setId_user($user->getIdUser());
 
             $entityManager->persist($archive);
-
-            // Supprimer la récolte originale
             $entityManager->remove($recolte);
             $entityManager->flush();
 
@@ -327,5 +312,4 @@ class RecolteController extends AbstractController
             'recolte' => $recolte,
         ]);
     }
-
 }

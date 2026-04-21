@@ -1,0 +1,135 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Test - Simulation Rendements{% endblock %}
+
+{% block agriculteur_body %}
+
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <i class="fas fa-flask"></i> <strong>Mode Test</strong> - Simulation de 4 scénarios de rendement
+    </div>
+
+    <h1>🧪 Test - Simulation Rendements</h1>
+
+    <div class="row mt-4">
+        {% for key, scenario in scenarios %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-{{ scenario.color }} text-white">
+                        <strong>Scénario: {{ key|replace('_', ' ')|title }}</strong>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ scenario.status }}</h5>
+
+                        <div class="mt-3">
+                            <p><strong>Score Qualité Sol:</strong></p>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-{{ scenario.color }}"
+                                     style="width: {{ scenario.soil_quality }}%">
+                                    {{ scenario.soil_quality }}/100
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <p><strong>Productivité:</strong> <span class="badge bg-{{ scenario.color }}">{{ scenario.productivity }} kg/m²</span></p>
+                            <p><strong>Efficacité:</strong> <span class="badge bg-{{ scenario.color }}">{{ scenario.efficiency }}</span></p>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="progress" style="height: 25px;">
+                                {% set eff_value = scenario.efficiency|replace('%', '')|trim|float %}
+                                <div class="progress-bar bg-{{ scenario.color }}"
+                                     style="width: {{ eff_value > 100 ? 100 : eff_value }}%">
+                                    {{ scenario.efficiency }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Explications -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-book"></i> Explication des Scénarios
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="accordionExplanations">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcellent">
+                                    ✅ Excellent - Rendement Exceptionnel
+                                </button>
+                            </h2>
+                            <div id="collapseExcellent" class="accordion-collapse collapse show" data-bs-parent="#accordionExplanations">
+                                <div class="accordion-body">
+                                    <p>Le sol a une excellente qualité (90/100) et le rendement atteint 4.8 kg/m², représentant 95% du potentiel.</p>
+                                    <p><strong>Actions:</strong> Maintenir les pratiques actuelles, documenter les bonnes méthodes.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGood">
+                                    ℹ️ Good - Performance Optimale
+                                </button>
+                            </h2>
+                            <div id="collapseGood" class="accordion-collapse collapse" data-bs-parent="#accordionExplanations">
+                                <div class="accordion-body">
+                                    <p>Le sol a une bonne qualité (75/100) et le rendement de 3.5 kg/m² correspond bien aux attentes (83%).</p>
+                                    <p><strong>Actions:</strong> Performance satisfaisante. Vérifier les facteurs limitants pour améliorer de 10-15%.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePoor">
+                                    ⚠️ Poor - À Améliorer
+                                </button>
+                            </h2>
+                            <div id="collapsePoor" class="accordion-collapse collapse" data-bs-parent="#accordionExplanations">
+                                <div class="accordion-body">
+                                    <p>Le sol a une qualité moyenne (50/100) et le rendement (1.8 kg/m²) n'atteint que 50% du potentiel.</p>
+                                    <p><strong>Actions:</strong> Analyser les facteurs déficients (NPK, pH). Appliquer recommandations fertilisation.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCritical">
+                                    🔴 Critical - Action Urgente
+                                </button>
+                            </h2>
+                            <div id="collapseCritical" class="accordion-collapse collapse" data-bs-parent="#accordionExplanations">
+                                <div class="accordion-body">
+                                    <p>Le sol a une mauvaise qualité (30/100) et le rendement (0.8 kg/m²) ne représente que 20% du potentiel.</p>
+                                    <p><strong>Actions URGENTES:</strong> Intervention immédiate - Correction pH, enrichissement NPK, drainage si nécessaire.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retour -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <a href="{{ path('app_agriculteur_home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
