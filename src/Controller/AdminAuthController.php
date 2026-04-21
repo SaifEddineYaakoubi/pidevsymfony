@@ -15,6 +15,11 @@ final class AdminAuthController extends AbstractController
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // ✅ Correction : S'assurer que $lastUsername n'est pas NULL
+        if ($lastUsername === null) {
+            $lastUsername = '';
+        }
+
         return $this->render('admin/auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,

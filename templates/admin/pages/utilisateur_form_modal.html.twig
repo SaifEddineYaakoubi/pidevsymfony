@@ -41,6 +41,25 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
+            {{ form_label(form.dateNaissance, 'Date de naissance', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateNaissance) }}
+            <small class="text-muted">Optionnel - Pour les statistiques</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.sexe, 'Sexe', {'label_attr': {'class': 'control-label'}}) }}
+            {{ form_widget(form.sexe, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.sexe) }}
+            <small class="text-muted">Optionnel</small>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
             {{ form_label(form.mot_de_passe.first, 'Mot de passe', {'label_attr': {'class': 'control-label'}}) }}
             {{ form_widget(form.mot_de_passe.first, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le mot de passe'}}) }}
             {{ form_errors(form.mot_de_passe.first) }}

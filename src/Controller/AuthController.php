@@ -34,6 +34,11 @@ class AuthController extends AbstractController
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // ✅ Correction : S'assurer que $lastUsername n'est pas NULL
+        if ($lastUsername === null) {
+            $lastUsername = '';
+        }
+
         return $this->render('admin/auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
@@ -76,6 +81,14 @@ class AuthController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            // Sauvegarder le descripteur facial si fourni
+            $faceDescriptor = $request->request->get('face_descriptor');
+            if ($faceDescriptor) {
+                $user->setFaceDescriptor($faceDescriptor);
+                $user->setFaceEnabled(true);
+                $entityManager->flush();
+            }
+
             $this->addFlash('success', 'Inscription réussie ! Vous pouvez maintenant vous connecter.');
             return $this->redirectToRoute('app_login');
         }
@@ -83,5 +96,13 @@ class AuthController extends AbstractController
         return $this->render('admin/auth/register.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/profile/setup-faceid', name: 'app_setup_faceid')]
+    public function setupFaceId(): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        return $this->render('admin/profile/setup_faceid.html.twig');
     }
 }
