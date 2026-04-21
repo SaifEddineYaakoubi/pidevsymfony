@@ -9,6 +9,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -65,7 +66,14 @@ class StockCrudController extends AbstractController
     #[Route('/new', name: 'stock_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour ajouter du stock.');
+        }
+
         $stock = new Stock();
+        $stock->setUtilisateur($user); // Définir automatiquement l'utilisateur connecté
+
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
@@ -87,13 +95,13 @@ class StockCrudController extends AbstractController
                 // Augmenter la quantité du stock existant
                 $existingStock->setQuantite($existingStock->getQuantite() + $stock->getQuantite());
                 $em->flush();
-                
+
                 $this->addFlash('success', 'Quantité ajoutée au stock existant.');
             } else {
                 // Créer un nouveau stock
                 $em->persist($stock);
                 $em->flush();
-                
+
                 $this->addFlash('success', 'Nouveau stock ajouté.');
             }
 
