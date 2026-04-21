@@ -61,6 +61,23 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $faceDescriptor = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $faceEnabled = false;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $profilePicture = null;
+
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTimeInterface $dateNaissance = null;
+
+    #[ORM\Column(type: 'string', length: 10, nullable: true)]
+    private ?string $sexe = null;
+
+
+
     /**
      * Inverse side for Parcelle::id_user
      * @var Collection<int, Parcelle>
@@ -167,6 +184,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+
     // === UserInterface Methods ===
 
     public function getUserIdentifier(): string
@@ -223,5 +242,71 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getVentes(): Collection
     {
         return $this->ventes;
+    }
+
+    public function getFaceDescriptor(): ?string
+    {
+        return $this->faceDescriptor;
+    }
+
+    public function setFaceDescriptor(?string $faceDescriptor): self
+    {
+        $this->faceDescriptor = $faceDescriptor;
+        return $this;
+    }
+
+    public function isFaceEnabled(): ?bool
+    {
+        return $this->faceEnabled;
+    }
+
+    public function setFaceEnabled(?bool $faceEnabled): self
+    {
+        $this->faceEnabled = $faceEnabled;
+        return $this;
+    }
+
+    public function getProfilePicture(): ?string
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?string $profilePicture): self
+    {
+        $this->profilePicture = $profilePicture;
+        return $this;
+    }
+
+    public function getDateNaissance(): ?\DateTimeInterface
+    {
+        return $this->dateNaissance;
+    }
+
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): self
+    {
+        $this->dateNaissance = $dateNaissance;
+        return $this;
+    }
+
+    public function getSexe(): ?string
+    {
+        return $this->sexe;
+    }
+
+    public function setSexe(?string $sexe): self
+    {
+        $this->sexe = $sexe;
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        if (!$this->dateNaissance) {
+            return null;
+        }
+        
+        $now = new \DateTime();
+        $interval = $this->dateNaissance->diff($now);
+        return $interval->y;
     }
 }

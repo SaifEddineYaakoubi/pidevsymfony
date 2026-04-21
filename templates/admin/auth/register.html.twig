@@ -49,10 +49,61 @@
                             <small class="text-muted">Choisissez votre rôle dans la plateforme</small>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form_label(form.dateNaissance, 'Date de naissance') }}
+                                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateNaissance) }}
+                                    <small class="text-muted">Optionnel - Pour les statistiques</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form_label(form.sexe) }}
+                                    {{ form_widget(form.sexe, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.sexe) }}
+                                    <small class="text-muted">Optionnel</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group mb-3">
                             {{ form_label(form.mot_de_passe) }}
                             {{ form_widget(form.mot_de_passe, {'attr': {'class': 'form-control'}}) }}
                             {{ form_errors(form.mot_de_passe) }}
+                        </div>
+
+                        <!-- Section reconnaissance faciale -->
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-camera me-2"></i>
+                                Reconnaissance faciale (optionnel)
+                            </label>
+                            <div class="border rounded p-3" style="background: rgba(102, 126, 234, 0.05);">
+                                <div class="text-center mb-3">
+                                    <div id="faceStatus" class="alert alert-info small mb-2">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Configurez la reconnaissance faciale pour vous connecter avec votre visage
+                                    </div>
+                                    <button type="button" id="setupFaceBtn" class="btn btn-outline-primary">
+                                        <i class="fas fa-camera"></i> Configurer maintenant
+                                    </button>
+                                </div>
+                                <div id="faceSection" style="display: none;">
+                                    <div class="position-relative">
+                                        <video id="faceVideo" width="100%" height="auto" autoplay muted style="border-radius: 10px; max-height: 300px;"></video>
+                                        <canvas id="faceCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                                    </div>
+                                    <div class="mt-3 text-center">
+                                        <div id="faceMessage" class="mb-2"></div>
+                                        <button type="button" id="captureFaceBtn" class="btn btn-success w-100" disabled>
+                                            <i class="fas fa-camera"></i> Capturer mon visage
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="faceDescriptorInput" name="face_descriptor">
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
@@ -101,5 +152,205 @@
         border-color: #667eea;
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
     }
+    #faceCanvas {
+        pointer-events: none;
+    }
 </style>
+
+<!-- Face-API.js -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+let faceStream = null;
+let faceDescriptor = null;
+let modelsLoaded = false;
+
+// Attendre que Face-API.js soit chargé
+window.addEventListener('load', function() {
+    // Attendre un peu pour s'assurer que face-api est disponible
+    setTimeout(() => {
+        if (typeof faceapi !== 'undefined') {
+            loadFaceModels();
+        } else {
+            console.error('Face-API.js non chargé');
+            document.getElementById('faceStatus').innerHTML = `
+                <div class="alert alert-danger small">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Erreur de chargement de Face-API.js. Rechargez la page.
+                </div>
+            `;
+        }
+    }, 500);
+});
+
+// Charger les modèles Face-API.js
+async function loadFaceModels() {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+    
+    try {
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        console.log('Modèles Face-API chargés');
+        document.getElementById('faceStatus').innerHTML = `
+            <div class="alert alert-success small">
+                <i class="fas fa-check-circle"></i> 
+                Prêt ! Cliquez sur "Configurer maintenant" pour capturer votre visage.
+            </div>
+        `;
+    } catch (error) {
+        console.error('Erreur chargement modèles:', error);
+        document.getElementById('faceStatus').innerHTML = `
+            <div class="alert alert-danger small">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Erreur de chargement des modèles. Vérifiez votre connexion internet.
+            </div>
+        `;
+    }
+}
+
+// Activer la configuration faciale
+document.getElementById('setupFaceBtn').addEventListener('click', async () => {
+    const faceSection = document.getElementById('faceSection');
+    const setupBtn = document.getElementById('setupFaceBtn');
+    const faceMessage = document.getElementById('faceMessage');
+    
+    if (faceSection.style.display === 'none') {
+        if (!modelsLoaded) {
+            faceMessage.innerHTML = `
+                <div class="alert alert-warning">
+                    Chargement des modèles en cours... Veuillez patienter.
+                </div>
+            `;
+            return;
+        }
+
+        // Démarrer la caméra
+        try {
+            faceStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { width: 640, height: 480 } 
+            });
+            const video = document.getElementById('faceVideo');
+            video.srcObject = faceStream;
+            
+            faceSection.style.display = 'block';
+            setupBtn.innerHTML = '<i class="fas fa-times"></i> Annuler';
+            setupBtn.classList.remove('btn-outline-primary');
+            setupBtn.classList.add('btn-danger');
+            
+            // Attendre que la vidéo soit prête
+            video.addEventListener('loadedmetadata', () => {
+                const canvas = document.getElementById('faceCanvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                // Activer la détection en temps réel
+                detectFace();
+            });
+        } catch (error) {
+            faceMessage.innerHTML = `
+                <div class="alert alert-danger">
+                    Impossible d'accéder à la caméra. Vérifiez vos permissions.
+                </div>
+            `;
+        }
+    } else {
+        // Fermer la caméra
+        if (faceStream) {
+            faceStream.getTracks().forEach(track => track.stop());
+        }
+        faceSection.style.display = 'none';
+        setupBtn.innerHTML = '<i class="fas fa-camera"></i> Configurer maintenant';
+        setupBtn.classList.remove('btn-danger');
+        setupBtn.classList.add('btn-outline-primary');
+        document.getElementById('captureFaceBtn').disabled = true;
+    }
+});
+
+// Détecter le visage en temps réel
+async function detectFace() {
+    const video = document.getElementById('faceVideo');
+    const canvas = document.getElementById('faceCanvas');
+    const captureBtn = document.getElementById('captureFaceBtn');
+    const faceMessage = document.getElementById('faceMessage');
+    
+    if (!video.srcObject) return;
+    
+    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    faceapi.matchDimensions(canvas, displaySize);
+    
+    setInterval(async () => {
+        if (!video.srcObject) return;
+        
+        const detections = await faceapi
+            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+        
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (detections) {
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+            faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+            
+            captureBtn.disabled = false;
+            faceMessage.innerHTML = `
+                <div class="alert alert-success small">
+                    <i class="fas fa-check-circle"></i> Visage détecté ! Cliquez sur "Capturer"
+                </div>
+            `;
+            
+            // Stocker le descripteur temporairement
+            faceDescriptor = Array.from(detections.descriptor);
+        } else {
+            captureBtn.disabled = true;
+            faceMessage.innerHTML = `
+                <div class="alert alert-warning small">
+                    <i class="fas fa-search"></i> Positionnez votre visage face à la caméra
+                </div>
+            `;
+        }
+    }, 100);
+}
+
+// Capturer le visage
+document.getElementById('captureFaceBtn').addEventListener('click', () => {
+    if (!faceDescriptor) {
+        return;
+    }
+    
+    // Sauvegarder le descripteur dans le champ caché
+    document.getElementById('faceDescriptorInput').value = JSON.stringify(faceDescriptor);
+    
+    document.getElementById('faceMessage').innerHTML = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Visage capturé avec succès !
+            <br><small>Votre visage sera enregistré lors de l'inscription.</small>
+        </div>
+    `;
+    
+    // Désactiver le bouton
+    document.getElementById('captureFaceBtn').disabled = true;
+    
+    // Arrêter la caméra
+    if (faceStream) {
+        faceStream.getTracks().forEach(track => track.stop());
+    }
+    
+    // Fermer la section après 2 secondes
+    setTimeout(() => {
+        document.getElementById('faceSection').style.display = 'none';
+        document.getElementById('setupFaceBtn').innerHTML = '<i class="fas fa-check-circle"></i> Visage configuré ✓';
+        document.getElementById('setupFaceBtn').classList.remove('btn-danger');
+        document.getElementById('setupFaceBtn').classList.add('btn-success');
+        document.getElementById('setupFaceBtn').disabled = true;
+    }, 2000);
+});
+</script>
+
 {% endblock %}

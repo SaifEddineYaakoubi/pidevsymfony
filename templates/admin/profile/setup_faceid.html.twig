@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Configurer Face ID{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-fingerprint fa-3x mb-3"></i>
+                    <h3 class="mb-0">Configurer la reconnaissance biométrique</h3>
+                    <p class="mb-0 mt-2">Face ID / Touch ID / Windows Hello</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <div id="statusMessage" class="mb-4"></div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Comment ça marche ?</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Cliquez sur "Configurer maintenant"</li>
+                            <li>Votre appareil vous demandera de vous authentifier (Face ID, empreinte, PIN...)</li>
+                            <li>Une fois configuré, vous pourrez vous connecter sans mot de passe</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important :</strong> Cette fonctionnalité nécessite HTTPS ou localhost.
+                        Assurez-vous d'accéder au site via <code>http://localhost:8000</code>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button id="setupFaceIdBtn" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            <i class="fas fa-fingerprint me-2"></i>Configurer maintenant
+                        </button>
+
+                        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+                        </a>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Vos données biométriques restent sur votre appareil et ne sont jamais envoyées au serveur.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('js/webauthn.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const btn = document.getElementById('setupFaceIdBtn');
+    const statusDiv = document.getElementById('statusMessage');
+
+    // Vérifier la disponibilité
+    if (!isWebAuthnAvailable()) {
+        btn.disabled = true;
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                Votre navigateur ne supporte pas WebAuthn. Utilisez Chrome, Edge, Safari ou Firefox récent.
+            </div>
+        `;
+        return;
+    }
+
+    const isPlatformAvailable = await isPlatformAuthenticatorAvailable();
+    if (!isPlatformAvailable) {
+        statusDiv.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Aucun authentificateur biométrique détecté sur cet appareil.
+            </div>
+        `;
+    } else {
+        statusDiv.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Votre appareil supporte la reconnaissance biométrique !
+            </div>
+        `;
+    }
+});
+
+document.getElementById('setupFaceIdBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('setupFaceIdBtn');
+    const statusDiv = document.getElementById('statusMessage');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Configuration en cours...';
+
+    try {
+        const result = await registerWebAuthn();
+
+        statusDiv.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Succès !</strong> ${result.message}
+                <br><small>Vous pouvez maintenant vous connecter avec votre biométrie.</small>
+            </div>
+        `;
+
+        btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Configuré avec succès !';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+
+        setTimeout(() => {
+            window.location.href = '{{ path("app_admin_dashboard") }}';
+        }, 2000);
+
+    } catch (error) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-fingerprint me-2"></i>Réessayer';
+
+        let errorMessage = error.message;
+        if (error.message.includes('NotAllowedError')) {
+            errorMessage = 'Opération annulée ou refusée par l\'utilisateur.';
+        } else if (error.message.includes('NotSupportedError')) {
+            errorMessage = 'Votre appareil ne supporte pas cette fonctionnalité.';
+        }
+
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Erreur :</strong> ${errorMessage}
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

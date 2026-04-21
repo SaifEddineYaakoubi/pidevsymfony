@@ -1,0 +1,136 @@
+{# templates/reset_password/request.html.twig #}
+{% extends 'admin/base_auth.html.twig' %}
+
+{% block title %}SmartFarm - Réinitialisation du mot de passe{% endblock %}
+
+{% block admin_auth_body %}
+<style>
+    .reset-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        color: #fff;
+    }
+
+    .reset-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .reset-card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+        background: rgba(255,255,255,0.12);
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.3);
+        color: #fff;
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.9rem;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #fff;
+        width: 100%;
+    }
+
+    .btn-reset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        color: #fff;
+    }
+
+    .btn-back {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+
+    .btn-back:hover {
+        color: #fff;
+    }
+
+    .alert {
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="reset-card">
+                <div class="reset-card-header">
+                    <i class="fas fa-key fa-3x mb-3"></i>
+                    <h3 class="fw-bold mb-1">Mot de passe oublié ?</h3>
+                    <p class="mb-0 opacity-75">Nous vous enverrons un lien de réinitialisation</p>
+                </div>
+
+                <div class="reset-card-body">
+                    {% for flash_error in app.flashes('reset_password_error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ flash_error }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    {{ form_start(requestForm) }}
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Votre adresse email
+                            </label>
+                            {{ form_widget(requestForm.email, {'attr': {'class': 'form-control', 'placeholder': 'exemple@smartfarm.com'}}) }}
+                            {{ form_errors(requestForm.email) }}
+                        </div>
+
+                        <button type="submit" class="btn-reset">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer le lien
+                        </button>
+                    {{ form_end(requestForm) }}
+
+                    <div class="text-center mt-3">
+                        <a href="{{ path('app_admin_login') }}" class="btn-back">
+                            <i class="fas fa-arrow-left me-1"></i>Retour à la connexion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

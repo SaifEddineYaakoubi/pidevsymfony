@@ -8,7 +8,10 @@
         <!-- AFFICHAGE UTILISATEUR SIMPLE -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
+                <img src="{% if app.user.profilePicture %}{{ asset('uploads/profiles/' ~ app.user.profilePicture) }}{% else %}{{ asset('adminlte/dist/img/user2-160x160.jpg') }}{% endif %}" 
+                     class="img-circle elevation-2" 
+                     alt="User Image"
+                     style="width: 40px; height: 40px; object-fit: cover;">
             </div>
             <div class="info">
                 <a href="#" class="d-block">{{ app.user ? app.user.userIdentifier : 'Invité' }}</a>
@@ -120,52 +123,76 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="text-center mb-3">
-                    <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}"
-                         class="img-circle elevation-2"
-                         style="width: 100px; height: 100px; object-fit: cover;">
-                </div>
-                <table class="table table-borderless">
-                    <tr>
-                        <th><i class="fas fa-user"></i> Nom complet :</th>
-                        <td>{{ app.user.nom }} {{ app.user.prenom }}</td>
-                    </tr>
-                    <tr>
-                        <th><i class="fas fa-envelope"></i> Email :</th>
-                        <td>{{ app.user.email }}</td>
-                    </tr>
-                    <tr>
-                        <th><i class="fas fa-tag"></i> Rôle :</th>
-                        <td>
-                            {% set roles = app.user.roles %}
-                            {% if 'ROLE_ADMIN' in roles %}
-                                <span class="badge bg-danger">Administrateur</span>
-                            {% elseif 'ROLE_STOCK' in roles %}
-                                <span class="badge bg-warning">Responsable Stock</span>
-                            {% elseif 'ROLE_AGRICULTEUR' in roles %}
-                                <span class="badge bg-success">Agriculteur</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><i class="fas fa-calendar"></i> Date création :</th>
-                        <td>{{ app.user.dateCreation ? app.user.dateCreation|date('d/m/Y') : 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <th><i class="fas fa-power-off"></i> Statut :</th>
-                        <td>
-                            {% if app.user.statut %}
-                                <span class="badge bg-success">Actif</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactif</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
+                <form id="profileUpdateForm">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img id="profilePicturePreview" 
+                                 src="{% if app.user.profilePicture %}{{ asset('uploads/profiles/' ~ app.user.profilePicture) }}{% else %}{{ asset('adminlte/dist/img/user2-160x160.jpg') }}{% endif %}"
+                                 class="img-circle elevation-2 shadow"
+                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff;">
+                            <label for="profilePictureInput" class="position-absolute" style="bottom: 0; right: 0; cursor: pointer;">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 35px; height: 35px; border: 2px solid #fff;">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </label>
+                            <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                            <input type="hidden" id="profilePictureData" name="profile_picture_data">
+                        </div>
+                        <p class="text-muted small mt-2 mb-0">Cliquez sur l'icône pour changer la photo</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Nom</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-primary"></i></span>
+                                <input type="text" name="nom" class="form-control border-start-0" value="{{ app.user.nom }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">Prénom</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-primary"></i></span>
+                                <input type="text" name="prenom" class="form-control border-start-0" value="{{ app.user.prenom }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-primary"></i></span>
+                            <input type="email" name="email" class="form-control border-start-0" value="{{ app.user.email }}" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="bg-light p-3 rounded-3 mb-3">
+                        <h6 class="mb-3 text-primary"><i class="fas fa-shield-alt me-2"></i>Sécurité</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Nouveau mot de passe (optionnel)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" name="new_password" class="form-control border-start-0" placeholder="Laisser vide si inchangé">
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label small fw-bold text-muted">Mot de passe actuel (requis)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-key text-warning"></i></span>
+                                <input type="password" name="current_password" class="form-control border-start-0" placeholder="Confirmez avec votre mot de passe" required>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times"></i> Fermer
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Annuler</button>
+                <button type="submit" form="profileUpdateForm" class="btn btn-primary rounded-pill px-4 btn-gradient">
+                    <i class="fas fa-save me-2"></i> Enregistrer
                 </button>
             </div>
         </div>
@@ -173,6 +200,114 @@
 </div>
 
 <script>
+$(function() {
+    // Gestion de l'upload de la photo de profil
+    $('#profilePictureInput').on('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Vérifier le type de fichier
+        if (!file.type.match('image.*')) {
+            Swal.fire('Erreur', 'Veuillez sélectionner une image', 'error');
+            return;
+        }
+
+        // Vérifier la taille (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire('Erreur', 'L\'image ne doit pas dépasser 5 MB', 'error');
+            return;
+        }
+
+        // Lire et prévisualiser l'image
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                // Redimensionner l'image si nécessaire
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                const maxSize = 500;
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > height) {
+                    if (width > maxSize) {
+                        height *= maxSize / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convertir en base64
+                const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+                
+                // Mettre à jour la prévisualisation
+                $('#profilePicturePreview').attr('src', base64Image);
+                
+                // Stocker dans le champ caché
+                $('#profilePictureData').val(base64Image);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Image chargée !',
+                    text: 'N\'oubliez pas de cliquer sur "Enregistrer"',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    $('#profileUpdateForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const submitBtn = form.closest('.modal-content').find('[form="profileUpdateForm"]');
+        const originalBtnHtml = submitBtn.html();
+
+        // Désactiver le bouton pendant l'envoi
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Enregistrement...');
+
+        $.ajax({
+            url: "{{ path('app_admin_profile_update') }}",
+            type: "POST",
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Profil mis à jour !',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload(); // Recharger pour voir les changements partout
+                    });
+                } else {
+                    Swal.fire('Erreur', response.message, 'error');
+                    submitBtn.prop('disabled', false).html(originalBtnHtml);
+                }
+            },
+            error: function(xhr) {
+                const response = xhr.responseJSON;
+                Swal.fire('Erreur', response ? response.message : 'Une erreur est survenue', 'error');
+                submitBtn.prop('disabled', false).html(originalBtnHtml);
+            }
+        });
+    });
+});
+
 function confirmLogout() {
     Swal.fire({
         title: 'Déconnexion',

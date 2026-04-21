@@ -24,6 +24,15 @@
                 {# Vente / Client (CRUD) #}
                 <li><a href="{{ path('app_vente_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_vente_' ? 'active' : '' }}">Ventes</a></li>
                 <li><a href="{{ path('app_client_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_client_' ? 'active' : '' }}">Clients</a></li>
+                <li>
+                    <a href="{{ path('app_messages_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_messages' ? 'active' : '' }}">
+                        Messages
+                        {% set unreadCount = render(path('app_messages_unread_count'))|trim %}
+                        {% if unreadCount > 0 %}
+                            <span class="badge bg-danger ms-1" style="font-size: 0.6rem; vertical-align: top;">{{ unreadCount }}</span>
+                        {% endif %}
+                    </a>
+                </li>
 
                 {# Compte Agriculteur #}
                 {% if is_granted('ROLE_AGRICULTEUR') %}

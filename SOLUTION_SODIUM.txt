@@ -1,0 +1,70 @@
+╔══════════════════════════════════════════════════════════════╗
+║  SOLUTION : Activer l'extension Sodium                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+OPTION 1 : Script automatique (RECOMMANDÉ)
+═══════════════════════════════════════════
+
+1. Ouvrez PowerShell en tant qu'ADMINISTRATEUR
+   (Clic droit sur PowerShell → Exécuter en tant qu'administrateur)
+
+2. Naviguez vers votre projet :
+   cd C:\Users\amine\OneDrive\Desktop\devPI
+
+3. Exécutez le script :
+   .\activer-sodium.ps1
+
+4. Si vous avez une erreur de sécurité, exécutez d'abord :
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+   Puis réessayez :
+   .\activer-sodium.ps1
+
+
+OPTION 2 : Modification manuelle
+═════════════════════════════════
+
+1. Ouvrez le fichier :
+   C:\xampp\php\php.ini
+
+2. Cherchez la ligne (Ctrl+F) :
+   ;extension=sodium
+
+3. Supprimez le point-virgule pour obtenir :
+   extension=sodium
+
+4. Sauvegardez le fichier
+
+5. Redémarrez Apache depuis le panneau XAMPP
+
+
+VÉRIFICATION
+════════════
+
+Après l'activation, vérifiez avec :
+   php -m | findstr sodium
+
+Vous devriez voir "sodium" dans la liste.
+
+
+REDÉMARRER L'APPLICATION
+═════════════════════════
+
+1. Videz le cache Symfony :
+   php bin/console cache:clear
+
+2. Redémarrez le serveur :
+   symfony server:start
+   OU
+   php -S localhost:8000 -t public/
+
+3. Testez la connexion !
+
+
+BESOIN D'AIDE ?
+═══════════════
+
+Si ça ne fonctionne toujours pas :
+- Vérifiez que C:\xampp\php\ext\php_sodium.dll existe
+- Redémarrez complètement votre ordinateur
+- Vérifiez que vous utilisez PHP 7.2 ou supérieur (vous avez 8.1.25, c'est bon)
