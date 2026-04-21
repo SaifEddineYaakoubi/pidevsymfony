@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Stock;
 use App\Entity\Produit;
+use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -20,26 +21,42 @@ class StockType extends AbstractType
                 'label' => 'Quantité',
                 'required' => true,
                 'scale' => 2,
+                'attr' => [
+                    'min' => '0',
+                    'step' => '0.01',
+                    'placeholder' => 'Entrez la quantité (ex: 50.00)',
+                    'inputmode' => 'decimal',
+                ],
+                'help' => 'La quantité doit être supérieure ou égale à 0',
             ])
             ->add('date_entree', DateType::class, [
-                'label' => 'Date entrée',
+                'label' => 'Date d\'entrée',
                 'required' => true,
                 'widget' => 'single_text',
+                'attr' => [
+                    'type' => 'date',
+                    'placeholder' => 'YYYY-MM-DD',
+                ],
+                'help' => 'Sélectionnez la date d\'entrée du stock',
             ])
             ->add('date_expiration', DateType::class, [
-                'label' => 'Date expiration',
+                'label' => 'Date d\'expiration',
                 'required' => true,
                 'widget' => 'single_text',
+                'attr' => [
+                    'type' => 'date',
+                    'placeholder' => 'YYYY-MM-DD',
+                ],
+                'help' => 'Doit être supérieure ou égale à la date d\'entrée',
             ])
             ->add('id_produit', EntityType::class, [
                 'class' => Produit::class,
                 'choice_label' => 'nom',
                 'label' => 'Produit',
                 'required' => true,
-            ])
-            ->add('id_user', NumberType::class, [
-                'label' => 'ID utilisateur',
-                'required' => true,
+                'placeholder' => '-- Sélectionnez un produit --',
+                'error_bubbling' => false,
+                'help' => 'Choisissez le produit à stocker',
             ])
         ;
     }

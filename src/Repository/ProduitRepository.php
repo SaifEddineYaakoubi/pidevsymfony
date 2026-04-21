@@ -21,7 +21,7 @@ class ProduitRepository extends ServiceEntityRepository
             'type' => 'p.type',
             'unite' => 'p.unite',
             'prixUnitaire' => 'p.prix_unitaire',
-            'idUser' => 'p.id_user',
+            'idUser' => 'u.email', // Tri par email de l'utilisateur
         ];
 
         $searchFields = [
@@ -34,6 +34,8 @@ class ProduitRepository extends ServiceEntityRepository
         $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
 
         $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.utilisateur', 'u')
+            ->addSelect('u')
             ->orderBy($sortColumn, $direction);
 
         if ($search) {
@@ -47,5 +49,26 @@ class ProduitRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function countByType(?string $search = null): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('p.type, COUNT(p.id_produit) as count')
+            ->groupBy('p.type');
+
+        if ($search) {
+            $qb->andWhere('p.nom LIKE :search OR p.type LIKE :search OR p.unite LIKE :search')
+                ->setParameter('search', '%'.$search.'%');
+        }
+
+        $results = $qb->getQuery()->getResult();
+
+        $counts = [];
+        foreach ($results as $result) {
+            $counts[$result['type']] = (int) $result['count'];
+        }
+
+        return $counts;
     }
 }

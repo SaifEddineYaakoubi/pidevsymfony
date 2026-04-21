@@ -1,0 +1,22 @@
+<header id="header" class="header d-flex align-items-center position-relative">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+        <a href="http://127.0.0.1:8000/stock" class="logo d-flex align-items-center me-4">
+            <img src="{{ asset('agriculture/assets/img/logo.png') }}" alt="AgriCulture">
+            
+        </a>
+
+        
+
+        <nav id="navmenu" class="navmenu">
+            <ul>
+                <li><a href="{{ path('app_stock_home') }}" class="{{ app.request.attributes.get('_route') == 'app_stock_home' ? 'active' : '' }}">Home</a></li>
+                <li><a href="{{ path('stock_index') }}" class="{{ app.request.attributes.get('_route') in ['stock_index', 'stock_show', 'stock_edit', 'stock_new', 'stock_delete'] ? 'active' : '' }}"><i class="bi bi-box-seam me-2"></i>Stock</a></li>
+                <li><a href="{{ path('produit_index') }}" class="{{ app.request.attributes.get('_route') in ['produit_index', 'produit_show', 'produit_edit', 'produit_new', 'produit_delete'] ? 'active' : '' }}"><i class="bi bi-leaf me-2"></i>Produit</a></li>
+                <li><a class="text-danger" href="{{ path('app_logout') }}">Logout</a></li>
+            </ul>
+            <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        </nav>
+
+    </div>
+</header>

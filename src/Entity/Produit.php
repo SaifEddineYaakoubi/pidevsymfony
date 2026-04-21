@@ -44,10 +44,12 @@ class Produit
     #[Assert\PositiveOrZero(message: 'Le prix unitaire doit être supérieur ou égal à 0.')]
     private ?float $prix_unitaire = null;
 
-    #[ORM\Column(type: 'integer')]
-    #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
-    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
-    private ?int $id_user = null;
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $alertEnvoyee = false;
+
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: true)]
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\OneToMany(mappedBy: 'id_produit', targetEntity: Stock::class, cascade: ['persist', 'remove'])]
     private Collection $stocks;
@@ -117,12 +119,29 @@ class Produit
 
     public function getIdUser(): ?int
     {
-        return $this->id_user;
+        return $this->utilisateur?->getIdUser();
     }
 
     public function setIdUser(?int $idUser): self
     {
-        $this->id_user = $idUser;
+        if ($idUser === null) {
+            $this->utilisateur = null;
+        } else {
+            // Cette méthode est gardée pour compatibilité, mais il est préférable d'utiliser setUtilisateur()
+            // Pour l'instant, on ne fait rien car Doctrine gérera la relation
+        }
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }
@@ -130,6 +149,17 @@ class Produit
     public function getStocks(): Collection
     {
         return $this->stocks;
+    }
+
+    public function getQuantite(): float
+    {
+        $total = 0.0;
+
+        foreach ($this->getStocks() as $stock) {
+            $total += $stock->getQuantite() ?? 0.0;
+        }
+
+        return $total;
     }
 
     public function addStock(Stock $stock): self
@@ -230,5 +260,17 @@ class Produit
 
         // Icône par défaut
         return '🥬';
+    }
+
+    public function isAlertEnvoyee(): ?bool
+    {
+        return $this->alertEnvoyee;
+    }
+
+    public function setAlertEnvoyee(?bool $alertEnvoyee): self
+    {
+        $this->alertEnvoyee = $alertEnvoyee;
+
+        return $this;
     }
 }

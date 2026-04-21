@@ -26,6 +26,9 @@
 
     {# CRUD UI CSS is imported in assets/app.js and loaded via {{ importmap('app') }} #}
 
+    {# Form validation CSS #}
+    <link rel="stylesheet" href="{{ asset('css/form-validation.css') }}">
+
     <style>
         /* ===== DASHBOARD MODERN DESIGN ===== */
 
@@ -352,6 +355,9 @@
 
     {# Keep importmap block available if the app uses it #}
     {{ parent() }}
+
+    {# Form validation JS #}
+    <script src="{{ asset('js/form-validation.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
