@@ -1,0 +1,148 @@
+{# templates/reset_password/reset.html.twig #}
+{% extends 'admin/base_auth.html.twig' %}
+
+{% block title %}SmartFarm - Nouveau mot de passe{% endblock %}
+
+{% block admin_auth_body %}
+<style>
+    .reset-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        color: #fff;
+    }
+
+    .reset-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .reset-card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+        background: rgba(255,255,255,0.12);
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.3);
+        color: #fff;
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.9rem;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #fff;
+        width: 100%;
+    }
+
+    .btn-reset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        color: #fff;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .strength-weak { color: #e74c3c; }
+    .strength-medium { color: #f39c12; }
+    .strength-strong { color: #2ecc71; }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="reset-card">
+                <div class="reset-card-header">
+                    <i class="fas fa-lock fa-3x mb-3"></i>
+                    <h3 class="fw-bold mb-1">Nouveau mot de passe</h3>
+                    <p class="mb-0 opacity-75">Choisissez un mot de passe sécurisé</p>
+                </div>
+
+                <div class="reset-card-body">
+                    {{ form_start(resetForm) }}
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-key me-1"></i>Nouveau mot de passe
+                            </label>
+                            {{ form_widget(resetForm.plainPassword.first, {'attr': {'class': 'form-control', 'placeholder': 'Entrez votre nouveau mot de passe', 'id': 'password_first'}}) }}
+                            {{ form_errors(resetForm.plainPassword.first) }}
+                            <div class="password-strength" id="passwordStrength"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-check-circle me-1"></i>Confirmer le mot de passe
+                            </label>
+                            {{ form_widget(resetForm.plainPassword.second, {'attr': {'class': 'form-control', 'placeholder': 'Confirmez votre mot de passe'}}) }}
+                            {{ form_errors(resetForm.plainPassword.second) }}
+                        </div>
+
+                        <button type="submit" class="btn-reset">
+                            <i class="fas fa-save me-2"></i>Réinitialiser le mot de passe
+                        </button>
+                    {{ form_end(resetForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Indicateur de force du mot de passe
+document.getElementById('password_first').addEventListener('input', function() {
+    const password = this.value;
+    const strengthDiv = document.getElementById('passwordStrength');
+
+    if (password.length === 0) {
+        strengthDiv.innerHTML = '';
+        return;
+    }
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]+/)) strength++;
+    if (password.match(/[A-Z]+/)) strength++;
+    if (password.match(/[0-9]+/)) strength++;
+    if (password.match(/[$@#&!]+/)) strength++;
+
+    if (strength <= 2) {
+        strengthDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Faible';
+        strengthDiv.className = 'password-strength strength-weak';
+    } else if (strength <= 4) {
+        strengthDiv.innerHTML = '<i class="fas fa-chart-line"></i> Moyen';
+        strengthDiv.className = 'password-strength strength-medium';
+    } else {
+        strengthDiv.innerHTML = '<i class="fas fa-check-circle"></i> Fort';
+        strengthDiv.className = 'password-strength strength-strong';
+    }
+});
+</script>
+{% endblock %}

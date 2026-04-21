@@ -1,0 +1,87 @@
+{# templates/reset_password/check_email.html.twig #}
+{% extends 'admin/base_auth.html.twig' %}
+
+{% block title %}SmartFarm - Email envoyé{% endblock %}
+
+{% block admin_auth_body %}
+<style>
+    .check-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+        color: #fff;
+        text-align: center;
+    }
+
+    .check-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .check-card-body {
+        padding: 2rem;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.9rem;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #fff;
+        width: 100%;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        color: #fff;
+    }
+
+    .alert-info {
+        background: rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(102, 126, 234, 0.5);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #fff;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="check-card">
+                <div class="check-card-header">
+                    <i class="fas fa-envelope fa-3x mb-3"></i>
+                    <h3 class="fw-bold mb-1">Email envoyé !</h3>
+                </div>
+
+                <div class="check-card-body">
+                    <div class="alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Si un compte correspond à votre email, vous venez de recevoir un email contenant un lien pour réinitialiser votre mot de passe.
+                    </div>
+
+                    <p class="mb-4">
+                        Si vous ne recevez pas d'email, vérifiez vos spams ou
+                        <a href="{{ path('app_forgot_password_request') }}" style="color: #667eea;">réessayez</a>.
+                    </p>
+
+                    <a href="{{ path('app_admin_login') }}" class="btn-back">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la connexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

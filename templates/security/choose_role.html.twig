@@ -1,0 +1,355 @@
+{# templates/security/choose_role.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm — Choisissez votre rôle</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 1rem;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 3rem;
+        }
+
+        .header .avatar {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-size: 2rem;
+            box-shadow: 0 8px 24px rgba(102,126,234,0.4);
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.55);
+            font-size: 1rem;
+        }
+
+        /* ── Flash ── */
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* ── Role Cards ── */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 18px;
+        }
+
+        .role-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-color);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 0 0 1px var(--card-color);
+        }
+
+        .role-card.selected {
+            border-color: var(--card-color);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 3px var(--card-color), 0 16px 40px rgba(0,0,0,0.4);
+        }
+
+        .role-card.selected .card-checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Admin */
+        .role-admin { --card-color: rgba(231, 76, 60, 0.8); }
+        .role-admin .role-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .role-admin .btn-choose { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        /* Stock */
+        .role-stock { --card-color: rgba(243, 156, 18, 0.8); }
+        .role-stock .role-icon { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .role-stock .btn-choose { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+        /* Agriculteur */
+        .role-agri { --card-color: rgba(46, 204, 113, 0.8); }
+        .role-agri .role-icon { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .role-agri .btn-choose { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+        .role-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-size: 2rem;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .role-title {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-desc {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-features li {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.8rem;
+            padding: 0.3rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .role-features li i {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .btn-choose {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-choose:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-checkmark {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 28px;
+            height: 28px;
+            background: var(--card-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.75rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s ease;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            text-align: center;
+            color: rgba(255,255,255,0.25);
+            font-size: 0.78rem;
+            margin-top: 2rem;
+        }
+
+        /* ── Pulse animation on selected ── */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 var(--card-color); }
+            70% { box-shadow: 0 0 0 10px transparent; }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        .role-card.selected { animation: pulse-ring 0.6s ease-out; }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+    {# ── Header ── #}
+    <div class="header">
+        <div class="avatar">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <h1>Bienvenue sur SmartFarm !</h1>
+        <p>Vous êtes connecté avec Google. Choisissez votre rôle pour accéder à votre espace dédié.</p>
+    </div>
+
+    {# ── Flash Messages ── #}
+    {% for msg in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {# ── Cartes de rôle ── #}
+    <form method="post" action="{{ path('app_choose_role') }}" id="roleForm">
+        <input type="hidden" name="role" id="selectedRole" value="">
+
+        <div class="roles-grid">
+
+            {# ── Admin ── #}
+            <div class="role-card role-admin" onclick="selectRole('admin', this)" id="card-admin">
+                <div class="card-checkmark"><i class="fas fa-check"></i></div>
+                <div class="role-icon"><i class="fas fa-crown"></i></div>
+                <div class="role-title">Administrateur</div>
+                <div class="role-desc">Accès complet à toutes les fonctionnalités de la plateforme.</div>
+                <ul class="role-features">
+                    <li><i class="fas fa-check-circle" style="color:#e74c3c;"></i> Gestion des utilisateurs</li>
+                    <li><i class="fas fa-check-circle" style="color:#e74c3c;"></i> Configuration système</li>
+                    <li><i class="fas fa-check-circle" style="color:#e74c3c;"></i> Tableaux de bord globaux</li>
+                    <li><i class="fas fa-check-circle" style="color:#e74c3c;"></i> Rapports et statistiques</li>
+                </ul>
+                <button type="button" class="btn-choose" onclick="selectRole('admin', document.getElementById('card-admin'))">
+                    <i class="fas fa-crown me-2"></i>Choisir Admin
+                </button>
+            </div>
+
+            {# ── Responsable Stock ── #}
+            <div class="role-card role-stock" onclick="selectRole('responsable_stock', this)" id="card-stock">
+                <div class="card-checkmark"><i class="fas fa-check"></i></div>
+                <div class="role-icon"><i class="fas fa-boxes"></i></div>
+                <div class="role-title">Responsable Stock</div>
+                <div class="role-desc">Gérez les stocks, produits et mouvements de marchandises.</div>
+                <ul class="role-features">
+                    <li><i class="fas fa-check-circle" style="color:#f39c12;"></i> Gestion des stocks</li>
+                    <li><i class="fas fa-check-circle" style="color:#f39c12;"></i> Suivi des produits</li>
+                    <li><i class="fas fa-check-circle" style="color:#f39c12;"></i> Gestion des ventes</li>
+                    <li><i class="fas fa-check-circle" style="color:#f39c12;"></i> Alertes de rupture</li>
+                </ul>
+                <button type="button" class="btn-choose" onclick="selectRole('responsable_stock', document.getElementById('card-stock'))">
+                    <i class="fas fa-boxes me-2"></i>Choisir Responsable Stock
+                </button>
+            </div>
+
+            {# ── Agriculteur ── #}
+            <div class="role-card role-agri" onclick="selectRole('agriculteur', this)" id="card-agri">
+                <div class="card-checkmark"><i class="fas fa-check"></i></div>
+                <div class="role-icon"><i class="fas fa-tractor"></i></div>
+                <div class="role-title">Agriculteur</div>
+                <div class="role-desc">Gérez vos parcelles, cultures et récoltes au quotidien.</div>
+                <ul class="role-features">
+                    <li><i class="fas fa-check-circle" style="color:#2ecc71;"></i> Gestion des parcelles</li>
+                    <li><i class="fas fa-check-circle" style="color:#2ecc71;"></i> Suivi des cultures</li>
+                    <li><i class="fas fa-check-circle" style="color:#2ecc71;"></i> Analyse des récoltes</li>
+                    <li><i class="fas fa-check-circle" style="color:#2ecc71;"></i> Rendement & rapport</li>
+                </ul>
+                <button type="button" class="btn-choose" onclick="selectRole('agriculteur', document.getElementById('card-agri'))">
+                    <i class="fas fa-tractor me-2"></i>Choisir Agriculteur
+                </button>
+            </div>
+
+        </div>
+
+        {# ── Bouton de confirmation (apparaît après sélection) ── #}
+        <div id="confirmSection" style="display:none; text-align:center;">
+            <button type="submit" class="btn btn-light btn-lg px-5 rounded-pill fw-bold"
+                    style="box-shadow: 0 8px 24px rgba(255,255,255,0.15);">
+                <i class="fas fa-arrow-right me-2"></i>Accéder à mon espace
+            </button>
+            <p style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin-top:0.75rem;">
+                Vous pouvez changer votre rôle plus tard depuis votre profil.
+            </p>
+        </div>
+    </form>
+
+    <div class="page-footer">
+        &copy; {{ "now"|date("Y") }} SmartFarm — Tous droits réservés
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentSelected = null;
+
+    function selectRole(role, cardEl) {
+        // Désélectionner tous
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+
+        // Sélectionner la carte cliquée
+        cardEl.classList.add('selected');
+        currentSelected = role;
+
+        // Mettre à jour l'input caché
+        document.getElementById('selectedRole').value = role;
+
+        // Afficher le bouton de confirmation
+        document.getElementById('confirmSection').style.display = 'block';
+
+        // Scroll vers le bouton
+        setTimeout(() => {
+            document.getElementById('confirmSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    // Empêcher la soumission sans sélection
+    document.getElementById('roleForm').addEventListener('submit', function(e) {
+        if (!currentSelected) {
+            e.preventDefault();
+            alert('Veuillez choisir un rôle avant de continuer.');
+        }
+    });
+</script>
+</body>
+</html>

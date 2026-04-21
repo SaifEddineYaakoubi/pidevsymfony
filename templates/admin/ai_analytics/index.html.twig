@@ -1,0 +1,402 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Analyse IA - Statistiques Utilisateurs{% endblock %}
+
+{% block admin_page_title %}
+<i class="fas fa-brain text-primary"></i> Analyse IA des Visiteurs
+{% endblock %}
+
+{% block admin_body %}
+<div class="container-fluid">
+            
+            <!-- Loader -->
+            <div id="loader" class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                <p class="mt-3">Analyse des données en cours...</p>
+            </div>
+
+            <!-- Contenu principal -->
+            <div id="analytics-content" style="display: none;">
+                
+                <!-- Cartes de statistiques principales -->
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3 id="totalUsers">0</h3>
+                                <p>Utilisateurs Total</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3 id="averageAge">0</h3>
+                                <p>Âge Moyen</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3 id="medianAge">0</h3>
+                                <p>Âge Médian</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3 id="ageRange">0-0</h3>
+                                <p>Tranche d'Âge</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-arrows-alt-h"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="row">
+                    <!-- Répartition par sexe -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary">
+                                <h3 class="card-title">
+                                    <i class="fas fa-venus-mars"></i> Répartition par Sexe
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="genderChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Répartition par tranche d'âge -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-bar"></i> Répartition par Tranche d'Âge
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="ageRangeChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights IA -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-gradient-primary">
+                                <h3 class="card-title">
+                                    <i class="fas fa-lightbulb"></i> Insights IA - Recommandations
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="insights-container" class="row">
+                                    <!-- Les insights seront ajoutés ici dynamiquement -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prédictions -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-info">
+                            <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Tendance de Croissance</span>
+                                <span class="info-box-number" id="growthTrend">-</span>
+                                <div class="progress">
+                                    <div class="progress-bar" id="growthProgress" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-description" id="growthPercentage">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-success">
+                            <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Tendance Démographique</span>
+                                <span class="info-box-number" id="demographicTrend" style="font-size: 1rem;">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-warning">
+                            <span class="info-box-icon"><i class="fas fa-venus-mars"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Genre Dominant</span>
+                                <span class="info-box-number" id="dominantGender">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+let genderChart, ageRangeChart;
+
+// Charger les données au chargement de la page
+$(document).ready(function() {
+    loadAnalytics();
+});
+
+function loadAnalytics() {
+    $.ajax({
+        url: '{{ path('app_ai_analytics_data') }}',
+        type: 'GET',
+        success: function(data) {
+            console.log('Données reçues:', data);
+            
+            // Masquer le loader
+            $('#loader').hide();
+            $('#analytics-content').fadeIn();
+            
+            // Mettre à jour les cartes
+            updateCards(data);
+            
+            // Créer les graphiques
+            createGenderChart(data.sexe_distribution);
+            createAgeRangeChart(data.age_ranges);
+            
+            // Afficher les insights
+            displayInsights(data.insights);
+            
+            // Afficher les prédictions
+            displayPredictions(data.predictions);
+        },
+        error: function(xhr, status, error) {
+            console.error('Erreur:', error);
+            $('#loader').html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Erreur lors du chargement des données: ${error}
+                </div>
+            `);
+        }
+    });
+}
+
+function updateCards(data) {
+    $('#totalUsers').text(data.total_users);
+    $('#averageAge').html(data.average_age + ' <small>ans</small>');
+    $('#medianAge').html(data.median_age + ' <small>ans</small>');
+    $('#ageRange').html(data.age_range.min + '-' + data.age_range.max + ' <small>ans</small>');
+}
+
+function createGenderChart(sexeData) {
+    const ctx = document.getElementById('genderChart').getContext('2d');
+    
+    const labels = [];
+    const values = [];
+    const colors = [];
+    
+    const genderLabels = {
+        'homme': 'Hommes',
+        'femme': 'Femmes',
+        'autre': 'Autre',
+        'non_specifie': 'Non spécifié'
+    };
+    
+    const genderColors = {
+        'homme': '#3498db',
+        'femme': '#e74c3c',
+        'autre': '#9b59b6',
+        'non_specifie': '#95a5a6'
+    };
+    
+    for (const [key, count] of Object.entries(sexeData.counts)) {
+        if (count > 0) {
+            labels.push(genderLabels[key]);
+            values.push(count);
+            colors.push(genderColors[key]);
+        }
+    }
+    
+    genderChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createAgeRangeChart(ageData) {
+    const ctx = document.getElementById('ageRangeChart').getContext('2d');
+    
+    const labels = Object.keys(ageData.counts);
+    const values = Object.values(ageData.counts);
+    
+    ageRangeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels.map(l => l + ' ans'),
+            datasets: [{
+                label: 'Nombre d\'utilisateurs',
+                data: values,
+                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                borderColor: 'rgba(46, 204, 113, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y} utilisateur(s)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function displayInsights(insights) {
+    const container = $('#insights-container');
+    container.empty();
+    
+    if (insights.length === 0) {
+        container.html(`
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Pas assez de données pour générer des insights.
+                </div>
+            </div>
+        `);
+        return;
+    }
+    
+    insights.forEach(insight => {
+        const alertClass = {
+            'info': 'alert-info',
+            'success': 'alert-success',
+            'warning': 'alert-warning',
+            'danger': 'alert-danger'
+        }[insight.type] || 'alert-info';
+        
+        container.append(`
+            <div class="col-md-4">
+                <div class="alert ${alertClass}">
+                    <h5><i class="fas ${insight.icon}"></i> ${insight.title}</h5>
+                    <p class="mb-0">${insight.message}</p>
+                </div>
+            </div>
+        `);
+    });
+}
+
+function displayPredictions(predictions) {
+    // Tendance de croissance
+    const growthText = predictions.growth_trend === 'positive' ? 'Positive' : 'Stable';
+    $('#growthTrend').text(growthText);
+    $('#growthProgress').css('width', predictions.growth_percentage + '%');
+    $('#growthPercentage').text(`+${predictions.growth_percentage}% prévu`);
+    
+    // Tendance démographique
+    $('#demographicTrend').text(predictions.demographic_trend);
+    
+    // Genre dominant
+    const genderText = {
+        'homme': 'Masculin',
+        'femme': 'Féminin',
+        'autre': 'Autre',
+        'non_specifie': 'Non spécifié'
+    }[predictions.dominant_gender] || 'N/A';
+    $('#dominantGender').text(genderText);
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-box {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert {
+    border-radius: 8px;
+}
+</style>
+
+{% endblock %}

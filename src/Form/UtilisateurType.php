@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -85,6 +86,30 @@ class UtilisateurType extends AbstractType
                 'label' => 'Actif',
                 'required' => false,
                 'attr' => ['class' => 'form-check-input']
+            ])
+            ->add('dateNaissance', DateType::class, [
+                'label' => 'Date de naissance',
+                'required' => false,
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control', 'placeholder' => 'jj/mm/aaaa'],
+                'html5' => true,
+                'constraints' => [
+                    new Assert\LessThan(
+                        value: 'today',
+                        message: 'La date de naissance doit être dans le passé.'
+                    ),
+                ],
+            ])
+            ->add('sexe', ChoiceType::class, [
+                'label' => 'Sexe',
+                'required' => false,
+                'choices' => [
+                    'Homme' => 'homme',
+                    'Femme' => 'femme',
+                    'Autre' => 'autre',
+                ],
+                'placeholder' => 'Sélectionnez le sexe',
+                'attr' => ['class' => 'form-control'],
             ]);
     }
 

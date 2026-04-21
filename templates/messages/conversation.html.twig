@@ -1,0 +1,183 @@
+{% set base_layout = is_granted('ROLE_ADMIN') ? 'admin/base_admin.html.twig' : (is_granted('ROLE_STOCK') ? 'front/base_stock.html.twig' : 'front/base_agriculteur.html.twig') %}
+{% extends base_layout %}
+
+{% block title %}Chat avec {{ partner.prenom }} - SmartFarm{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock %}
+
+{% block admin_page_title %}Discussion avec {{ partner.prenom }}{% endblock %}
+{% block admin_body %}
+    {{ block('chat_content') }}
+{% endblock %}
+
+{% block agriculteur_body %}
+    <div class="container-fluid py-4">
+        {{ block('chat_content') }}
+    </div>
+{% endblock %}
+
+{% block chat_content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
+        <!-- DIRECT CHAT PRIMARY -->
+        <div class="card card-primary card-outline direct-chat direct-chat-primary shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h3 class="card-title">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar bg-secondary mr-2" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                            {{ partner.prenom|first|upper }}
+                        </div>
+                        <span class="font-weight-bold">{{ partner.prenom }} {{ partner.nom }}</span>
+                    </div>
+                </h3>
+
+                <div class="card-tools">
+                    <span title="Total messages" class="badge badge-light px-2">{{ messages|length }}</span>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body bg-light">
+                <!-- Conversations are loaded here -->
+                <div class="direct-chat-messages" id="chatMessages" style="height: 500px; background: #f4f6f9;">
+                    {% for msg in messages %}
+                        {% set isMe = (msg.sender == app.user) %}
+                        <!-- Message. Default to the left -->
+                        <div class="direct-chat-msg {{ isMe ? 'right' : '' }} mb-4">
+                            <div class="direct-chat-infos clearfix mb-1">
+                                <span class="direct-chat-name float-{{ isMe ? 'right' : 'left' }} small text-muted">
+                                    {{ isMe ? 'Moi' : partner.prenom }}
+                                </span>
+                                <span class="direct-chat-timestamp float-{{ isMe ? 'left' : 'right' }} small text-muted mx-2">
+                                    {{ msg.sentAt|date('d/m H:i') }}
+                                </span>
+                            </div>
+                            <!-- /.direct-chat-infos -->
+                            <div class="user-avatar direct-chat-img bg-{{ isMe ? 'primary' : 'secondary' }} shadow-sm">
+                                {{ (isMe ? app.user.prenom : partner.prenom)|first|upper }}
+                            </div>
+                            <!-- /.direct-chat-img -->
+                            <div class="direct-chat-text shadow-sm" style="border-radius: 18px; {{ isMe ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;' : 'background: white; border: none; color: #333;' }}">
+                                {{ msg.content }}
+                            </div>
+                            <!-- /.direct-chat-text -->
+                        </div>
+                        <!-- /.direct-chat-msg -->
+                    {% endfor %}
+                </div>
+                <!--/.direct-chat-messages-->
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer bg-white py-3 border-0">
+                <form id="sendMessageForm">
+                    <input type="hidden" name="receiver_id" value="{{ partner.idUser }}">
+                    <div class="input-group">
+                        <input type="text" name="content" id="messageInput" placeholder="Tapez votre message..." class="form-control rounded-pill border-0 bg-light px-4 py-2" autocomplete="off" required>
+                        <span class="input-group-append ml-2">
+                            <button type="submit" class="btn btn-primary rounded-circle" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!--/.direct-chat -->
+        
+        <div class="text-center mt-4">
+            <a href="{{ path('app_messages_index') }}" class="btn btn-link text-muted">
+                <i class="fas fa-arrow-left mr-2"></i> Retour aux discussions
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.direct-chat-messages {
+    padding: 20px;
+}
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+/* Aligner le texte des bulles */
+.direct-chat-msg.right .direct-chat-text {
+    margin-right: 48px;
+    margin-left: 0;
+}
+.direct-chat-msg .direct-chat-text {
+    margin-left: 48px;
+    margin-right: 0;
+}
+.direct-chat-text::after, .direct-chat-text::before {
+    display: none !important; /* On retire les triangles AdminLTE par défaut pour un look plus moderne */
+}
+</style>
+
+<script>
+$(function() {
+    const chatMessages = $('#chatMessages');
+    
+    // Défiler vers le bas au chargement
+    chatMessages.scrollTop(chatMessages[0].scrollHeight);
+
+    $('#sendMessageForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const input = $('#messageInput');
+        const content = input.val().trim();
+        
+        if (!content) return;
+
+        $.ajax({
+            url: "{{ path('app_messages_send') }}",
+            type: "POST",
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Ajouter le message visuellement sans recharger avec le nouveau style
+                    const html = `
+                        <div class="direct-chat-msg right mb-4">
+                            <div class="direct-chat-infos clearfix mb-1">
+                                <span class="direct-chat-name float-right small text-muted">Moi</span>
+                                <span class="direct-chat-timestamp float-left small text-muted mx-2">${response.sentAt}</span>
+                            </div>
+                            <div class="user-avatar direct-chat-img bg-primary shadow-sm">
+                                {{ app.user.prenom|first|upper }}
+                            </div>
+                            <div class="direct-chat-text shadow-sm" style="border-radius: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;">
+                                ${content}
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.append(html);
+                    input.val('');
+                    chatMessages.scrollTop(chatMessages[0].scrollHeight);
+                } else {
+                    Swal.fire('Erreur', response.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Erreur', 'Impossible d\'envoyer le message', 'error');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

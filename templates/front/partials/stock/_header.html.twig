@@ -11,6 +11,15 @@
         <nav id="navmenu" class="navmenu">
             <ul>
                 <li><a href="{{ path('app_stock_home') }}" class="{{ app.request.attributes.get('_route') == 'app_stock_home' ? 'active' : '' }}">Home</a></li>
+                <li>
+                    <a href="{{ path('app_messages_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_messages' ? 'active' : '' }}">
+                        Messages
+                        {% set unreadCount = render(path('app_messages_unread_count'))|trim %}
+                        {% if unreadCount > 0 %}
+                            <span class="badge bg-danger ms-1" style="font-size: 0.6rem; vertical-align: top;">{{ unreadCount }}</span>
+                        {% endif %}
+                    </a>
+                </li>
                 <li><a class="text-danger" href="{{ path('app_logout') }}">Logout</a></li>
             </ul>
             <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

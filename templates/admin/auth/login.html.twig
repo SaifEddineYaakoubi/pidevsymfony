@@ -4,52 +4,265 @@
 {% block title %}SmartFarm - Connexion{% endblock %}
 
 {% block admin_auth_body %}
+
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #2ecc71;
+        --danger: #e74c3c;
+        --google-red: #DB4437;
+    }
+
+    body {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        color: #fff;
+    }
+
+    .login-card-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2.5rem 2rem;
+        text-align: center;
+    }
+
+    .login-card-header .logo-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+    }
+
+    .login-card-body {
+        padding: 2.5rem;
+    }
+
+    .form-label {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group-text {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.6);
+    }
+
+    .form-control {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #fff;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.3);
+    }
+
+    .form-control:focus {
+        background: rgba(255,255,255,0.12);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.3);
+        color: #fff;
+    }
+
+    .form-check-input {
+        background-color: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.3);
+    }
+
+    .form-check-label {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.9rem;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        color: #fff;
+        width: 100%;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        color: #fff;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.15);
+    }
+
+    .divider span {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .btn-google {
+        background: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.85rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #333;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-google:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255,255,255,0.2);
+        color: #333;
+    }
+
+    .btn-google img {
+        width: 22px;
+        height: 22px;
+    }
+
+    .roles-section {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .role-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.8);
+        justify-content: center;
+    }
+
+    .role-badge.admin { border-color: rgba(231,76,60,0.4); }
+    .role-badge.stock { border-color: rgba(243,156,18,0.4); }
+    .role-badge.agri  { border-color: rgba(46,204,113,0.4); }
+
+    .alert {
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+
+    .register-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .register-link:hover {
+        color: #9b59b6;
+        text-decoration: underline;
+    }
+
+    .footer-text {
+        text-align: center;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.8rem;
+        margin-top: 1.5rem;
+    }
+</style>
+
 <div class="container">
     <div class="row justify-content-center align-items-center min-vh-100">
         <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="mb-3">
-                        <i class="fas fa-leaf fa-3x"></i>
+            <div class="login-card">
+
+                {# ── Header ── #}
+                <div class="login-card-header">
+                    <div class="logo-icon">
+                        <i class="fas fa-leaf"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-0">SmartFarm</h3>
-                    <p class="mb-0 mt-2">Système de Gestion Agricole Intelligent</p>
+                    <h3 class="fw-bold mb-1">SmartFarm</h3>
+                    <p class="mb-0 opacity-75">Système de Gestion Agricole</p>
                 </div>
 
-                <div class="card-body p-5">
+                {# ── Body ── #}
+                <div class="login-card-body">
 
-                    {# Afficher les messages flash s'il y en a #}
+                    {# Flash messages #}
                     {% for message in app.flashes('success') %}
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
 
                     {% for message in app.flashes('error') %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
 
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ error.messageKey | trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                    {# ── Formulaire Email / Password ── #}
                     <form method="post" action="{{ path('app_admin_login') }}">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        {# Let the authenticator decide the target redirect based on roles. Remove forced _target_path. #}
 
-                        <div class="form-group mb-4">
-                            <label class="form-label text-muted">
-                                <i class="fas fa-envelope me-2"></i>Adresse Email
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Adresse Email
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-envelope text-primary"></i>
-                                </span>
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                 <input type="email"
+                                       id="email"
                                        name="email"
-                                       value="{{ last_username is defined ? last_username : (app.request.get('_username')|default('')) }}"
+                                       value="{{ last_username|default('') }}"
                                        class="form-control form-control-lg"
                                        placeholder="exemple@smartfarm.com"
                                        required
@@ -57,113 +270,337 @@
                             </div>
                         </div>
 
-                        <div class="form-group mb-4">
-                            <label class="form-label text-muted">
-                                <i class="fas fa-lock me-2"></i>Mot de passe
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-lock me-1"></i>Mot de passe
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-key text-primary"></i>
-                                </span>
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
                                 <input type="password"
+                                       id="password"
                                        name="password"
                                        class="form-control form-control-lg"
                                        placeholder="••••••••"
                                        required>
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePassword()"
+                                        style="border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6);">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <div class="form-group mb-4">
+                        <div class="mb-4">
                             <div class="form-check">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="_remember_me"
-                                       id="remember_me">
-                                <label class="form-check-label text-muted" for="remember_me">
+                                <input class="form-check-input" type="checkbox" name="_remember_me" id="remember_me">
+                                <label class="form-check-label" for="remember_me">
                                     <i class="fas fa-check-circle me-1"></i>Se souvenir de moi
                                 </label>
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-gradient btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        <button type="submit" class="btn-login mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </button>
+                    </form>
+                    
+                    <div class="divider">
+                        <span>OU</span>
+                    </div>
+                    
+                    <button type="button" id="faceLoginBtn" class="btn-login" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <i class="fas fa-camera me-2"></i>Se connecter avec mon visage
+                    </button>
+                    
+                    <div id="faceLoginMessage" class="mt-3"></div>
+                    
+                    <!-- Modal pour la reconnaissance faciale -->
+                    <div id="faceLoginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+                        <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 600px; width: 90%;">
+                            <h4 class="text-dark mb-3">
+                                <i class="fas fa-camera me-2"></i>Reconnaissance faciale
+                            </h4>
+                            <div class="position-relative">
+                                <video id="faceLoginVideo" width="100%" height="auto" autoplay muted style="border-radius: 10px; max-height: 400px;"></video>
+                                <canvas id="faceLoginCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                            </div>
+                            <div id="faceLoginStatus" class="mt-3"></div>
+                            <button type="button" id="closeFaceModal" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times me-2"></i>Annuler
                             </button>
                         </div>
+                    </div>
 
-
-                        <div class="text-center mt-4">
-                            <div class="small text-muted">
-                                <i class="fas fa-shield-alt me-1"></i>
-                                Connexion sécurisée - SmartFarm
-                            </div>
-                        </div>
-                    </form>
-                {# Ajoutez ceci juste avant <hr class="my-4"> #}
                 <div class="text-center mt-3">
-                    <p class="mb-0">
-                        Pas encore de compte ?
-                        <a href="{{ path('app_register') }}" class="text-primary font-weight-bold">
-                            <i class="fas fa-user-plus"></i> S'inscrire
-                        </a>
-                    </p>
+                    <a href="{{ path('app_forgot_password_request') }}"
+                       style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;">
+                        <i class="fas fa-key me-1"></i>Mot de passe oublié ?
+                    </a>
                 </div>
 
-                <hr class="my-4">
 
-                    <hr class="my-4">
-
-                    <div class="text-center">
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Démo des rôles:
+                    {# ── Pied de page ── #}
+                    <div class="text-center mt-4">
+                        <p class="mb-0" style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                            Pas encore de compte ?
+                            <a href="{{ path('app_register') }}" class="register-link">
+                                <i class="fas fa-user-plus ms-1"></i> S'inscrire
+                            </a>
                         </p>
-                        <div class="row mt-3">
-                            <div class="col-md-4">
-                                <span class="badge bg-danger">
-                                    <i class="fas fa-crown"></i> Admin
-                                </span>
+                    </div>
+
+                    {# ── Rôles disponibles ── #}
+                    <div class="roles-section">
+                        <p class="text-center mb-3" style="color: rgba(255,255,255,0.4); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px;">
+                            Accès par rôle
+                        </p>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <div class="role-badge admin">
+                                    <i class="fas fa-crown" style="color: #e74c3c;"></i>
+                                    Admin
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-warning">
-                                    <i class="fas fa-boxes"></i> Stock
-                                </span>
+                            <div class="col-4">
+                                <div class="role-badge stock">
+                                    <i class="fas fa-boxes" style="color: #f39c12;"></i>
+                                    Stock
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-success">
-                                    <i class="fas fa-tractor"></i> Agriculteur
-                                </span>
+                            <div class="col-4">
+                                <div class="role-badge agri">
+                                    <i class="fas fa-tractor" style="color: #2ecc71;"></i>
+                                    Agriculteur
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div class="text-center mt-4">
-                <p class="text-muted small">
-                    &copy; {{ "now"|date("Y") }} SmartFarm - Tous droits réservés
-                </p>
-            </div>
+            <p class="footer-text">
+                &copy; {{ "now"|date("Y") }} SmartFarm — Tous droits réservés
+            </p>
         </div>
     </div>
 </div>
 
-<style>
-    .btn-gradient {
-        transition: all 0.3s ease;
+<script src="{{ asset('js/webauthn.js') }}"></script>
+<script>
+function togglePassword() {
+    const pwd  = document.getElementById('password');
+    const icon = document.getElementById('toggleIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        pwd.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
     }
-    .btn-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+</script>
+
+<!-- Face-API.js pour la reconnaissance faciale -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+let faceLoginStream = null;
+let modelsLoaded = false;
+
+// Attendre que Face-API.js soit chargé
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        if (typeof faceapi !== 'undefined') {
+            loadFaceModels();
+        } else {
+            console.error('Face-API.js non chargé');
+        }
+    }, 500);
+});
+
+// Charger les modèles Face-API.js
+async function loadFaceModels() {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+    
+    try {
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        console.log('Modèles Face-API chargés pour login');
+    } catch (error) {
+        console.error('Erreur chargement modèles:', error);
     }
-    .card {
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95);
+}
+
+// Bouton de connexion avec reconnaissance faciale
+document.getElementById('faceLoginBtn').addEventListener('click', async () => {
+    const messageDiv = document.getElementById('faceLoginMessage');
+    
+    if (!modelsLoaded) {
+        messageDiv.innerHTML = `
+            <div class="alert alert-warning" style="background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.3); color: rgba(255,255,255,0.8);">
+                <i class="fas fa-spinner fa-spin me-2"></i>
+                Chargement des modèles... Veuillez patienter.
+            </div>
+        `;
+        
+        // Attendre que les modèles soient chargés
+        await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+                if (modelsLoaded) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100);
+        });
     }
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    
+    // Ouvrir le modal
+    const modal = document.getElementById('faceLoginModal');
+    modal.style.display = 'flex';
+    
+    // Démarrer la caméra
+    try {
+        faceLoginStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { width: 640, height: 480 } 
+        });
+        const video = document.getElementById('faceLoginVideo');
+        video.srcObject = faceLoginStream;
+        
+        // Attendre que la vidéo soit prête
+        video.addEventListener('loadedmetadata', () => {
+            const canvas = document.getElementById('faceLoginCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Démarrer la reconnaissance
+            recognizeFace();
+        });
+    } catch (error) {
+        document.getElementById('faceLoginStatus').innerHTML = `
+            <div class="alert alert-danger">
+                Impossible d'accéder à la caméra. Vérifiez vos permissions.
+            </div>
+        `;
     }
-</style>
+});
+
+// Fermer le modal
+document.getElementById('closeFaceModal').addEventListener('click', () => {
+    if (faceLoginStream) {
+        faceLoginStream.getTracks().forEach(track => track.stop());
+    }
+    document.getElementById('faceLoginModal').style.display = 'none';
+});
+
+// Reconnaissance faciale
+async function recognizeFace() {
+    const video = document.getElementById('faceLoginVideo');
+    const canvas = document.getElementById('faceLoginCanvas');
+    const statusDiv = document.getElementById('faceLoginStatus');
+    
+    if (!video.srcObject) return;
+    
+    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    faceapi.matchDimensions(canvas, displaySize);
+    
+    statusDiv.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-search me-2"></i>Recherche de votre visage...
+        </div>
+    `;
+    
+    const recognitionInterval = setInterval(async () => {
+        if (!video.srcObject) {
+            clearInterval(recognitionInterval);
+            return;
+        }
+        
+        const detections = await faceapi
+            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+        
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (detections) {
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+            faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+            
+            statusDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>Visage détecté ! Vérification en cours...
+                </div>
+            `;
+            
+            // Envoyer le descripteur au serveur
+            const descriptor = Array.from(detections.descriptor);
+            
+            try {
+                const response = await fetch('/api/face/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ descriptor })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    clearInterval(recognitionInterval);
+                    
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Bienvenue ${result.name} ! Connexion en cours...
+                        </div>
+                    `;
+                    
+                    // Authentifier l'utilisateur
+                    const authResponse = await fetch('/api/face/authenticate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userId: result.userId })
+                    });
+                    
+                    const authResult = await authResponse.json();
+                    
+                    if (authResult.success) {
+                        // Arrêter la caméra
+                        if (faceLoginStream) {
+                            faceLoginStream.getTracks().forEach(track => track.stop());
+                        }
+                        
+                        // Rediriger
+                        window.location.href = authResult.redirect;
+                    }
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-search me-2"></i>Recherche en cours...
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        } else {
+            statusDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-search me-2"></i>Positionnez votre visage face à la caméra
+                </div>
+            `;
+        }
+    }, 1000); // Vérifier toutes les secondes
+}
+</script>
+
 {% endblock %}
