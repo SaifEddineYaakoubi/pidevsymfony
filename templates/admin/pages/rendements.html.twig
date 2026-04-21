@@ -1,0 +1,130 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Admin - Rendements{% endblock %}
+{% block admin_page_title %}Rendements{% endblock %}
+
+{% block admin_body %}
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% set qVal = q ?? app.request.query.get('q') ?? '' %}
+    {% set sortVal = sort ?? app.request.query.get('sort') ?? 'productivite' %}
+    {% set dirVal = dir ?? app.request.query.get('dir') ?? 'DESC' %}
+
+    {# helper macro to build sort links that keep the current search query #}
+    {% macro sort_link(routeName, q, currentSort, currentDir, key, label) %}
+        {% set isActive = (currentSort == key) %}
+        {% set nextDir = (isActive and (currentDir|upper == 'ASC')) ? 'DESC' : 'ASC' %}
+        <a href="{{ path(routeName, { q: q, sort: key, dir: nextDir }) }}" class="text-decoration-none">
+            {{ label }}
+            {% if isActive %}
+                <i class="fas {{ (currentDir|upper == 'ASC') ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
+            {% else %}
+                <i class="fas fa-sort text-muted"></i>
+            {% endif %}
+        </a>
+    {% endmacro %}
+    {% import _self as ui %}
+
+    <div data-controller="crud-search"
+         data-crud-search-url-value="{{ path('app_admin_rendements') }}">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: .75rem;">
+                <h3 class="card-title mb-0">Liste des rendements</h3>
+
+                <form method="get" action="{{ path(currentRoute) }}" class="d-flex align-items-center" style="gap: .5rem;" onsubmit="return false;">
+                    <input type="hidden" name="sort" value="{{ sortVal }}">
+                    <input type="hidden" name="dir" value="{{ dirVal }}">
+                    <div class="input-group input-group-sm" style="width: 320px;">
+                        <input type="text" name="q" value="{{ qVal }}" class="form-control" placeholder="Rechercher (culture, productivité, surface)…"
+                               autocomplete="off"
+                               data-crud-search-target="input"
+                               data-action="input->crud-search#search">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ path(currentRoute) }}" title="Réinitialiser">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body">
+            {# Statistics Cards #}
+            <div class="row mb-4">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ stats.total_filtered }}</h3>
+                            <p>Total rendements</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+
+                {% set faible = stats.counts_by_class.faible ?? 0 %}
+                {% set moyen = stats.counts_by_class.moyen ?? 0 %}
+                {% set bon = stats.counts_by_class.bon ?? 0 %}
+                {% set eleve = stats.counts_by_class.eleve ?? 0 %}
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ faible }}</h3>
+                            <p>Faible (&lt;1 kg/m²)</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ moyen }}</h3>
+                            <p>Moyen (1-2 kg/m²)</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-minus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ bon + eleve }}</h3>
+                            <p>Bon/Élevé (≥2 kg/m²)</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Sort Controls #}
+            <div class="mb-3">
+                <label class="form-label">Trier par:</label>
+                <div class="btn-group btn-group-sm" role="group">
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'productivite', 'Productivité') }}
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'surface_exploitee', 'Surface') }}
+                    {{ ui.sort_link(currentRoute, qVal, sortVal, dirVal, 'quantite_totale', 'Quantité totale') }}
+                </div>
+            </div>
+
+            {# Results Container #}
+            <div class="agri-crud-results" data-crud-search-target="results">
+                <div class="agri-crud-loader" aria-hidden="true"></div>
+                {% include 'admin/pages/rendements/_results.html.twig' %}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

@@ -35,9 +35,34 @@
                         <p>Widgets</p>
                     </a>
                 </li>
+<<<<<<< Updated upstream
                 <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_pages_tables_' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-table"></i>
+=======
+
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_recoltes') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_recoltes' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-wheat-awn"></i>
+                        <p>Récoltes</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_rendements') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_rendements' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>Rendements</p>
+                    </a>
+                </li>
+
+
+                <!-- SECTION COMPTE -->
+                <li class="nav-header">COMPTE</li>
+
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user-circle"></i>
+>>>>>>> Stashed changes
                         <p>
                             Tables
                             <i class="right fas fa-angle-left"></i>

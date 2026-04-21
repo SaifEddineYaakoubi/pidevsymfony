@@ -1,0 +1,85 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="text-muted small">
+        {{ recoltes|length }} résultat(s)
+        {% if search %}pour "{{ search }}"{% endif %}
+    </div>
+</div>
+
+<div class="row g-3" id="recolteCards">
+    {% for recolte in recoltes %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card h-100 agri-card"
+                 role="button"
+                 data-card-type="recolte"
+                 data-id="{{ recolte.id_recolte }}"
+                 data-href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}"
+                 data-delete-token="{{ csrf_token('delete' ~ recolte.id_recolte) }}"
+                 style="cursor: pointer; transition: all 0.2s ease; background: linear-gradient(135deg, rgba(34, 139, 34, 0.12), rgba(50, 205, 50, 0.10)) !important;">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title text-truncate mb-1">{{ recolte.type_culture }}</h5>
+                        <span class="badge bg-{{
+                            recolte.qualite == 'excellente' ? 'success' :
+                            (recolte.qualite == 'bonne' ? 'primary' :
+                            (recolte.qualite == 'moyenne' ? 'warning' :
+                            (recolte.qualite == 'mauvaise' ? 'danger' : 'secondary')))
+                        }} fs-6">
+                            {{ recolte.qualite ?: '-' }}
+                        </span>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong class="text-success">{{ recolte.quantite }} kg</strong>
+                    </div>
+
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            {{ recolte.date_recolte ? recolte.date_recolte|date('d/m/Y') : '-' }}
+                        </small>
+                    </div>
+
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            {{ recolte.localisation }}
+                        </small>
+                    </div>
+
+                    <div class="mt-auto">
+                        {% if rendements[recolte.id_recolte] is defined and rendements[recolte.id_recolte] is not null %}
+                            <div class="text-primary mb-3">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <strong>{{ rendements[recolte.id_recolte]|number_format(2, '.', '') }} kg/m²</strong>
+                            </div>
+                        {% else %}
+                            <div class="text-muted mb-3">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Rendement non calculé
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary flex-fill" href="{{ path('app_recolte_show', {'id_recolte': recolte.id_recolte}) }}">Voir</a>
+                            <a class="btn btn-sm btn-outline-secondary flex-fill" href="{{ path('app_recolte_edit', {'id_recolte': recolte.id_recolte}) }}">Modifier</a>
+                            <form method="post"
+                                  action="{{ path('app_recolte_delete', {'id_recolte': recolte.id_recolte}) }}"
+                                  class="d-inline flex-fill"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette récolte?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recolte.id_recolte) }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>Aucune récolte trouvée</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>

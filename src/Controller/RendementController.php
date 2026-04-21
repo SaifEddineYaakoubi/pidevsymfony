@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\SoilAnalysisService;
 
 #[Route('/rendement')]
 class RendementController extends AbstractController
@@ -49,10 +50,30 @@ class RendementController extends AbstractController
     }
 
     #[Route('/{idRendement}', name: 'app_rendement_show', methods: ['GET'])]
+<<<<<<< Updated upstream
     public function show(Rendement $rendement): Response
     {
+=======
+    public function show(int $idRendement, RendementRepository $rendementRepository, SoilAnalysisService $soilService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $rendement = $rendementRepository->findOneForUser($idRendement, $user);
+        if (!$rendement) {
+            throw $this->createNotFoundException('Rendement non trouvé');
+        }
+
+        // Récupérer l'analyse d'impact du sol sur le rendement
+        $yieldAnalysis = $soilService->analyzeImpactOnYield($rendement);
+
+>>>>>>> Stashed changes
         return $this->render('rendement/show.html.twig', [
             'rendement' => $rendement,
+            'yield_analysis' => $yieldAnalysis,
+            'json_pretty' => json_encode($yieldAnalysis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         ]);
     }
 

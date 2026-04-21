@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test API AgroAPI{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-flask"></i> Interface de Test AgroAPI
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Sélectionnez une récolte ou un rendement pour tester l'intégration avec l'API AgroAPI.
+                    </p>
+
+                    <ul class="nav nav-tabs mb-3" id="testTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="recoltes-tab" data-bs-toggle="tab" data-bs-target="#recoltes" type="button" role="tab">
+                                <i class="fas fa-leaf"></i> Récoltes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="rendements-tab" data-bs-toggle="tab" data-bs-target="#rendements" type="button" role="tab">
+                                <i class="fas fa-chart-bar"></i> Rendements
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="testTabsContent">
+                        <!-- Onglet Récoltes -->
+                        <div class="tab-pane fade show active" id="recoltes" role="tabpanel">
+                            {% if recoltes|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Type Culture</th>
+                                                <th>Localisation</th>
+                                                <th>Quantité</th>
+                                                <th>Date Récolte</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for recolte in recoltes %}
+                                                <tr>
+                                                    <td>#{{ recolte.id_recolte }}</td>
+                                                    <td><strong>{{ recolte.type_culture }}</strong></td>
+                                                    <td>{{ recolte.localisation }}</td>
+                                                    <td>
+                                                        <span class="badge bg-info">{{ recolte.quantite }} kg</span>
+                                                    </td>
+                                                    <td>
+                                                        {% if recolte.date_recolte %}
+                                                            {{ recolte.date_recolte|date('d/m/Y') }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <a href="{{ path('test_soil_test_recolte', {'id_recolte': recolte.id_recolte}) }}"
+                                                               class="btn btn-primary" title="Tester l'analyse">
+                                                                <i class="fas fa-flask"></i> Tester
+                                                            </a>
+                                                            <a href="{{ path('test_soil_api_test_recolte', {'id_recolte': recolte.id_recolte}) }}"
+                                                               class="btn btn-info" title="Voir JSON" target="_blank">
+                                                                <i class="fas fa-code"></i> JSON
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Aucune récolte trouvée. Créez d'abord une récolte.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Onglet Rendements -->
+                        <div class="tab-pane fade" id="rendements" role="tabpanel">
+                            {% if rendements|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Récolte</th>
+                                                <th>Productivité</th>
+                                                <th>Quantité Totale</th>
+                                                <th>Surface</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for rendement in rendements %}
+                                                <tr>
+                                                    <td>#{{ rendement.id_rendement }}</td>
+                                                    <td>
+                                                        Récolte #{{ rendement.id_recolte.id_recolte }}
+                                                        ({{ rendement.id_recolte.type_culture }})
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success">
+                                                            {{ rendement.productivite|number_format(2, '.', '') }} kg/m²
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ rendement.quantite_totale }} kg</td>
+                                                    <td>{{ rendement.surface_exploitee }} m²</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <a href="{{ path('test_soil_test_rendement', {'idRendement': rendement.id_rendement}) }}"
+                                                               class="btn btn-primary" title="Tester l'analyse">
+                                                                <i class="fas fa-flask"></i> Tester
+                                                            </a>
+                                                            <a href="{{ path('test_soil_api_test_rendement', {'idRendement': rendement.id_rendement}) }}"
+                                                               class="btn btn-info" title="Voir JSON" target="_blank">
+                                                                <i class="fas fa-code"></i> JSON
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Aucun rendement trouvé.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Cette page de test vous permet de vérifier l'intégration AgroAPI.
+                        Les données sont cachées 24h.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

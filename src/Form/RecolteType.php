@@ -19,14 +19,20 @@ class RecolteType extends AbstractType
         $builder
             ->add('quantite', NumberType::class, [
                 'label' => 'Quantité',
+<<<<<<< Updated upstream
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Positive(),
                 ],
+=======
+                'required' => true,
+                'attr' => ['min' => '0.01', 'step' => '0.01']
+>>>>>>> Stashed changes
             ])
             ->add('date_recolte', DateType::class, [
                 'label' => 'Date de récolte',
                 'widget' => 'single_text',
+<<<<<<< Updated upstream
                 'required' => false,
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -35,9 +41,13 @@ class RecolteType extends AbstractType
                         'message' => 'La date de récolte ne peut pas être dans le futur.',
                     ]),
                 ],
+=======
+                'required' => true,
+>>>>>>> Stashed changes
             ])
             ->add('qualite', ChoiceType::class, [
                 'label' => 'Qualité',
+                'required' => true,
                 'choices' => [
                     'Excellente' => 'excellente',
                     'Bonne' => 'bonne',
@@ -50,6 +60,7 @@ class RecolteType extends AbstractType
             ])
             ->add('type_culture', TextType::class, [
                 'label' => 'Type de culture',
+<<<<<<< Updated upstream
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Length(['min' => 2, 'max' => 100]),
@@ -61,6 +72,13 @@ class RecolteType extends AbstractType
                     new Assert\NotBlank(),
                     new Assert\Length(['min' => 2, 'max' => 150]),
                 ],
+=======
+                'required' => true,
+            ])
+            ->add('localisation', TextType::class, [
+                'label' => 'Localisation',
+                'required' => true,
+>>>>>>> Stashed changes
             ])
         ;
     }
