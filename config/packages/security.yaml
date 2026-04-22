@@ -48,9 +48,11 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/admin/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/admin/logout$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/face/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/face/authenticate$, roles: PUBLIC_ACCESS }
         - { path: ^/stock/test-mail-simple$, roles: PUBLIC_ACCESS }
         - { path: ^/stock, roles: [ROLE_ADMIN, ROLE_STOCK, ROLE_AGRICULTEUR] }
-        - { path: ^/admin/logout$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/agriculteur, roles: [ROLE_AGRICULTEUR, ROLE_ADMIN, ROLE_STOCK] }
         - { path: ^/profile, roles: [ROLE_ADMIN, ROLE_AGRICULTEUR, ROLE_STOCK] }

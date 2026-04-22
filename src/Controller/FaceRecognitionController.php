@@ -119,7 +119,7 @@ class FaceRecognitionController extends AbstractController
             $role = strtolower($user->getRole() ?? '');
             
             if ($role === 'admin' || str_starts_with($role, 'role_admin')) {
-                $redirectUrl = $this->generateUrl('app_admin_dashboard');
+                $redirectUrl = $this->generateUrl('app_ai_analytics');
             } elseif ($role === 'responsable_stock' || str_starts_with($role, 'role_stock')) {
                 $redirectUrl = $this->generateUrl('app_stock_home');
             } elseif ($role === 'agriculteur' || str_starts_with($role, 'role_agriculteur')) {

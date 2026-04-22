@@ -70,6 +70,23 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ path('app_messages_index') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_messages' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-comments"></i>
+                        <p>Messagerie</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ path('app_ai_analytics') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_ai_analytics' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-brain text-primary"></i>
+                        <p>
+                            Analyse IA
+                            <span class="badge badge-success right">NEW</span>
+                        </p>
+                    </a>
+                </li>
+
 
                 <!-- SECTION COMPTE -->
                 <li class="nav-header">COMPTE</li>

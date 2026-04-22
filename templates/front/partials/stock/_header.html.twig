@@ -23,6 +23,12 @@
                 <li><a href="#" class="disabled" title="Accès non disponible">Clients</a></li>
 
                 {# Compte Responsable Stock #}
+                <li>
+                    <a href="{{ path('app_messages_index') }}" class="{{ app.request.attributes.get('_route') starts with 'app_messages' ? 'active' : '' }}">
+                        Messages
+                    </a>
+                </li>
+
                 {% if is_granted('ROLE_STOCK') %}
                     <li class="dropdown">
                         <a href="#">

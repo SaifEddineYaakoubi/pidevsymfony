@@ -77,7 +77,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if ($roleField) {
             $rf = strtolower($roleField);
             if ($rf === 'admin' || str_starts_with($rf, 'role_admin')) {
-                $target = 'app_admin_dashboard';
+                $target = 'app_ai_analytics';
             } elseif ($rf === 'responsable_stock' || str_starts_with($rf, 'role_stock')) {
                 $target = 'app_stock_home';
             } elseif ($rf === 'agriculteur' || str_starts_with($rf, 'role_agriculteur')) {
@@ -106,7 +106,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             if ($targetPath) {
                 return new RedirectResponse($targetPath);
             }
-            return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+            return new RedirectResponse($this->urlGenerator->generate('app_ai_analytics'));
         } elseif (in_array('ROLE_STOCK', $roles)) {
             return new RedirectResponse($this->urlGenerator->generate('app_stock_home'));
         } elseif (in_array('ROLE_AGRICULTEUR', $roles)) {
