@@ -30,6 +30,14 @@ services:
         arguments:
             $nominatimUserAgent: '%app.nominatim.user_agent%'
 
+    App\Service\GeoLocationService:
+        arguments:
+            $apiKey: '%env(IPGEOLOCATION_API_KEY)%'
+
+    App\Service\CurrencyService:
+        arguments:
+            $apiKey: '%env(EXCHANGERATE_API_KEY)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
@@ -48,3 +56,10 @@ services:
             - '@http_client'
             - '@logger'
             - '%env(HUGGINGFACE_API_KEY)%'
+
+    # PredictionService requires explicit scalar bindings: project dir and database URL
+    App\Service\PredictionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $databaseUrl: '%env(resolve:DATABASE_URL)%'
+

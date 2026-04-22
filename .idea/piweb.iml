@@ -166,6 +166,17 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/web-auth/webauthn-lib" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/web-auth/webauthn-symfony-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/web-token/jwt-library" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/bacon/bacon-qr-code" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/clue/stream-filter" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/dasprid/enum" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/endroid/qr-code" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/client-common" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/discovery" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/httplug" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/message" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/promise" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/railsware/mailtrap-php" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/brevo-mailer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -160,6 +160,25 @@ final class StockController extends AbstractController
         return $this->render('stock/alert_interface.html.twig');
     }
 
+    #[Route('/stock/test-brevo-alert', name: 'app_stock_test_brevo_alert', methods: ['GET'])]
+    public function testBrevoAlert(): JsonResponse
+    {
+        try {
+            $result = $this->stockAlertService->checkAndSendAlerts();
+            return new JsonResponse([
+                'status' => 'ok',
+                'alerts_sent' => $result['produits'] ?? [],
+                'alertes' => $result['alertes'] ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'alerts_sent' => [],
+            ], 500);
+        }
+    }
+
     #[Route('/stock/send-alerts', name: 'app_stock_send_alerts', methods: ['POST'])]
     public function sendAlerts(Request $request): JsonResponse
     {
