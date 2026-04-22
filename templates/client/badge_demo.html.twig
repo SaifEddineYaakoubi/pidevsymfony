@@ -1,0 +1,104 @@
+{# templates/client/badge_demo.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Système de Badges Clients{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">
+        <i class="fas fa-medal"></i> Système de Badges Clients
+    </h1>
+
+    {# Explication du système #}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Comment fonctionne le système de badges ?</h5>
+        </div>
+        <div class="card-body">
+            <p>Les clients sont automatiquement classifiés selon le nombre de ventes effectuées :</p>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <span class="badge bg-warning text-dark">🥇 Or (Gold)</span>
+                    <strong>3 ventes ou plus</strong> - Clients VIP
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-secondary">🥈 Argent (Silver)</span>
+                    <strong>2 ventes</strong> - Clients réguliers
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger">🥉 Bronze</span>
+                    <strong>1 vente</strong> - Nouveaux clients
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-light text-dark">⚪ Aucun</span>
+                    <strong>0 vente</strong> - Clients sans achat
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {# Statistiques globales #}
+    {% set stats = badge_stats() %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h2 class="display-4">{{ stats.gold }}</h2>
+                    <p class="mb-0">🥇 Clients Or</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-secondary">
+                <div class="card-body">
+                    <h2 class="display-4">{{ stats.silver }}</h2>
+                    <p class="mb-0">🥈 Clients Argent</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                    <h2 class="display-4">{{ stats.bronze }}</h2>
+                    <p class="mb-0">🥉 Clients Bronze</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-light">
+                <div class="card-body">
+                    <h2 class="display-4">{{ stats.none }}</h2>
+                    <p class="mb-0">⚪ Sans badge</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Exemples d'utilisation dans Twig #}
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Exemples d'utilisation dans Twig</h5>
+        </div>
+        <div class="card-body">
+            <h6>1. Afficher le badge avec le filtre :</h6>
+            <pre><code>{{ '{{ client|badge_html }}' }}</code></pre>
+
+            <h6 class="mt-3">2. Afficher uniquement l'icône :</h6>
+            <pre><code>{{ '{{ client|badge_html(false) }}' }}</code></pre>
+
+            <h6 class="mt-3">3. Utiliser le partial :</h6>
+            <pre><code>{{ "{% include 'client/_badge_display.html.twig' with {'client': client} %}" }}</code></pre>
+
+            <h6 class="mt-3">4. Récupérer l'objet badge :</h6>
+            <pre><code>{{ '{% set badge = client_badge(client) %}
+{{ badge.icon }} {{ badge.label }}' }}</code></pre>
+
+            <h6 class="mt-3">5. Condition basée sur le badge :</h6>
+            <pre><code>{{ "{% set badge = client_badge(client) %}
+{% if badge.value == 'gold' %}
+    <span class=\"text-warning\">Client VIP!</span>
+{% endif %}" }}</code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,18 +15,39 @@ class ClientType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom du client',
-                'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: Jean Dupont'],
+                'required' => true,
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Ex: Jean Dupont',
+                    'minlength' => 3,
+                    'maxlength' => 100,
+                ],
+                'help' => 'Minimum 3 caractères, maximum 100',
             ])
             ->add('contact', TextType::class, [
                 'label' => 'Contact (Téléphone ou Email)',
-                'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: 06 12 34 56 78 ou email@example.com'],
+                'required' => true,
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Ex: 06 12 34 56 78 ou email@example.com',
+                    'minlength' => 8,
+                    'maxlength' => 100,
+                ],
+                'help' => 'Email ou numéro de téléphone valide requis',
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
-                'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Ex: 123 Rue de la Paix, 75000 Paris'],
+                'required' => true,
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Ex: 123 Rue de la Paix, 75000 Paris',
+                    'minlength' => 3,
+                    'maxlength' => 150,
+                ],
+                'help' => 'Minimum 3 caractères',
             ])
         ;
     }
@@ -40,3 +61,5 @@ class ClientType extends AbstractType
         ]);
     }
 }
+
+

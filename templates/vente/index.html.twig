@@ -6,10 +6,9 @@
     <div style="background-color: #f8f9fa; min-height: 100vh; padding: 20px 0;">
         <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
 
-            <!-- Header Section -->
             <div style="margin-bottom: 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div>
+                    <div style="flex: 1;">
                         <h1 style="margin: 0 0 5px 0; font-weight: 700; color: #1a1a2e; font-size: 1.75rem;">📊 Ventes</h1>
                         <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">Suivi de vos transactions</p>
                     </div>
@@ -19,7 +18,6 @@
                 </div>
             </div>
 
-            <!-- Search Card -->
             <div style="background: white; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
                 <form method="GET" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
@@ -29,8 +27,8 @@
                                 type="text"
                                 name="search"
                                 style="flex: 1; border: none; background: none; padding: 8px 12px; font-size: 0.9rem; outline: none;"
-                                placeholder="Rechercher..."
-                                value="{{ search }}"
+                                placeholder="Rechercher par client ou produit..."
+                                value="{{ search|default('') }}"
                             >
                         </div>
                     </div>
@@ -83,7 +81,7 @@
                                     <div>
                                         <div class="small opacity-75">Dernière Vente</div>
                                         <div class="h5 mb-0">
-                                            {% if stats.last_vente_date is not empty %}
+                                            {% if stats.last_vente_date is defined and stats.last_vente_date is not empty %}
                                                 {{ stats.last_vente_date|date('d/m/Y') }}
                                             {% else %}
                                                 —
@@ -98,105 +96,206 @@
                 </div>
             </div>
 
-            <!-- Table Card -->
-            <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); margin-bottom: 20px;">
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                        <thead style="background: linear-gradient(135deg, #2d3561 0%, #1a1f4b 100%); color: white;">
-                            <tr>
-                                <th style="width: 25%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
-                                    <i class="fas fa-user" style="margin-right: 6px;"></i>Client
-                                </th>
-                                <th style="width: 20%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
-                                    <a href="{{ path('app_vente_index', {
-                                        'search': search,
-                                        'sortBy': 'date_vente',
-                                        'order': (sortBy == 'date_vente' ? nextOrder : 'DESC')
-                                    }) }}" style="color: white; text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                                        <span><i class="fas fa-calendar" style="margin-right: 6px;"></i>Date</span>
-                                        {% if sortBy == 'date_vente' %}
-                                            <i class="fas fa-{{ order == 'ASC' ? 'sort-numeric-down' : 'sort-numeric-up' }}"></i>
-                                        {% else %}
-                                            <i class="fas fa-sort" style="opacity: 0.5;"></i>
-                                        {% endif %}
-                                    </a>
-                                </th>
-                                <th style="width: 25%; font-weight: 600; padding: 12px 16px; text-align: left; letter-spacing: 0.3px;">
-                                    <a href="{{ path('app_vente_index', {
-                                        'search': search,
-                                        'sortBy': 'montant_total',
-                                        'order': (sortBy == 'montant_total' ? nextOrder : 'DESC')
-                                    }) }}" style="color: white; text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                                        <span><i class="fas fa-coins" style="margin-right: 6px;"></i>Montant</span>
-                                        {% if sortBy == 'montant_total' %}
-                                            <i class="fas fa-{{ order == 'ASC' ? 'sort-amount-down' : 'sort-amount-up' }}"></i>
-                                        {% else %}
-                                            <i class="fas fa-sort" style="opacity: 0.5;"></i>
-                                        {% endif %}
-                                    </a>
-                                </th>
-                                <th style="width: 30%; font-weight: 600; padding: 12px 16px; text-align: center; letter-spacing: 0.3px;">
-                                    <i class="fas fa-cog" style="margin-right: 4px;"></i>Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for vente in ventes %}
-                                <tr style="border-bottom: 1px solid #e9ecef; transition: background-color 0.2s;">
-                                    <td style="padding: 10px 16px; color: #1a1a2e;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
-                                                <i class="fas fa-user-tie"></i>
-                                            </div>
-                                            <span style="font-weight: 500; font-size: 0.9rem;">{{ vente.id_client ? (vente.id_client|safe_client_name) : 'Inconnu' }}</span>
-                                        </div>
-                                    </td>
-                                    <td style="padding: 10px 16px; color: #666; font-size: 0.9rem;">
-                                        <i class="far fa-calendar-alt" style="margin-right: 4px; color: #9ca3af;"></i>{{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}
-                                    </td>
-                                    <td style="padding: 10px 16px;">
-                                        <span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
-                                            {{ vente.montant_total ? (vente.montant_total|number_format(2, '.', ' ') ~ ' TND') : '0.00 TND' }}
-                                        </span>
-                                    </td>
-                                    <td style="padding: 10px 16px; text-align: center;">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="btn-group" role="group" aria-label="Actions vente">
-                                                <a href="{{ path('app_vente_show', {'id_vente': vente.id_vente}) }}"
-                                                   class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
-                                                   title="Voir">
-                                                    <i class="fas fa-eye"></i><span>Voir</span>
-                                                </a>
-                                                <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}"
-                                                   class="btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-1"
-                                                   title="Éditer">
-                                                    <i class="fas fa-edit"></i><span>Éditer</span>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="4" style="padding: 40px 16px; text-align: center; color: #9ca3af;">
-                                        <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.3;"></i>
-                                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Aucune vente trouvée</p>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            {# Carte Prédiction IA - Aperçu rapide #}
+            <div class="container" style="padding: 0; margin-bottom: 20px;">
+                <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                    <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-robot" style="font-size: 1.5rem; color: white;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 style="margin: 0; color: white; font-weight: 700; font-size: 1.2rem;">
+                                            Prédiction IA du Prochain Mois
+                                        </h5>
+                                        <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.85rem;">
+                                            Analyse prédictive basée sur l'historique de vos ventes
+                                        </p>
+                                    </div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                                    <div style="color: rgba(255,255,255,0.9); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                                        Chiffre d'Affaires Prédit
+                                    </div>
+                                    <div style="color: white; font-size: 2rem; font-weight: 800; line-height: 1;">
+                                        <i class="fas fa-chart-line" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                        Voir le Dashboard IA
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <a href="{{ path('app_dashboard') }}" class="btn btn-light btn-lg" style="border-radius: 10px; padding: 15px 30px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%;">
+                                    <i class="fas fa-brain" style="margin-right: 8px;"></i>
+                                    Accéder au Dashboard
+                                </a>
+                                <small style="display: block; margin-top: 10px; color: rgba(255,255,255,0.8); font-size: 0.8rem;">
+                                    <i class="fas fa-info-circle"></i> Prédictions avancées avec IA
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
+            <style>
+                .vente-card { transition: all 0.3s ease; border: 1px solid #e9ecef; height: 100%; }
+                .vente-card:hover { box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important; transform: translateY(-5px); }
+                .vente-card .card-header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-bottom: none; padding: 16px; }
+                .vente-card .card-header .badge { background: rgba(255, 255, 255, 0.3); color: white; font-size: 0.9rem; padding: 6px 12px; }
+                .vente-card .card-body { padding: 18px 16px; }
+                .vente-card .info-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; font-size: 0.9rem; }
+                .vente-card .info-row i { color: #10b981; min-width: 20px; margin-top: 2px; font-size: 1rem; }
+                .vente-card .info-label { color: #9ca3af; font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
+                .vente-card .info-value { color: #1a1a2e; font-weight: 500; }
+                .vente-card .montant-value { color: #15803d; font-weight: 700; font-size: 1.1rem; }
+                .vente-card .card-footer { background: #f9fafb; border-top: 1px solid #e9ecef; padding: 12px 16px; display: flex; gap: 6px; }
+                .vente-card .btn-group { width: 100%; display: flex; gap: 6px; }
+                .empty-state-vente { text-align: center; padding: 60px 20px; color: #9ca3af; }
+                
+                /* Animation pour le bouton Dashboard IA */
+                .dashboard-ia-btn {
+                    transition: all 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .dashboard-ia-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+                }
+                .dashboard-ia-btn:active {
+                    transform: translateY(0);
+                }            </style>
+
+            <div style="margin-bottom: 20px;">
+                {% if ventes|length > 0 %}
+                    <div class="row g-4">
+                        {% for vente in ventes %}
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card vente-card shadow-sm">
+                                    <div class="card-header d-flex justify-content-between align-items-start">
+                                        <div style="flex: 1;">
+                                            <h6 style="margin: 0 0 6px 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                                <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                                                    <i class="fas fa-user-tie"></i>
+                                                </div>
+                                                <span>
+                                                    {% if vente.idClient %}
+                                                        {{ vente.idClient.nom }}
+                                                    {% else %}
+                                                        Inconnu
+                                                    {% endif %}
+                                                </span>
+                                            </h6>
+                                            <div style="font-size: 0.75rem; opacity: 0.8; color: white;">Client</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="info-row">
+                                            <i class="fas fa-calendar"></i>
+                                            <div style="flex: 1;">
+                                                <div class="info-label">Date de Vente</div>
+                                                <div class="info-value">{{ vente.dateVente ? vente.dateVente|date('d/m/Y') : '-' }}</div>
+                                            </div>
+                                        </div>
+                                        {% if vente.idProduit %}
+                                            <div class="info-row">
+                                                <i class="fas fa-box"></i>
+                                                <div style="flex: 1;">
+                                                    <div class="info-label">Produit</div>
+                                                    <div class="info-value">{{ vente.idProduit.nom }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="info-row">
+                                                <i class="fas fa-weight"></i>
+                                                <div style="flex: 1;">
+                                                    <div class="info-label">Quantité</div>
+                                                    <div class="info-value">{{ (vente.quantite|number_format(2, ',', ' ') ~ ' ' ~ vente.idProduit.unite) }}</div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        <div class="info-row">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <div style="flex: 1;">
+                                                <div class="info-label">Montant Total</div>
+                                                <div class="info-value montant-value">
+                                                    {{ vente.montantTotal ? (vente.montantTotal|number_format(2, ',', ' ') ~ ' DT') : '0,00 DT' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {# Affichage de la géolocalisation si disponible #}
+                                        {% if vente.ville or vente.fraisLivraison %}
+                                            <div class="info-row">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                <div style="flex: 1;">
+                                                    <div class="info-label">Livraison</div>
+                                                    <div class="info-value" style="font-size: 0.85rem;">
+                                                        {% if vente.ville %}
+                                                            {{ vente.ville }}
+                                                        {% endif %}
+                                                        {% if vente.fraisLivraison %}
+                                                            <span class="badge bg-info ms-1" style="font-size: 0.75rem;">
+                                                                {{ vente.fraisLivraison|number_format(0) }} DT
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="card-footer">
+                                        <div class="btn-group">
+                                           <a href="{{ path('app_vente_show', {'idVente': vente.idVente}) }}" class="btn btn-outline-primary btn-sm">
+                                               <i class="fas fa-eye"></i> Voir
+                                           </a>
+
+                                           {# QR Code Button #}
+                                           <button 
+                                               type="button" 
+                                               class="btn btn-info btn-sm" 
+                                               onclick="openQrCodeModal('{{ path('app_vente_qrcode', {'idVente': vente.idVente}) }}', 'vente', {{ vente.idVente }}, 'Vente #{{ vente.idVente }}')"
+                                               title="Générer le QR Code"
+                                           >
+                                               <i class="fas fa-qrcode"></i> QR
+                                           </button>
+
+                                           <a href="{{ path('app_vente_edit', {'idVente': vente.idVente}) }}" class="btn btn-outline-warning btn-sm">
+                                               <i class="fas fa-edit"></i> Éditer
+                                           </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card shadow-sm border-0">
+                        <div class="empty-state-vente">
+                            <i class="fas fa-shopping-cart" style="font-size: 3rem; opacity: 0.2; margin-bottom: 10px; display: block;"></i>
+                            <p style="margin: 0; font-size: 0.9rem;">Aucune vente trouvée</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="{{ path('app_vente_new') }}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15); display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-plus"></i> Nouvelle
+                    <a href="{{ path('app_vente_new') }}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-plus"></i> Nouvelle Vente
                     </a>
-                    <a href="{{ path('app_vente_export_pdf', {'search': search, 'sortBy': sortBy, 'order': order}) }}" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15); display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-file-pdf"></i> PDF
+                    <a href="{{ path('app_vente_forecast') }}" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-chart-line"></i> Prévisions
+                        <span style="background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">PRO</span>
+                    </a>
+                    <a href="{{ path('app_vente_analyse_devises') }}" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-exchange-alt"></i> Analyse Devises
+                    </a>
+                    <a href="{{ path('app_vente_geolocalisation') }}" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; border: none; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(6, 182, 212, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-map-marked-alt"></i> Carte Livraisons
                     </a>
                 </div>
                 <div style="color: #6b7280; font-weight: 500; font-size: 0.9rem;">
@@ -205,4 +304,7 @@
             </div>
         </div>
     </div>
+
+    {# Include QR Code Modal #}
+    {% include 'components/_qrcode_modal.html.twig' %}
 {% endblock %}

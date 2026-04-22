@@ -50,6 +50,13 @@ security:
         - { path: ^/admin/login$, roles: PUBLIC_ACCESS }
         - { path: ^/admin/logout$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        # Routes publiques pour QR codes (accessibles sans authentification)
+        - { path: ^/vente/\d+/pdf$, roles: PUBLIC_ACCESS }
+        - { path: ^/vente/\d+/download-page$, roles: PUBLIC_ACCESS }
+        - { path: ^/client/\d+/pdf$, roles: PUBLIC_ACCESS }
+        - { path: ^/client/\d+/download-page$, roles: PUBLIC_ACCESS }
+        # Routes protégées
+        - { path: ^/vente, roles: ROLE_USER }
         - { path: ^/stock, roles: ROLE_STOCK }
         - { path: ^/agriculteur, roles: [ROLE_AGRICULTEUR, ROLE_ADMIN] }
         - { path: ^/profile, roles: ROLE_USER }
