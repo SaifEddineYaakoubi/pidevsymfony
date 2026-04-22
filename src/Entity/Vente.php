@@ -6,136 +6,119 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\VenteRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use App\Entity\Utilisateur;
-
 #[ORM\Entity(repositoryClass: VenteRepository::class)]
+#[ORM\HasLifecycleCallbacks] // <--- MOHIM: bech el calcul automatique i-khdem
 class Vente
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private ?int $id_vente = null;
 
-    #[ORM\Column(type: "date", nullable: true)]
-    #[Assert\NotNull(message: "La date de vente est obligatoire.")]
-    #[Assert\Type(type: "\DateTimeInterface", message: "La date de vente doit être une date valide.")]
-    #[Assert\LessThanOrEqual(
-        value: "today",
-        message: "La date de vente ne peut pas être dans le futur."
+    #[ORM\Column(type: "date")]
+    #[Assert\Range(
+        min: "1970-01-01",
+        max: "+1 day", // Zid l-ghodwa bech ma t-7el-lekch machakel
+        notInRangeMessage: "La date de vente est invalide."
     )]
     private ?\DateTimeInterface $date_vente = null;
 
-    #[ORM\Column(type: "float", nullable: true)]
-    #[Assert\NotNull(message: "Le montant total est obligatoire.")]
-    #[Assert\Type(type: "float", message: "Le montant doit être un nombre valide.")]
+    #[ORM\Column(type: "float")]
+    // ISLAH: Na77ina el Assert\NotNull bech i-khalli el calcul i-sir automatique
     #[Assert\Positive(message: "Le montant doit être un nombre positif.")]
-    #[Assert\LessThan(
-        value: 1000000,
-        message: "Le montant ne peut pas dépasser 1 000 000."
-    )]
     private ?float $montant_total = null;
 
+    /**
+     * Flag pour indiquer si le montant a été calculé manuellement avec réduction
+     * Si true, le PrePersist ne recalculera pas le montant
+     */
+    private bool $montantCalculatedWithDiscount = false;
 
-        #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: "ventes")]
+    #[ORM\Column(type: "float")]
+    #[Assert\NotNull(message: "La quantité vendue est obligatoire.")]
+    #[Assert\Positive(message: "La quantité doit être un nombre positif.")]
+    private ?float $quantite = null;
+
+    #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'ventes')]
     #[ORM\JoinColumn(name: 'id_client', referencedColumnName: 'id_client', onDelete: 'CASCADE')]
     #[Assert\NotNull(message: "Le client est obligatoire.")]
     private ?Client $id_client = null;
 
-        #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "ventes")]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'ventes')]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', onDelete: 'CASCADE')]
     private ?Utilisateur $id_user = null;
 
-    public function getId_vente(): ?int
+    #[ORM\ManyToOne(targetEntity: Produit::class)]
+    #[ORM\JoinColumn(name: 'id_produit', referencedColumnName: 'id_produit', onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: "Le produit est obligatoire.")]
+    private ?Produit $id_produit = null;
+
+    #[ORM\Column(type: "string", length: 100, nullable: true)]
+    private ?string $ville = null;
+
+    #[ORM\Column(type: "string", length: 100, nullable: true)]
+    private ?string $region = null;
+
+    #[ORM\Column(type: "float", nullable: true)]
+    private ?float $frais_livraison = null;
+
+    // ======================================================
+    // LOGIC AUTOMATIQUE: Calcul du montant avant sauvegarde
+    // ======================================================
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function calculateMontant(): void
     {
-        return $this->id_vente;
+        // Si le montant a déjà été calculé avec réduction, ne pas le recalculer
+        if ($this->montantCalculatedWithDiscount) {
+            return;
+        }
+
+        if ($this->id_produit !== null && $this->quantite !== null) {
+            // Montant = Prix du produit * Quantité (sans réduction)
+            $this->montant_total = $this->id_produit->getPrixUnitaire() * $this->quantite;
+        }
     }
 
-    // Pas de setter pour l'id: il est auto-généré par la base
-
-    public function getDate_vente()
+    /**
+     * Définit le montant total avec réduction déjà appliquée
+     * Empêche le recalcul automatique
+     */
+    public function setMontantTotalWithDiscount(float $montant_total): self
     {
-        return $this->date_vente;
-    }
-
-    public function setDate_vente($value)
-    {
-        $this->date_vente = $value;
-    }
-
-    // Getters/Setters camelCase pour Symfony
-    public function getDateVente()
-    {
-        return $this->date_vente;
-    }
-
-    public function setDateVente($value)
-    {
-        $this->date_vente = $value;
+        $this->montant_total = $montant_total;
+        $this->montantCalculatedWithDiscount = true;
         return $this;
     }
 
-    public function getMontantTotal()
-    {
-        return $this->montant_total;
-    }
+    // ================= Getters & Setters =================
 
-    public function setMontantTotal($value)
-    {
-        $this->montant_total = $value;
-        return $this;
-    }
+    public function getIdVente(): ?int { return $this->id_vente; }
 
-    public function getMontant_total()
-    {
-        return $this->montant_total;
-    }
+    public function getDateVente(): ?\DateTimeInterface { return $this->date_vente; }
+    public function setDateVente(\DateTimeInterface $date_vente): self { $this->date_vente = $date_vente; return $this; }
 
-    public function setMontant_total($value)
-    {
-        $this->montant_total = $value;
-    }
+    public function getMontantTotal(): ?float { return $this->montant_total; }
+    public function setMontantTotal(?float $montant_total): self { $this->montant_total = $montant_total; return $this; }
 
-    public function getId_client()
-    {
-        return $this->id_client;
-    }
+    public function getQuantite(): ?float { return $this->quantite; }
+    public function setQuantite(?float $quantite): self { $this->quantite = $quantite; return $this; }
 
-    public function setId_client($value)
-    {
-        $this->id_client = $value;
-    }
+    public function getIdClient(): ?Client { return $this->id_client; }
+    public function setIdClient(?Client $client): self { $this->id_client = $client; return $this; }
 
-    // Getters/Setters camelCase pour les relations
-    public function getIdClient()
-    {
-        return $this->id_client;
-    }
+    public function getIdUser(): ?Utilisateur { return $this->id_user; }
+    public function setIdUser(?Utilisateur $user): self { $this->id_user = $user; return $this; }
 
-    public function setIdClient($value)
-    {
-        $this->id_client = $value;
-        return $this;
-    }
+    public function getIdProduit(): ?Produit { return $this->id_produit; }
+    public function setIdProduit(?Produit $produit): self { $this->id_produit = $produit; return $this; }
 
-    public function getId_user()
-    {
-        return $this->id_user;
-    }
+    public function getVille(): ?string { return $this->ville; }
+    public function setVille(?string $ville): self { $this->ville = $ville; return $this; }
 
-    public function setId_user($value)
-    {
-        $this->id_user = $value;
-    }
+    public function getRegion(): ?string { return $this->region; }
+    public function setRegion(?string $region): self { $this->region = $region; return $this; }
 
-    public function getIdUser()
-    {
-        return $this->id_user;
-    }
-
-    public function setIdUser($value)
-    {
-        $this->id_user = $value;
-        return $this;
-    }
+    public function getFraisLivraison(): ?float { return $this->frais_livraison; }
+    public function setFraisLivraison(?float $frais_livraison): self { $this->frais_livraison = $frais_livraison; return $this; }
 }

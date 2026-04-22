@@ -52,8 +52,20 @@
                         <p>Cultures</p>
                     </a>
                 </li>
+            {# Gestion vente #}
+            <li class="nav-item">
+                <a href="{{ path('app_admin_vente_index') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_vente' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-shopping-basket"></i>
+                    <p>Ventes</p>
+                </a>
+            </li>
 
-
+            <li class="nav-item">
+                <a href="{{ path('app_admin_client_index') }}" class="nav-link {{ app.request.attributes.get('_route') starts with 'app_admin_client' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>Clients</p>
+                </a>
+            </li>
                 <!-- SECTION COMPTE -->
                 <li class="nav-header">COMPTE</li>
 

@@ -14,19 +14,19 @@
                             <tbody>
                                 <tr>
                                     <th>ID Vente</th>
-                                    <td>{{ vente.id_vente }}</td>
+                                    <td>{{ vente.idVente }}</td>
                                 </tr>
-                                {% if vente.id_client is not null %}
+                                {% if vente.idClient is not null %}
                                     <tr>
                                         <th>Client</th>
                                         <td>
-                                            <strong>{{ vente.id_client|safe_client_name }}</strong><br/>
-                                            <small class="text-muted">Contact: {{ vente.id_client|safe_client_contact }}</small>
+                                            <strong>{{ vente.idClient.nom }}</strong><br/>
+                                            <small class="text-muted">Contact: {{ vente.idClient.contact }}</small>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Adresse Client</th>
-                                        <td>{{ vente.id_client|safe_client_adresse }}</td>
+                                        <td>{{ vente.idClient.adresse }}</td>
                                     </tr>
                                 {% else %}
                                     <tr>
@@ -36,12 +36,89 @@
                                 {% endif %}
                                 <tr>
                                     <th>Date de Vente</th>
-                                    <td>{{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}</td>
+                                    <td>{{ vente.dateVente ? vente.dateVente|date('d/m/Y') : '-' }}</td>
                                 </tr>
+                                {% if vente.idProduit is not null %}
+                                    <tr>
+                                        <th>Produit</th>
+                                        <td>
+                                            <strong>{{ vente.idProduit.nom }}</strong>
+                                            <small class="text-muted d-block">Type: {{ vente.idProduit.type }}, Unité: {{ vente.idProduit.unite }}</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Prix Unitaire</th>
+                                        <td>{{ vente.idProduit.prixUnitaire|number_format(2, ',', ' ') }} TND</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Quantité Vendue</th>
+                                        <td>{{ vente.quantite ? (vente.quantite|number_format(2, ',', ' ') ~ ' ' ~ vente.idProduit.unite) : '-' }}</td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <th>Montant Total</th>
-                                    <td><strong class="text-success">{{ vente.montant_total|number_format(2, ',', ' ') }} €</strong></td>
+                                    <td>
+                                        <strong class="text-success">{{ vente.montantTotal|number_format(2, ',', ' ') }} TND</strong>
+                                        
+                                        {# Affichage de la conversion en EUR #}
+                                        {% if conversion.success %}
+                                            <span class="badge bg-primary ms-2" style="font-size: 0.9rem;">
+                                                <i class="bi bi-currency-exchange"></i>
+                                                ≈ {{ conversion.montant_eur|number_format(2, ',', ' ') }} EUR
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">
+                                                Taux de change: 1 TND = {{ conversion.taux|number_format(4, ',', ' ') }} EUR
+                                            </small>
+                                        {% elseif conversion.error %}
+                                            <br>
+                                            <small class="text-warning">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                                {{ conversion.error }}
+                                            </small>
+                                        {% endif %}
+                                    </td>
                                 </tr>
+                                
+                                {# Informations de Géolocalisation et Livraison #}
+                                {% if vente.ville or vente.region or vente.fraisLivraison %}
+                                    <tr>
+                                        <th colspan="2" class="bg-light">
+                                            <i class="bi bi-geo-alt-fill text-primary"></i> Informations de Livraison
+                                        </th>
+                                    </tr>
+                                    {% if vente.ville %}
+                                        <tr>
+                                            <th>Ville</th>
+                                            <td>
+                                                <i class="bi bi-building"></i> {{ vente.ville }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if vente.region %}
+                                        <tr>
+                                            <th>Région</th>
+                                            <td>
+                                                <i class="bi bi-map"></i> {{ vente.region }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if vente.fraisLivraison %}
+                                        <tr>
+                                            <th>Frais de Livraison</th>
+                                            <td>
+                                                <span class="badge bg-info" style="font-size: 0.95rem;">
+                                                    <i class="bi bi-truck"></i> {{ vente.fraisLivraison|number_format(2, ',', ' ') }} DT
+                                                </span>
+                                                {% if vente.region and 'Tunis' in vente.region %}
+                                                    <small class="text-muted ms-2">(Tarif Tunis)</small>
+                                                {% else %}
+                                                    <small class="text-muted ms-2">(Tarif Standard)</small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>
@@ -49,7 +126,7 @@
 
                 <div class="mt-4">
                     <a href="{{ path('app_vente_index') }}" class="btn btn-secondary">Retour à la liste</a>
-                    <a href="{{ path('app_vente_edit', {'id_vente': vente.id_vente}) }}" class="btn btn-warning">Éditer</a>
+                    <a href="{{ path('app_vente_edit', {'idVente': vente.idVente}) }}" class="btn btn-warning">Éditer</a>
                     {{ include('vente/_delete_form.html.twig') }}
                 </div>
             </div>

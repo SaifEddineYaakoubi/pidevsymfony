@@ -1,0 +1,98 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_page_title %}Ajouter un Client{% endblock %}
+
+{% block admin_breadcrumbs %}
+<ol class="breadcrumb float-sm-right">
+    <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_admin_client_index') }}">Clients</a></li>
+    <li class="breadcrumb-item active">Ajouter</li>
+</ol>
+{% endblock %}
+
+{% block admin_body %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : (label == 'success' ? 'success' : label) }} alert-dismissible fade show" role="alert">
+                    {{ msg }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-plus"></i> Nouveau Client
+                </h3>
+            </div>
+
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'data-turbo': 'false'}}) }}
+
+                {# Nom #}
+                <div class="form-group row">
+                    <label for="client_nom" class="col-sm-4 col-form-label">Nom</label>
+                    <div class="col-sm-8">
+                        {{ form_widget(form.nom, {attr: {class: 'form-control', placeholder: 'Ex: Ahmed Ben Mohamed'}}) }}
+                        {% if form.nom.vars.errors|length > 0 %}
+                            <small class="form-text text-danger">
+                                {% for error in form.nom.vars.errors %}
+                                    {{ error.message }}
+                                {% endfor %}
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Contact #}
+                <div class="form-group row">
+                    <label for="client_contact" class="col-sm-4 col-form-label">Contact</label>
+                    <div class="col-sm-8">
+                        {{ form_widget(form.contact, {attr: {class: 'form-control', placeholder: 'Email ou Téléphone'}}) }}
+                        {% if form.contact.vars.errors|length > 0 %}
+                            <small class="form-text text-danger">
+                                {% for error in form.contact.vars.errors %}
+                                    {{ error.message }}
+                                {% endfor %}
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Adresse #}
+                <div class="form-group row">
+                    <label for="client_adresse" class="col-sm-4 col-form-label">Adresse</label>
+                    <div class="col-sm-8">
+                        {{ form_widget(form.adresse, {attr: {class: 'form-control', placeholder: 'Ex: 123 Rue de la Paix, Tunis'}}) }}
+                        {% if form.adresse.vars.errors|length > 0 %}
+                            <small class="form-text text-danger">
+                                {% for error in form.adresse.vars.errors %}
+                                    {{ error.message }}
+                                {% endfor %}
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Ajouter
+                    </button>
+                    <a href="{{ path('app_admin_client_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

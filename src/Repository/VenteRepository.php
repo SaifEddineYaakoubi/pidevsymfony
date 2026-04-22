@@ -15,26 +15,22 @@ class VenteRepository extends ServiceEntityRepository
     }
 
     /**
-     * Recherche par nom de client ou ID et tri les ventes
+     * Recherche et tri (Version ADMIN)
      */
     public function findBySearchAndSort(?string $search = null, string $sortBy = 'date_vente', string $order = 'DESC'): array
     {
-        // 1. Valider l'ordre pour éviter les injections SQL
         $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
 
-        // 2. Liste des colonnes triables autorisées
+        // EL ISLAH HNA: Nesta3mlou el esmawet mta3 el Entity b-el underscore
         $sortableColumns = ['date_vente', 'montant_total', 'id_vente'];
         if (!in_array($sortBy, $sortableColumns, true)) {
             $sortBy = 'date_vente';
         }
 
-        $qb = $this->createQueryBuilder('v');
+        $qb = $this->createQueryBuilder('v')
+            ->leftJoin('v.id_client', 'c') // S7i7a tawa (id_client kima f-el Entity)
+            ->addSelect('c');
 
-        // 3. Joindre la table Client (c) pour accéder au nom
-        $qb->leftJoin('v.id_client', 'c')
-           ->addSelect('c'); // Optimization: évite le problème N+1
-
-        // 4. Ajouter la recherche par ID de vente OU par nom du client
         if (!empty($search)) {
             $qb->andWhere(
                 $qb->expr()->orX(
@@ -45,61 +41,13 @@ class VenteRepository extends ServiceEntityRepository
             ->setParameter('search', '%' . $search . '%');
         }
 
-        // 5. Ajouter le tri
-        $qb->orderBy('v.' . $sortBy, $order);
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function findBySearchAndSortForUser(Utilisateur $user, ?string $search = null, string $sortBy = 'date_vente', string $order = 'DESC'): array
-    {
-        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
-
-        $sortableColumns = ['date_vente', 'montant_total', 'id_vente'];
-        if (!in_array($sortBy, $sortableColumns, true)) {
-            $sortBy = 'date_vente';
-        }
-
-        $qb = $this->createQueryBuilder('v')
-            ->andWhere('v.id_user = :user')
-            ->setParameter('user', $user);
-
-        $qb->leftJoin('v.id_client', 'c')
-            ->addSelect('c');
-
-        if (!empty($search)) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    $qb->expr()->like('v.id_vente', ':search'),
-                    $qb->expr()->like('c.nom', ':search')
-                )
-            )
-                ->setParameter('search', '%' . $search . '%');
-        }
-
         $qb->orderBy('v.' . $sortBy, $order);
 
         return $qb->getQuery()->getResult();
     }
 
     /**
-     * Obtenir toutes les ventes triées avec le client chargé
-     */
-    public function findAllSorted(): array
-    {
-        return $this->createQueryBuilder('v')
-            ->leftJoin('v.id_client', 'c')
-            ->addSelect('c')
-            ->orderBy('v.date_vente', 'DESC')
-            ->addOrderBy('v.id_vente', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * Stats globales pour l'entête dashboard de la page index.
-     *
-     * @return array{total_revenus: float, ventes_count: int, last_vente_date: ?\DateTimeInterface}
+     * Stats globales (Version ADMIN)
      */
     public function getVenteStats(): array
     {
@@ -112,40 +60,54 @@ class VenteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
 
+        $total = $row['total_revenus'] ?? 0;
+        $count = $row['ventes_count'] ?? 0;
+
         return [
-            'total_revenus' => isset($row['total_revenus']) ? (float) $row['total_revenus'] : 0.0,
-            'ventes_count' => isset($row['ventes_count']) ? (int) $row['ventes_count'] : 0,
+            'total_revenus' => (float) $total,
+            'ventes_count' => (int) $count,
+            'montant_moyen' => ($count > 0) ? ($total / $count) : 0,
             'last_vente_date' => $row['last_vente_date'] ?? null,
         ];
+    }
+
+    // --- Version FRONT (USER) ---
+
+    public function findBySearchAndSortForUser(Utilisateur $user, ?string $search = null, string $sortBy = 'date_vente', string $order = 'DESC'): array
+    {
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $qb = $this->createQueryBuilder('v')
+            ->andWhere('v.id_user = :user') // id_user kima f-el Entity
+            ->setParameter('user', $user)
+            ->leftJoin('v.id_client', 'c')
+            ->addSelect('c');
+
+        if (!empty($search)) {
+            $qb->andWhere('c.nom LIKE :search')->setParameter('search', '%' . $search . '%');
+        }
+
+        $qb->orderBy('v.' . $sortBy, $order);
+        return $qb->getQuery()->getResult();
     }
 
     public function getVenteStatsForUser(Utilisateur $user): array
     {
-        $row = $this->createQueryBuilder('v')
+        return $this->createQueryBuilder('v')
             ->select(
                 'COALESCE(SUM(v.montant_total), 0) AS total_revenus',
-                'COUNT(v.id_vente) AS ventes_count',
-                'MAX(v.date_vente) AS last_vente_date'
+                'COUNT(v.id_vente) AS ventes_count'
             )
             ->andWhere('v.id_user = :user')
             ->setParameter('user', $user)
             ->getQuery()
-            ->getOneOrNullResult();
-
-        return [
-            'total_revenus' => isset($row['total_revenus']) ? (float) $row['total_revenus'] : 0.0,
-            'ventes_count' => isset($row['ventes_count']) ? (int) $row['ventes_count'] : 0,
-            'last_vente_date' => $row['last_vente_date'] ?? null,
-        ];
+            ->getSingleResult();
     }
 
-    public function findOneForUser(int $id, Utilisateur $user): ?Vente
+    /**
+     * Alias pour getVenteStats (pour compatibilité adminIndex)
+     */
+    public function getAllVenteStats(): array
     {
-        $v = $this->findOneBy([
-            'id_vente' => $id,
-            'id_user' => $user,
-        ]);
-
-        return $v instanceof Vente ? $v : null;
+        return $this->getVenteStats();
     }
 }

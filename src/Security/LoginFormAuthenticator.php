@@ -24,8 +24,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-    // Use the admin login route name so the authenticator recognizes the login form
-    public const LOGIN_ROUTE = 'app_admin_login';
+    // Use the login route name so the authenticator recognizes the login form
+    public const LOGIN_ROUTE = 'app_login';
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
@@ -83,7 +83,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             } elseif ($rf === 'agriculteur' || str_starts_with($rf, 'role_agriculteur')) {
                 $target = 'app_agriculteur_home';
             } else {
-                $target = 'app_home';
+                $target = 'app_admin_dashboard';
             }
 
             // If there is a saved target path (user was trying to access a protected URL), respect it
@@ -113,8 +113,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('app_agriculteur_home'));
         }
 
-        // Default fallback -- send the user to app_home which itself will redirect safely
-        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        // Default fallback -- send the user to admin dashboard
+        return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
     }
 
     protected function getLoginUrl(Request $request): string

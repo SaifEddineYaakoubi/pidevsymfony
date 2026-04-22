@@ -133,4 +133,12 @@ class ClientRepository extends ServiceEntityRepository
 
         return $c instanceof Client ? $c : null;
     }
+
+    /**
+     * Alias pour getClientStats (pour compatibilité adminIndex)
+     */
+    public function getAllClientStats(): array
+    {
+        return $this->getClientStats();
+    }
 }

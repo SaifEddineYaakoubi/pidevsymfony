@@ -1,0 +1,81 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_page_title %}Ajouter une Vente{% endblock %}
+
+{% block admin_body %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+
+        {# Zid hedhi bech t-chouf el ghalta d-iractement ken l-ajout ma d-it-3addach #}
+        {% if not form.vars.valid %}
+            <div class="alert alert-danger">
+                <strong>Attention!</strong> Veuillez vérifier les erreurs ci-dessous.
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
+
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-plus"></i> Nouvelle Vente</h3>
+            </div>
+
+           {# data-turbo="false" bech t-hanni rasek mel machekel mta3 el console #}
+           {{ form_start(form, {'attr': {'data-turbo': 'false'}}) }}
+           <div class="card-body">
+               <div class="form-group">
+                   {{ form_label(form.dateVente, "Date de Vente") }}
+                   {{ form_widget(form.dateVente, {attr: {class: 'form-control'}}) }}
+                   {{ form_errors(form.dateVente) }}
+               </div>
+
+               <div class="form-group">
+                   {{ form_label(form.idProduit, "Produit") }}
+                   {{ form_widget(form.idProduit, {attr: {class: 'form-control'}}) }}
+                   {{ form_errors(form.idProduit) }}
+               </div>
+
+               <div class="form-group">
+                   {{ form_label(form.quantite, "Quantité") }}
+                   {{ form_widget(form.quantite, {attr: {class: 'form-control'}}) }}
+                   {{ form_errors(form.quantite) }}
+               </div>
+
+               <div class="form-group">
+                   {{ form_label(form.idClient, "Client") }}
+                   {{ form_widget(form.idClient, {attr: {class: 'form-control'}}) }}
+                   {{ form_errors(form.idClient) }}
+               </div>
+
+               {# Montant total: Na77ineh mel form_widget bech ma d-i-bloki-ch el validation #}
+           </div>
+
+           <div class="card-footer">
+               <button type="submit" class="btn btn-primary">
+                   <i class="fas fa-save"></i> Enregistrer
+               </button>
+               <a href="{{ path('app_admin_vente_index') }}" class="btn btn-secondary float-right">Annuler</a>
+           </div>
+           {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const produitSelect = document.querySelector('#vente_idProduit'); // Thabbet fil-ID mta3ek
+    const quantiteInput = document.querySelector('#vente_quantite');
+    const montantDisplay = document.querySelector('#montant-display'); // Zid ID l-el blassa elli d-chouf fiha el prix
+
+    function calculate() {
+        // Houni d-najjem d-esta3mel AJAX bech d-jib el prix m-el base
+        // Wala as-hel 7aja: 7ot el prix d-akhel attribute 'data-prix' fil-options mta3 el select
+        const selectedOption = produitSelect.options[produitSelect.selectedIndex];
+        const prix = selectedOption.getAttribute('data-prix') || 0;
+        const total = prix * quantiteInput.value;
+        montantDisplay.innerText = total.toFixed(2) + ' DT';
+    }
+
+    produitSelect.addEventListener('change', calculate);
+    quantiteInput.addEventListener('input', calculate);
+});
+</script>
+{% endblock %}

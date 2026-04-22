@@ -1,0 +1,112 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Ventes avec QR Code - AgriCulture{% endblock %}
+
+{% block agriculteur_body %}
+    <div style="background-color: #f8f9fa; min-height: 100vh; padding: 20px 0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+
+            {# Header #}
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h1 style="margin: 0 0 5px 0; font-weight: 700; color: #1a1a2e; font-size: 1.75rem;">
+                            📊 Ventes
+                        </h1>
+                        <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">Suivi de vos transactions</p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%); color: #15803d; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;">
+                        <i class="fas fa-chart-line" style="margin-right: 6px;"></i>{{ ventes|length }}
+                    </div>
+                </div>
+            </div>
+
+            {# Cards Grid #}
+            <div class="row g-4">
+                {% for vente in ventes %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow-sm h-100">
+                            {# Card Header #}
+                            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-receipt"></i> Vente #{{ vente.idVente }}
+                                    </h6>
+                                    <span class="badge bg-light text-dark">
+                                        {{ vente.dateVente|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {# Card Body #}
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Client</small>
+                                    <strong>{{ vente.idClient.nom }}</strong>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Produit</small>
+                                    <strong>{{ vente.idProduit.nom }}</strong>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Quantité</small>
+                                        <strong>{{ vente.quantite }} {{ vente.idProduit.unite }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Total</small>
+                                        <strong class="text-success">{{ vente.montantTotal|number_format(2, ',', ' ') }} TND</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Card Footer with Actions #}
+                            <div class="card-footer bg-light">
+                                <div class="d-flex gap-2 justify-content-between">
+                                    <a href="{{ path('app_vente_show', {'idVente': vente.idVente}) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                    
+                                    {# QR Code Button #}
+                                    {% include 'components/_qrcode_button.html.twig' with {
+                                        'type': 'vente',
+                                        'id': vente.idVente,
+                                        'label': 'Vente #' ~ vente.idVente,
+                                        'btn_class': 'btn btn-sm btn-info'
+                                    } %}
+                                    
+                                    <a href="{{ path('app_vente_edit', {'idVente': vente.idVente}) }}" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Éditer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> Aucune vente trouvée
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Action Buttons #}
+            <div class="mt-4 d-flex justify-content-between align-items-center">
+                <a href="{{ path('app_vente_new') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Nouvelle Vente
+                </a>
+                <div class="text-muted">
+                    Total: <strong>{{ ventes|length }}</strong> vente(s)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Include QR Code Modal #}
+    {% include 'components/_qrcode_modal.html.twig' %}
+{% endblock %}

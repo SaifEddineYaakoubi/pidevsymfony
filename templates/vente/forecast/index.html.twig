@@ -1,0 +1,269 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Prévisions de Ventes IA{% endblock %}
+
+{% block agriculteur_body %}
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div class="container">
+        {# Header #}
+        <div class="text-center text-white mb-5">
+            <h1 class="display-4 mb-2">🤖 Prévisions de Ventes IA</h1>
+            <p class="lead">Intelligence Artificielle • Analyse Prédictive • Recommandations Stratégiques</p>
+        </div>
+
+        {# Tendance Globale #}
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        {% if forecast.tendance == 'hausse' %}
+                            <div class="display-1 mb-3">📈</div>
+                            <h3 class="text-success mb-2">Tendance Haussière</h3>
+                            <p class="text-muted mb-0">Vos ventes sont en croissance</p>
+                        {% elseif forecast.tendance == 'baisse' %}
+                            <div class="display-1 mb-3">📉</div>
+                            <h3 class="text-danger mb-2">Tendance Baissière</h3>
+                            <p class="text-muted mb-0">Attention, vos ventes diminuent</p>
+                        {% else %}
+                            <div class="display-1 mb-3">📊</div>
+                            <h3 class="text-info mb-2">Tendance Stable</h3>
+                            <p class="text-muted mb-0">Vos ventes sont constantes</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 mb-3">🎯</div>
+                        <h3 class="mb-2">Confiance IA</h3>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-success" style="width: {{ forecast.confiance }}%">
+                                <strong>{{ forecast.confiance }}%</strong>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0">Basé sur {{ nb_historique }} mois de données</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 mb-3">🔮</div>
+                        <h3 class="mb-2">Prévisions</h3>
+                        <h4 class="text-primary mb-2">3 Prochains Mois</h4>
+                        <p class="text-muted mb-0">Prédictions automatiques</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Prévisions des 3 Prochains Mois #}
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Prévisions des 3 Prochains Mois</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for prev in forecast.previsions %}
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted mb-3">{{ prev.mois }}</h6>
+                                    <div class="mb-3">
+                                        <div class="small text-muted">Ventes Prévues</div>
+                                        <h4 class="mb-0 text-primary">{{ prev.ventes_prevues }}</h4>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="small text-muted">Revenus Prévus</div>
+                                        <h4 class="mb-0 text-success">{{ prev.revenus_prevus|number_format(0) }} DT</h4>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: {{ prev.confiance }}%"></div>
+                                    </div>
+                                    <small class="text-muted">Confiance: {{ prev.confiance }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Graphique Historique + Prévisions #}
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Historique & Prévisions</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="forecastChart" height="80"></canvas>
+            </div>
+        </div>
+
+        {# Recommandations Stratégiques #}
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Recommandations Stratégiques</h5>
+            </div>
+            <div class="card-body">
+                {% if recommendations|length > 0 %}
+                    <div class="row g-3">
+                        {% for reco in recommendations %}
+                            <div class="col-md-6">
+                                <div class="alert alert-{% if reco.priorite == 'critique' %}danger{% elseif reco.priorite == 'haute' %}warning{% else %}info{% endif %} border-0 shadow-sm">
+                                    <div class="d-flex align-items-start">
+                                        <div class="fs-2 me-3">{{ reco.icon }}</div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="alert-heading mb-2">{{ reco.titre }}</h6>
+                                            <p class="mb-0">{{ reco.message }}</p>
+                                            <span class="badge bg-dark mt-2">Priorité: {{ reco.priorite|upper }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center mb-0">Aucune recommandation pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Analyse de Rentabilité #}
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-dollar-sign"></i> Top 10 Produits les Plus Rentables</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Produit</th>
+                                <th>Ventes</th>
+                                <th>Quantité</th>
+                                <th>Revenus</th>
+                                <th>Rentabilité/Vente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, prod in profitability %}
+                                <tr>
+                                    <td>
+                                        {% if index == 0 %}
+                                            <span class="badge bg-warning">🥇</span>
+                                        {% elseif index == 1 %}
+                                            <span class="badge bg-secondary">🥈</span>
+                                        {% elseif index == 2 %}
+                                            <span class="badge bg-danger">🥉</span>
+                                        {% else %}
+                                            {{ index + 1 }}
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ prod.produit }}</strong></td>
+                                    <td><span class="badge bg-info">{{ prod.nombre_ventes }}</span></td>
+                                    <td>{{ prod.quantite_totale }}</td>
+                                    <td><strong>{{ prod.revenus_totaux|number_format(2) }} DT</strong></td>
+                                    <td><span class="badge bg-success">{{ prod.rentabilite_par_vente|number_format(2) }} DT</span></td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Aucune donnée disponible</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Bouton Retour #}
+        <div class="text-center">
+            <a href="{{ path('app_vente_index') }}" class="btn btn-light btn-lg shadow">
+                <i class="fas fa-arrow-left"></i> Retour aux Ventes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    const nbHistorique = {{ nb_historique }};
+    
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ historique_labels|raw }},
+            datasets: [
+                {
+                    label: 'Revenus Réels',
+                    data: {{ historique_revenus|raw }}.slice(0, nbHistorique),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Prévisions IA',
+                    data: Array(nbHistorique - 1).fill(null).concat({{ historique_revenus|raw }}.slice(nbHistorique - 1)),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 3,
+                    borderDash: [10, 5],
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Évolution des Revenus - Historique & Prévisions'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2) + ' DT';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Revenus (DT)'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

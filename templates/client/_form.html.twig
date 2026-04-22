@@ -1,42 +1,54 @@
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
+
+    {% for type, messages in app.flashes %}
+        {% if type == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-circle"></i> Erreur:</strong>
+                {% for message in messages %}
+                    <div>{{ message }}</div>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
+
     {% if form.vars.errors|length > 0 %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Erreurs de validation :</strong>
+            <strong><i class="fas fa-exclamation-circle"></i> Erreurs de validation :</strong>
             {{ form_errors(form) }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endif %}
 
     <div class="mb-3">
-        <label class="form-label">{{ form.nom.vars.label }}</label>
+        <label class="form-label">{{ form.nom.vars.label }} <span class="text-danger">*</span></label>
         {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
         {% if form.nom.vars.errors|length > 0 %}
-            <div class="invalid-feedback d-block">
-                {{ form_errors(form.nom) }}
+            <div class="invalid-feedback d-block text-danger">
+                <i class="fas fa-times-circle"></i> {{ form_errors(form.nom) }}
             </div>
         {% endif %}
     </div>
 
     <div class="mb-3">
-        <label class="form-label">{{ form.contact.vars.label }}</label>
-        {{ form_widget(form.contact, {'attr': {'class': 'form-control', 'placeholder': 'Optionnel (min 5 caractères)'}}) }}
+        <label class="form-label">{{ form.contact.vars.label }} <span class="text-danger">*</span></label>
+        {{ form_widget(form.contact, {'attr': {'class': 'form-control', 'placeholder': 'Email ou Téléphone'}}) }}
         {% if form.contact.vars.errors|length > 0 %}
-            <div class="invalid-feedback d-block">
-                {{ form_errors(form.contact) }}
+            <div class="invalid-feedback d-block text-danger">
+                <i class="fas fa-times-circle"></i> {{ form_errors(form.contact) }}
             </div>
         {% endif %}
-        <small class="form-text text-muted">Optionnel</small>
+        <small class="form-text text-muted"><i class="fas fa-info-circle"></i> Email ou numéro de téléphone valide requis</small>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">{{ form.adresse.vars.label }}</label>
-        {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': 'Optionnel (min 3 caractères)'}}) }}
+        <label class="form-label">{{ form.adresse.vars.label }} <span class="text-danger">*</span></label>
+        {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': 'Adresse complète'}}) }}
         {% if form.adresse.vars.errors|length > 0 %}
-            <div class="invalid-feedback d-block">
-                {{ form_errors(form.adresse) }}
+            <div class="invalid-feedback d-block text-danger">
+                <i class="fas fa-times-circle"></i> {{ form_errors(form.adresse) }}
             </div>
         {% endif %}
-        <small class="form-text text-muted">Optionnel</small>
     </div>
 
     <div class="form-group mt-4">

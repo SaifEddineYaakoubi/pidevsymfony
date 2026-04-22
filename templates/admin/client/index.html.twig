@@ -1,0 +1,172 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_page_title %}Gestion des Clients{% endblock %}
+
+{% block admin_breadcrumbs %}
+<ol class="breadcrumb float-sm-right">
+    <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Accueil</a></li>
+    <li class="breadcrumb-item active">Clients</li>
+</ol>
+{% endblock %}
+
+{% block admin_body %}
+<div class="row">
+    <div class="col-12">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : (label == 'success' ? 'success' : label) }} alert-dismissible fade show" role="alert">
+                    {{ msg }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Stats Cards #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="small-box bg-info shadow">
+                    <div class="inner">
+                        <h3>{{ stats.clients_count ?? 0 }}</h3>
+                        <p>Nombre Total de Clients</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="small-box bg-success shadow">
+                    <div class="inner">
+                        <h3>{% if stats.last_client_id %}#{{ stats.last_client_id }}{% else %}—{% endif %}</h3>
+                        <p>Dernier Client Ajouté</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-user-plus"></i></div>
+                </div>
+            </div>
+        </div>
+
+        {# Table Card #}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list"></i> Liste des Clients
+                </h3>
+                <div class="card-tools">
+                    <a href="{{ path('app_admin_client_new') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="p-3">
+                    <form method="GET" class="form-inline mb-3">
+                        <input type="text" name="search" class="form-control mr-2" placeholder="Rechercher par nom..." value="{{ search }}">
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-search"></i> Chercher
+                        </button>
+                        {% if search %}
+                            <a href="{{ path('app_admin_client_index') }}" class="btn btn-secondary ml-2">Réinitialiser</a>
+                        {% endif %}
+                    </form>
+                </div>
+                <table class="table table-hover m-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%">#</th>
+                            <th style="width: 20%">
+                                <a href="{{ path('app_admin_client_index', {sortBy: 'nom', order: nextOrder}) }}" class="text-dark">
+                                    Nom {{ (sortBy == 'nom') ? (order == 'DESC' ? '▼' : '▲') : '' }}
+                                </a>
+                            </th>
+                            <th style="width: 12%">Badge</th>
+                            <th style="width: 22%">Contact</th>
+                            <th style="width: 23%">Adresse</th>
+                            <th style="width: 15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if clients|length > 0 %}
+                            {% for client in clients %}
+                                <tr>
+                                    <td><strong>{{ client.getId_client() }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ client.getNom() }}</span>
+                                    </td>
+                                    <td>
+                                        {{ client|badge_html }}
+                                        <br>
+                                        <small class="text-muted">{{ client.ventes|length }} vente(s)</small>
+                                    </td>
+                                    <td>
+                                        {% if '@' in client.getContact() %}
+                                            <i class="fas fa-envelope text-info"></i> <small>{{ client.getContact() }}</small>
+                                        {% else %}
+                                            <i class="fas fa-phone text-success"></i> <small>{{ client.getContact() }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ client.getAdresse() }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ path('app_admin_client_edit', {id_client: client.getId_client()}) }}" class="btn btn-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-id="{{ client.getId_client() }}" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted p-4">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                    Aucun client trouvé
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Delete Modal #}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Supprimer le Client</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir supprimer ce client ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display:inline;">
+                    <input type="hidden" name="_token" id="deleteToken">
+                    <button type="submit" class="btn btn-danger">Confirmer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('deleteModal').addEventListener('show.bs.modal', function(e) {
+        const button = e.relatedTarget;
+        const id = button.dataset.id;
+        const form = document.getElementById('deleteForm');
+        form.action = '{{ path('app_admin_client_delete', {id_client: '__ID__'}) }}'.replace('__ID__', id);
+        document.getElementById('deleteToken').value = '{{ csrf_token('delete' ~ '__ID__')|replace({'__ID__': ''}) }}' + id;
+    });
+</script>
+{% endblock %}
+
