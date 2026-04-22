@@ -1,0 +1,39 @@
+{# templates/components/_price_with_discount.html.twig #}
+{# 
+    Affiche un prix avec réduction basée sur le badge du client
+    
+    Paramètres:
+    - price: Prix de base (float)
+    - client: Objet Client
+    - show_details: Afficher les détails (bool, défaut: true)
+#}
+
+{% set pricing = price_with_discount(price, client) %}
+{% set badge = client_badge(client) %}
+
+<div class="price-with-discount">
+    {% if pricing.discount_percentage > 0 %}
+        {# Prix avec réduction #}
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted text-decoration-line-through">
+                {{ pricing.original|number_format(2, ',', ' ') }} TND
+            </span>
+            <span class="badge {{ badge.cssClass }}">
+                -{{ pricing.discount_percentage }}%
+            </span>
+        </div>
+        <div class="h5 mb-0 text-success">
+            {{ pricing.final|number_format(2, ',', ' ') }} TND
+        </div>
+        {% if show_details|default(true) %}
+            <small class="text-muted">
+                Économie: {{ pricing.discount_amount|number_format(2, ',', ' ') }} TND
+            </small>
+        {% endif %}
+    {% else %}
+        {# Prix sans réduction #}
+        <div class="h5 mb-0">
+            {{ pricing.final|number_format(2, ',', ' ') }} TND
+        </div>
+    {% endif %}
+</div>

@@ -25,10 +25,24 @@ class Client
         minMessage: "Le nom doit contenir au moins {{ limit }} caractères.",
         maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
     )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ\s\-']+$/",
+        message: "Le nom ne peut contenir que des lettres, des espaces, des tirets et des apostrophes."
+    )]
     private string $nom;
 
     #[ORM\Column(type: "string", length: 100)]
     #[Assert\NotBlank(message: "Le contact est obligatoire.")]
+    #[Assert\AtLeastOneOf(
+        constraints: [
+            new Assert\Email(message: "Le contact doit être une adresse email valide."),
+            new Assert\Regex(
+                pattern: '/^[0-9+]{1,3}[0-9]{8,}$/',
+                message: "Le contact doit être un numéro de téléphone valide (au minimum 8 chiffres) ou une adresse email."
+            )
+        ],
+        message: "Le contact doit être une adresse email valide ou un numéro de téléphone valide."
+    )]
     #[Assert\Length(
         min: 8,
         max: 100,
@@ -47,6 +61,9 @@ class Client
 
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $id_user = null;
+
+    #[ORM\Column(type: "string", length: 20, nullable: true)]
+    private ?string $badge = null;
 
     #[ORM\OneToMany(mappedBy: "id_client", targetEntity: Vente::class)]
     private Collection $ventes;
@@ -107,6 +124,26 @@ class Client
     {
         $this->id_user = $id_user;
         return $this;
+    }
+
+    public function getBadge(): ?string
+    {
+        return $this->badge;
+    }
+
+    public function setBadge(?string $badge): self
+    {
+        $this->badge = $badge;
+        return $this;
+    }
+
+    /**
+     * Retourne l'enum ClientBadge correspondant au badge du client
+     */
+    public function getBadgeEnum(): \App\Enum\ClientBadge
+    {
+        return \App\Enum\ClientBadge::tryFrom($this->badge ?? 'none') 
+            ?? \App\Enum\ClientBadge::NONE;
     }
 
     /**

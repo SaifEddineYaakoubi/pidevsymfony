@@ -1,0 +1,274 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_page_title %}Statistiques de Vente{% endblock %}
+
+{% block admin_body %}
+<div class="row">
+    {# Statistiques Globales #}
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ stats_globales.total_ventes }}</h3>
+                <p>Total Ventes</p>
+            </div>
+            <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ stats_globales.total_revenus|number_format(0, '.', ' ') }} <small>DT</small></h3>
+                <p>Revenus Totaux</p>
+            </div>
+            <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ stats_globales.total_clients }}</h3>
+                <p>Clients Actifs</p>
+            </div>
+            <div class="icon"><i class="fas fa-users"></i></div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ stats_globales.montant_moyen|number_format(2, '.', ' ') }} <small>DT</small></h3>
+                <p>Panier Moyen</p>
+            </div>
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {# Taux de Croissance #}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-line"></i> Taux de Croissance</h3>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4 {% if taux_croissance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if taux_croissance >= 0 %}+{% endif %}{{ taux_croissance|number_format(1) }}%
+                </h1>
+                <p class="text-muted">Comparaison mois actuel vs mois précédent</p>
+                
+                {% if comparaison.mois_actuel is defined and comparaison.mois_precedent is defined %}
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <h5>Mois Actuel</h5>
+                        <p class="mb-0"><strong>{{ comparaison.mois_actuel.nombre_ventes }}</strong> ventes</p>
+                        <p><strong>{{ comparaison.mois_actuel.total_revenus|number_format(2) }}</strong> DT</p>
+                    </div>
+                    <div class="col-6">
+                        <h5>Mois Précédent</h5>
+                        <p class="mb-0"><strong>{{ comparaison.mois_precedent.nombre_ventes }}</strong> ventes</p>
+                        <p><strong>{{ comparaison.mois_precedent.total_revenus|number_format(2) }}</strong> DT</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {# Prédiction #}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-crystal-ball"></i> Prédiction Mois Prochain</h3>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4 text-primary">{{ prediction|number_format(0, '.', ' ') }} <small>DT</small></h1>
+                <p class="text-muted">Basée sur la moyenne des 3 derniers mois</p>
+                <div class="progress mt-4" style="height: 30px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 100%">
+                        Revenus Estimés
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {# Graphique Évolution des Ventes #}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-area"></i> Évolution des Ventes (12 derniers mois)</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="ventesChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {# Top Produits #}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-trophy"></i> Top 5 Produits</h3>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Produit</th>
+                            <th>Ventes</th>
+                            <th>Revenus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index, produit in top_produits %}
+                        <tr>
+                            <td>
+                                {% if index == 0 %}
+                                    <i class="fas fa-medal text-warning"></i>
+                                {% elseif index == 1 %}
+                                    <i class="fas fa-medal text-secondary"></i>
+                                {% elseif index == 2 %}
+                                    <i class="fas fa-medal text-danger"></i>
+                                {% else %}
+                                    {{ index + 1 }}
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ produit.produit }}</strong></td>
+                            <td><span class="badge badge-info">{{ produit.nombre_ventes }}</span></td>
+                            <td><span class="badge badge-success">{{ produit.revenus_totaux|number_format(2) }} DT</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center">Aucune donnée</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    {# Top Clients #}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-star"></i> Top 5 Clients</h3>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client</th>
+                            <th>Achats</th>
+                            <th>Total Dépensé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index, client in top_clients %}
+                        <tr>
+                            <td>
+                                {% if index == 0 %}
+                                    <i class="fas fa-medal text-warning"></i>
+                                {% elseif index == 1 %}
+                                    <i class="fas fa-medal text-secondary"></i>
+                                {% elseif index == 2 %}
+                                    <i class="fas fa-medal text-danger"></i>
+                                {% else %}
+                                    {{ index + 1 }}
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ client.client }}</strong></td>
+                            <td><span class="badge badge-info">{{ client.nombre_achats }}</span></td>
+                            <td><span class="badge badge-success">{{ client.total_depense|number_format(2) }} DT</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center">Aucune donnée</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block admin_javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique des ventes
+    const ctx = document.getElementById('ventesChart').getContext('2d');
+    const ventesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ mois_labels|raw }},
+            datasets: [
+                {
+                    label: 'Nombre de Ventes',
+                    data: {{ mois_ventes|raw }},
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    yAxisID: 'y',
+                    tension: 0.4
+                },
+                {
+                    label: 'Revenus (DT)',
+                    data: {{ mois_revenus|raw }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Nombre de Ventes'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Revenus (DT)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

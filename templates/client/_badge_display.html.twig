@@ -1,0 +1,8 @@
+{# templates/client/_badge_display.html.twig #}
+{# Partial pour afficher le badge d'un client #}
+
+{% set badge = client_badge(client) %}
+
+<span class="{{ badge.cssClass }}" title="Client {{ badge.label }} - {{ client.ventes|length }} vente(s)">
+    {{ badge.icon }} {{ badge.label }}
+</span>

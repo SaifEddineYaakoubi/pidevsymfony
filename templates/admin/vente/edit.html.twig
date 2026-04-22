@@ -1,0 +1,61 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_page_title %}Modifier Vente #{{ vente.idVente }}{% endblock %}
+
+{% block admin_body %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title text-white"><i class="fas fa-edit"></i> Modification</h3>
+            </div>
+
+            {{ form_start(form, {'attr': {'data-turbo': 'false'}}) }}
+            <div class="card-body">
+                {# Date #}
+                <div class="form-group">
+                    {{ form_label(form.dateVente, "Date de Vente") }}
+                    {{ form_widget(form.dateVente, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.dateVente) }}
+                </div>
+
+                {# Produit #}
+                <div class="form-group">
+                    {{ form_label(form.idProduit, "Produit") }}
+                    {{ form_widget(form.idProduit, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.idProduit) }}
+                </div>
+
+                {# Quantité #}
+                <div class="form-group">
+                    {{ form_label(form.quantite, "Quantité") }}
+                    {{ form_widget(form.quantite, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.quantite) }}
+                </div>
+
+                {# Client #}
+                <div class="form-group">
+                    {{ form_label(form.idClient, "Client") }}
+                    {{ form_widget(form.idClient, {attr: {class: 'form-control'}}) }}
+                    {{ form_errors(form.idClient) }}
+                </div>
+
+                {# Montant Total (Read-only) #}
+                <div class="form-group">
+                    {{ form_label(form.montantTotal, "Montant Total") }}
+                    {{ form_widget(form.montantTotal, {attr: {class: 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <a href="{{ path('app_admin_vente_index') }}" class="btn btn-secondary float-right">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

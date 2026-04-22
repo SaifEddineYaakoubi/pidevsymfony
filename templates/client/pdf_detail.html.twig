@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Client - {{ client.nom }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+            line-height: 1.6;
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .info-section {
+            margin-bottom: 30px;
+        }
+        
+        .info-section h2 {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .info-grid {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .info-row {
+            display: table-row;
+        }
+        
+        .info-label {
+            display: table-cell;
+            padding: 10px 15px;
+            background: #f3f4f6;
+            font-weight: bold;
+            width: 40%;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .info-value {
+            display: table-cell;
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-gold {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-silver {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .badge-bronze {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .badge-none {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .stats-grid {
+            display: table;
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .stat-box {
+            display: table-cell;
+            width: 33.33%;
+            padding: 20px;
+            text-align: center;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-box .label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .ventes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .ventes-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+            font-weight: bold;
+        }
+        
+        .ventes-table td {
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .ventes-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 Fiche Client</h1>
+        <div class="subtitle">{{ client.nom }}</div>
+    </div>
+
+    {# Informations du Client #}
+    <div class="info-section">
+        <h2>📋 Informations Personnelles</h2>
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-label">Nom</div>
+                <div class="info-value">
+                    {{ client.nom }}
+                    {% if client.badge %}
+                        <span class="badge badge-{{ client.badge|lower }}">
+                            {% if client.badge == 'gold' %}🥇{% elseif client.badge == 'silver' %}🥈{% elseif client.badge == 'bronze' %}🥉{% endif %}
+                            {{ client.badge|upper }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Contact</div>
+                <div class="info-value">{{ client.contact }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Adresse</div>
+                <div class="info-value">{{ client.adresse }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Date d'inscription</div>
+                <div class="info-value">{{ client.dateInscription ? client.dateInscription|date('d/m/Y') : 'N/A' }}</div>
+            </div>
+        </div>
+    </div>
+
+    {# Statistiques #}
+    <div class="info-section">
+        <h2>📊 Statistiques</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="label">Nombre de Ventes</div>
+                <div class="value">{{ client.ventes|length }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Total Dépensé</div>
+                <div class="value">
+                    {% set total = 0 %}
+                    {% for vente in client.ventes %}
+                        {% set total = total + vente.montantTotal %}
+                    {% endfor %}
+                    {{ total|number_format(0, ',', ' ') }} TND
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Badge</div>
+                <div class="value" style="font-size: 18px;">
+                    {% if client.badge == 'gold' %}
+                        🥇 GOLD
+                    {% elseif client.badge == 'silver' %}
+                        🥈 SILVER
+                    {% elseif client.badge == 'bronze' %}
+                        🥉 BRONZE
+                    {% else %}
+                        - AUCUN
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Historique des Ventes #}
+    {% if client.ventes|length > 0 %}
+        <div class="info-section">
+            <h2>🛒 Historique des Ventes ({{ client.ventes|length }} dernières)</h2>
+            <table class="ventes-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vente in client.ventes|slice(0, 10) %}
+                        <tr>
+                            <td>{{ vente.dateVente ? vente.dateVente|date('d/m/Y') : 'N/A' }}</td>
+                            <td>{{ vente.idProduit ? vente.idProduit.nom : 'N/A' }}</td>
+                            <td>
+                                {{ vente.quantite|number_format(2, ',', ' ') }}
+                                {% if vente.idProduit %}{{ vente.idProduit.unite }}{% endif %}
+                            </td>
+                            <td>{{ vente.montantTotal|number_format(2, ',', ' ') }} TND</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if client.ventes|length > 10 %}
+                <p style="margin-top: 10px; color: #6b7280; font-size: 11px; text-align: center;">
+                    Affichage des 10 dernières ventes sur {{ client.ventes|length }} au total
+                </p>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="info-section">
+            <h2>🛒 Historique des Ventes</h2>
+            <p style="text-align: center; color: #6b7280; padding: 20px;">
+                Aucune vente enregistrée pour ce client
+            </p>
+        </div>
+    {% endif %}
+
+    {# Footer #}
+    <div class="footer">
+        <p>Document généré le {{ generatedDate|date('d/m/Y à H:i:s') }}</p>
+        <p>SmartFarm - Système de Gestion Agricole</p>
+    </div>
+</body>
+</html>

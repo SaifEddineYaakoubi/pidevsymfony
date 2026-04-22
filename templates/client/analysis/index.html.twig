@@ -1,0 +1,262 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Analyse de Fidélité Client{% endblock %}
+
+{% block agriculteur_body %}
+<div class="container-fluid py-4" style="background-color: #f8f9fa; min-height: 100vh;">
+    <div class="container">
+        {# Header #}
+        <div class="mb-4">
+            <h1 class="mb-2"><i class="fas fa-chart-pie"></i> Analyse de Fidélité Client</h1>
+            <p class="text-muted">Scoring, catégorisation et recommandations personnalisées</p>
+        </div>
+
+        {# Statistiques Globales #}
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-4 text-warning mb-2">👑</div>
+                        <h3 class="mb-0">{{ stats_globales.vip }}</h3>
+                        <small class="text-muted">Clients VIP</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-4 text-primary mb-2">⭐</div>
+                        <h3 class="mb-0">{{ stats_globales.fideles }}</h3>
+                        <small class="text-muted">Clients Fidèles</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-4 text-danger mb-2">🚨</div>
+                        <h3 class="mb-0">{{ stats_globales.risque_eleve }}</h3>
+                        <small class="text-muted">Risque Élevé</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-4 text-info mb-2">📊</div>
+                        <h3 class="mb-0">{{ stats_globales.total }}</h3>
+                        <small class="text-muted">Total Clients</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Liste des Clients Analysés #}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Classement des Clients</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Score</th>
+                                <th>Catégorie</th>
+                                <th>Ventes</th>
+                                <th>Total Dépensé</th>
+                                <th>Dernier Achat</th>
+                                <th>Risque</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, item in clients_analyses %}
+                                {% set client = item.client %}
+                                {% set analyse = item.analyse %}
+                                <tr>
+                                    <td>
+                                        {% if index == 0 %}
+                                            <span class="badge bg-warning">🥇</span>
+                                        {% elseif index == 1 %}
+                                            <span class="badge bg-secondary">🥈</span>
+                                        {% elseif index == 2 %}
+                                            <span class="badge bg-danger">🥉</span>
+                                        {% else %}
+                                            {{ index + 1 }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ client.nom }}</strong><br>
+                                        <small class="text-muted">{{ client.contact ?? 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress" style="width: 60px; height: 8px; margin-right: 8px;">
+                                                <div class="progress-bar 
+                                                    {% if analyse.score_fidelite >= 80 %}bg-success
+                                                    {% elseif analyse.score_fidelite >= 60 %}bg-primary
+                                                    {% elseif analyse.score_fidelite >= 40 %}bg-info
+                                                    {% elseif analyse.score_fidelite >= 20 %}bg-warning
+                                                    {% else %}bg-secondary{% endif %}"
+                                                    style="width: {{ analyse.score_fidelite }}%"></div>
+                                            </div>
+                                            <strong>{{ analyse.score_fidelite }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ analyse.categorie.couleur }}">
+                                            {{ analyse.categorie.icon }} {{ analyse.categorie.nom }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ analyse.nombre_ventes }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ analyse.total_depense|number_format(2) }} DT</strong><br>
+                                        <small class="text-muted">Moy: {{ analyse.panier_moyen|number_format(2) }} DT</small>
+                                    </td>
+                                    <td>
+                                        {% if analyse.dernier_achat %}
+                                            {{ analyse.dernier_achat|date('d/m/Y') }}<br>
+                                            <small class="text-muted">Il y a {{ analyse.jours_dernier_achat }} jours</small>
+                                        {% else %}
+                                            <span class="text-muted">Aucun</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ analyse.risque_perte.couleur }}">
+                                            {{ analyse.risque_perte.label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detailModal{{ client.id_client }}">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                {# Modal Détails #}
+                                <div class="modal fade" id="detailModal{{ client.id_client }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title">
+                                                    {{ analyse.categorie.icon }} Analyse Détaillée - {{ client.nom }}
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {# Score de Fidélité #}
+                                                <div class="mb-4">
+                                                    <h6 class="mb-3"><i class="fas fa-star"></i> Score de Fidélité</h6>
+                                                    <div class="progress" style="height: 30px;">
+                                                        <div class="progress-bar bg-{{ analyse.categorie.couleur }}" 
+                                                             style="width: {{ analyse.score_fidelite }}%">
+                                                            <strong>{{ analyse.score_fidelite }}/100</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center mt-2">
+                                                        <span class="badge bg-{{ analyse.categorie.couleur }} fs-6">
+                                                            {{ analyse.categorie.icon }} {{ analyse.categorie.nom }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {# Statistiques #}
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-4">
+                                                        <div class="card bg-light">
+                                                            <div class="card-body text-center">
+                                                                <div class="h3 mb-0">{{ analyse.nombre_ventes }}</div>
+                                                                <small class="text-muted">Ventes</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="card bg-light">
+                                                            <div class="card-body text-center">
+                                                                <div class="h3 mb-0">{{ analyse.total_depense|number_format(0) }} DT</div>
+                                                                <small class="text-muted">Total Dépensé</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="card bg-light">
+                                                            <div class="card-body text-center">
+                                                                <div class="h3 mb-0">{{ analyse.panier_moyen|number_format(0) }} DT</div>
+                                                                <small class="text-muted">Panier Moyen</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {# Risque de Perte #}
+                                                <div class="mb-4">
+                                                    <h6 class="mb-3"><i class="fas fa-exclamation-triangle"></i> Risque de Perte</h6>
+                                                    <div class="progress" style="height: 25px;">
+                                                        <div class="progress-bar bg-{{ analyse.risque_perte.couleur }}" 
+                                                             style="width: {{ analyse.risque_perte.niveau }}%">
+                                                            {{ analyse.risque_perte.label }} ({{ analyse.risque_perte.niveau }}%)
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {# Recommandations #}
+                                                <div>
+                                                    <h6 class="mb-3"><i class="fas fa-lightbulb"></i> Recommandations</h6>
+                                                    {% if analyse.recommandations|length > 0 %}
+                                                        <div class="list-group">
+                                                            {% for reco in analyse.recommandations %}
+                                                                <div class="list-group-item">
+                                                                    <div class="d-flex align-items-start">
+                                                                        <div class="fs-4 me-3">{{ reco.icon }}</div>
+                                                                        <div>
+                                                                            <strong class="text-capitalize">{{ reco.type }}</strong>
+                                                                            <p class="mb-0">{{ reco.message }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% else %}
+                                                        <p class="text-muted">Aucune recommandation spécifique.</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{{ path('app_client_show', {'id_client': client.id_client}) }}" 
+                                                   class="btn btn-primary">
+                                                    <i class="fas fa-user"></i> Voir Fiche Client
+                                                </a>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center py-4 text-muted">
+                                        Aucun client à analyser
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Bouton Retour #}
+        <div class="mt-4">
+            <a href="{{ path('app_client_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

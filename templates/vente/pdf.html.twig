@@ -150,7 +150,7 @@
             {# Twig "reduce" avec arrow functions peut échouer selon la version; on calcule en boucle #}
             {% set totalAmount = 0 %}
             {% for v in ventes %}
-                {% set totalAmount = totalAmount + (v.montant_total ?? 0) %}
+                {% set totalAmount = totalAmount + (v.montantTotal ?? 0) %}
             {% endfor %}
 
             <div class="stats">
@@ -176,8 +176,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 8%">ID</th>
-                        <th style="width: 20%">Client</th>
+                        <th style="width: 30%">Client</th>
                         <th style="width: 12%">Date</th>
                         <th style="width: 15%">Montant</th>
                     </tr>
@@ -185,26 +184,25 @@
                 <tbody>
                     {% for vente in ventes %}
                         <tr>
-                            <td>{{ vente.id_vente }}</td>
                             <td>
-                                {% if vente.id_client %}
-                                    {{ vente.id_client.nom }}
+                                {% if vente.idClient %}
+                                    {{ vente.idClient.nom }}
                                 {% else %}
                                     <span style="color: #999; font-style: italic;">Client supprimé</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {{ vente.date_vente ? vente.date_vente|date('d/m/Y') : '-' }}
+                                {{ vente.dateVente ? vente.dateVente|date('d/m/Y') : '-' }}
                             </td>
                             <td class="amount">
-                                {{ vente.montant_total ? (vente.montant_total|number_format(2, ',', ' ') ~ ' €') : '-' }}
+                                {{ vente.montantTotal ? (vente.montantTotal|number_format(2, ',', ' ') ~ ' €') : '-' }}
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr class="total-row">
-                        <td colspan="3" style="text-align: right;">TOTAL</td>
+                        <td colspan="2" style="text-align: right;">TOTAL</td>
                         <td class="amount">
                             {{ totalAmount|number_format(2, ',', ' ') }} €
                         </td>

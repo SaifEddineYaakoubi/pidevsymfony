@@ -29,7 +29,7 @@
 <section class="section">
 <div class="container">
 
-    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+    {{ form_start(form, { attr: { novalidate: 'novalidate', 'data-turbo': 'false' } }) }}
 
     {% if extraErrors is defined and extraErrors['_global'] is defined %}
         <div class="alert alert-danger">{{ extraErrors['_global'] }}</div>

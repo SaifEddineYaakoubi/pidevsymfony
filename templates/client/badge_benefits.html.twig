@@ -1,0 +1,243 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Avantages Clients - SmartFarm{% endblock %}
+
+{% block agriculteur_body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-gift"></i> Programme de Fidélité SmartFarm
+            </h1>
+            <p class="lead text-muted mb-5">
+                Plus vous achetez, plus vous économisez ! Découvrez nos badges de fidélité et leurs avantages exclusifs.
+            </p>
+        </div>
+    </div>
+
+    {# Explication du système #}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">
+                        <i class="fas fa-info-circle text-primary"></i> Comment ça marche ?
+                    </h4>
+                    <p class="mb-0">
+                        Chaque achat vous rapproche d'un nouveau badge ! Plus votre badge est élevé, 
+                        plus vos réductions sont importantes. Les réductions sont automatiquement appliquées 
+                        lors de vos achats.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Cartes des badges #}
+    <div class="row g-4 mb-5">
+        {# Badge Gold #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-lg" style="border-top: 4px solid #fbbf24 !important;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3" style="font-size: 4rem;">🥇</div>
+                    <h3 class="mb-2">Badge Or</h3>
+                    <p class="text-muted mb-3">3 achats ou plus</p>
+                    
+                    <div class="alert alert-warning mb-3">
+                        <h2 class="mb-0">-15%</h2>
+                        <small>de réduction</small>
+                    </div>
+
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            15% de réduction sur tous les achats
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Livraison gratuite
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Support prioritaire
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Accès aux offres exclusives
+                        </li>
+                    </ul>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">Exemple:</small><br>
+                        <strong>100 TND</strong> → 
+                        <span class="text-success"><strong>85 TND</strong></span>
+                        <br>
+                        <small class="text-success">Économie: 15 TND</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Badge Silver #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow" style="border-top: 4px solid #9ca3af !important;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3" style="font-size: 4rem;">🥈</div>
+                    <h3 class="mb-2">Badge Argent</h3>
+                    <p class="text-muted mb-3">2 achats</p>
+                    
+                    <div class="alert alert-secondary mb-3">
+                        <h2 class="mb-0">-10%</h2>
+                        <small>de réduction</small>
+                    </div>
+
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            10% de réduction sur tous les achats
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Notifications des promotions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Programme de parrainage
+                        </li>
+                    </ul>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">Exemple:</small><br>
+                        <strong>100 TND</strong> → 
+                        <span class="text-success"><strong>90 TND</strong></span>
+                        <br>
+                        <small class="text-success">Économie: 10 TND</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Badge Bronze #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow" style="border-top: 4px solid #ef4444 !important;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3" style="font-size: 4rem;">🥉</div>
+                    <h3 class="mb-2">Badge Bronze</h3>
+                    <p class="text-muted mb-3">1 achat</p>
+                    
+                    <div class="alert alert-danger mb-3">
+                        <h2 class="mb-0">-5%</h2>
+                        <small>de réduction</small>
+                    </div>
+
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            5% de réduction sur tous les achats
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> 
+                            Newsletter mensuelle
+                        </li>
+                    </ul>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">Exemple:</small><br>
+                        <strong>100 TND</strong> → 
+                        <span class="text-success"><strong>95 TND</strong></span>
+                        <br>
+                        <small class="text-success">Économie: 5 TND</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Pas de badge #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm" style="border-top: 4px solid #e5e7eb !important;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3" style="font-size: 4rem;">⚪</div>
+                    <h3 class="mb-2">Nouveau Client</h3>
+                    <p class="text-muted mb-3">0 achat</p>
+                    
+                    <div class="alert alert-light mb-3">
+                        <h2 class="mb-0">0%</h2>
+                        <small>de réduction</small>
+                    </div>
+
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2">
+                            <i class="fas fa-info-circle text-info"></i> 
+                            Faites votre premier achat
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-info-circle text-info"></i> 
+                            Obtenez le badge Bronze
+                        </li>
+                    </ul>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">Exemple:</small><br>
+                        <strong>100 TND</strong> → 
+                        <strong>100 TND</strong>
+                        <br>
+                        <small class="text-muted">Pas de réduction</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Progression #}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-4">
+                        <i class="fas fa-chart-line text-success"></i> Votre Progression
+                    </h4>
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <div class="mb-2">⚪</div>
+                                <small>Nouveau</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <div class="mb-2">🥉</div>
+                                <small><strong>1 achat</strong></small><br>
+                                <small class="text-success">+5% réduction</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <div class="mb-2">🥈</div>
+                                <small><strong>2 achats</strong></small><br>
+                                <small class="text-success">+10% réduction</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-warning bg-opacity-25 rounded">
+                                <div class="mb-2">🥇</div>
+                                <small><strong>3+ achats</strong></small><br>
+                                <small class="text-warning"><strong>+15% réduction</strong></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# CTA #}
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ path('app_vente_new') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-cart"></i> Faire un achat maintenant
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

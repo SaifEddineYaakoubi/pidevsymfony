@@ -1,0 +1,326 @@
+{% extends 'front/base_agriculteur.html.twig' %}
+
+{% block title %}Analyse des Devises - Ventes{% endblock %}
+
+{% block agriculteur_body %}
+<div class="container-fluid section">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1><i class="bi bi-currency-exchange"></i> Analyse des Devises</h1>
+                    <p class="text-muted mb-0">Conversion automatique TND → EUR → USD</p>
+                </div>
+                <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour aux ventes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Taux de Change Actuels #}
+    {% if rates.success %}
+    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-2">📊 Taux de Change Actuels</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>1 TND =</strong> 
+                    <span class="badge bg-primary ms-2">{{ rates.taux.EUR|number_format(4, '.', ' ') }} EUR</span>
+                    <span class="badge bg-success ms-2">{{ rates.taux.USD|number_format(4, '.', ' ') }} USD</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">
+                        <i class="bi bi-clock"></i> 
+                        Dernière mise à jour : 
+                        {% if rates.date_maj %}
+                            {{ rates.date_maj|date('d/m/Y H:i') }}
+                        {% else %}
+                            Aujourd'hui
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+        <div>
+            <strong>Attention !</strong> Impossible de récupérer les taux de change actuels.
+            <br><small>{{ rates.error }}</small>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Statistiques Totaux #}
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Total TND</h6>
+                            <h3 class="mb-0">{{ totaux.tnd|number_format(2, '.', ' ') }} DT</h3>
+                        </div>
+                        <i class="bi bi-cash-stack" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Total EUR</h6>
+                            <h3 class="mb-0">
+                                {% if rates.success %}
+                                    {{ totaux.eur|number_format(2, '.', ' ') }} €
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </h3>
+                        </div>
+                        <i class="bi bi-currency-euro" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-white-50 mb-2">Total USD</h6>
+                            <h3 class="mb-0">
+                                {% if rates.success %}
+                                    {{ totaux.usd|number_format(2, '.', ' ') }} $
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </h3>
+                        </div>
+                        <i class="bi bi-currency-dollar" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Tableau des Ventes avec Conversions #}
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-table"></i> Tableau d'Analyse Multi-Devises
+                </h5>
+                <span class="badge bg-primary">{{ ventes_conversions|length }} ventes</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if ventes_conversions|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tableAnalyse">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 80px;">
+                                <i class="bi bi-hash"></i> ID
+                            </th>
+                            <th>
+                                <i class="bi bi-person"></i> Client
+                            </th>
+                            <th>
+                                <i class="bi bi-box"></i> Produit
+                            </th>
+                            <th class="text-center">
+                                <i class="bi bi-calendar"></i> Date
+                            </th>
+                            <th class="text-end">
+                                <i class="bi bi-cash"></i> Montant TND
+                            </th>
+                            <th class="text-end">
+                                <i class="bi bi-currency-euro"></i> Montant EUR
+                            </th>
+                            <th class="text-end">
+                                <i class="bi bi-currency-dollar"></i> Montant USD
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in ventes_conversions %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">#{{ item.vente.idVente }}</span>
+                            </td>
+                            <td>
+                                <strong>
+                                    {% if item.vente.idClient %}
+                                        {{ item.vente.idClient.nom }}
+                                    {% else %}
+                                        <span class="text-muted">Inconnu</span>
+                                    {% endif %}
+                                </strong>
+                            </td>
+                            <td>
+                                {% if item.vente.idProduit %}
+                                    {{ item.vente.idProduit.nom }}
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.vente.quantite|number_format(2) }} {{ item.vente.idProduit.unite }}
+                                    </small>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <small>{{ item.vente.dateVente|date('d/m/Y') }}</small>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-primary">{{ item.montant_tnd|number_format(2, '.', ' ') }} DT</strong>
+                            </td>
+                            <td class="text-end">
+                                {% if item.montant_eur is not null %}
+                                    <span class="badge bg-primary" style="font-size: 0.9rem;">
+                                        {{ item.montant_eur|number_format(2, '.', ' ') }} €
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if item.montant_usd is not null %}
+                                    <span class="badge bg-success" style="font-size: 0.9rem;">
+                                        {{ item.montant_usd|number_format(2, '.', ' ') }} $
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="4" class="text-end">TOTAUX :</th>
+                            <th class="text-end">
+                                <strong class="text-primary">{{ totaux.tnd|number_format(2, '.', ' ') }} DT</strong>
+                            </th>
+                            <th class="text-end">
+                                {% if rates.success %}
+                                    <strong class="text-primary">{{ totaux.eur|number_format(2, '.', ' ') }} €</strong>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </th>
+                            <th class="text-end">
+                                {% if rates.success %}
+                                    <strong class="text-success">{{ totaux.usd|number_format(2, '.', ' ') }} $</strong>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                <p class="text-muted mt-3">Aucune vente à analyser</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Informations Complémentaires #}
+    <div class="row mt-4">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-info-circle text-info"></i> À propos de cette analyse
+                    </h6>
+                    <p class="card-text small text-muted mb-2">
+                        Cette page affiche toutes vos ventes avec leur équivalent en EUR (Euro) et USD (Dollar Américain).
+                    </p>
+                    <ul class="small text-muted mb-0">
+                        <li>Les taux de change sont mis à jour quotidiennement</li>
+                        <li>Les conversions sont calculées en temps réel</li>
+                        <li>Source : ExchangeRate API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-graph-up text-success"></i> Utilité de l'analyse
+                    </h6>
+                    <ul class="small text-muted mb-0">
+                        <li>Comparer vos revenus en différentes devises</li>
+                        <li>Préparer des rapports internationaux</li>
+                        <li>Suivre l'évolution des taux de change</li>
+                        <li>Faciliter les transactions internationales</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem 0.75rem;
+    }
+    
+    .table tbody td {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table tfoot th {
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 1rem 0.75rem;
+        border-top: 2px solid #dee2e6;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    // Animation d'entrée pour les lignes du tableau
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('#tableAnalyse tbody tr');
+        rows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
+    });
+</script>
+{% endblock %}

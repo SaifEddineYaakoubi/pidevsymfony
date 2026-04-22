@@ -1,60 +1,97 @@
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
+
+    {% for type, messages in app.flashes %}
+        {% if type == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-circle"></i> Erreur:</strong>
+                {% for message in messages %}
+                    <div>{{ message }}</div>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
+
     {% if form.vars.errors|length > 0 %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Erreurs de validation :</strong>
+            <strong><i class="fas fa-exclamation-circle"></i> Erreurs de validation :</strong>
             {{ form_errors(form) }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endif %}
 
     <div class="row">
+        {# Date de Vente #}
         <div class="col-md-6 mb-3">
-            <label class="form-label">{{ form.dateVente.vars.label }}</label>
+            <label class="form-label">{{ form.dateVente.vars.label }} <span class="text-danger">*</span></label>
             {{ form_widget(form.dateVente, {'attr': {'class': 'form-control'}}) }}
             {% if form.dateVente.vars.errors|length > 0 %}
-                <div class="invalid-feedback d-block">
-                    {{ form_errors(form.dateVente) }}
+                <div class="invalid-feedback d-block text-danger">
+                    <i class="fas fa-times-circle"></i> {{ form_errors(form.dateVente) }}
                 </div>
             {% endif %}
+            <small class="form-text text-muted"><i class="fas fa-info-circle"></i> Date obligatoire (pas dans le futur)</small>
         </div>
+
+        {# Produit (Menu déroulant avec Icons) #}
         <div class="col-md-6 mb-3">
-            <label class="form-label">{{ form.montantTotal.vars.label }}</label>
-            {{ form_widget(form.montantTotal, {'attr': {'class': 'form-control'}}) }}
-            {% if form.montantTotal.vars.errors|length > 0 %}
-                <div class="invalid-feedback d-block">
-                    {{ form_errors(form.montantTotal) }}
+            <label class="form-label">{{ form.idProduit.vars.label }} <span class="text-danger">*</span></label>
+            {{ form_widget(form.idProduit, {'attr': {'class': 'form-control'}}) }}
+            {% if form.idProduit.vars.errors|length > 0 %}
+                <div class="invalid-feedback d-block text-danger">
+                    <i class="fas fa-times-circle"></i> {{ form_errors(form.idProduit) }}
                 </div>
             {% endif %}
         </div>
     </div>
 
     <div class="row">
+        {# Quantité #}
         <div class="col-md-6 mb-3">
-            <label class="form-label">{{ form.idClient.vars.label }}</label>
-            {{ form_widget(form.idClient, {'attr': {'class': 'form-control'}}) }}
-            {% if form.idClient.vars.errors|length > 0 %}
-                <div class="invalid-feedback d-block">
-                    {{ form_errors(form.idClient) }}
+            <label class="form-label">{{ form.quantite.vars.label }} <span class="text-danger">*</span></label>
+            {{ form_widget(form.quantite, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 10.5'}}) }}
+            {% if form.quantite.vars.errors|length > 0 %}
+                <div class="invalid-feedback d-block text-danger">
+                    <i class="fas fa-times-circle"></i> {{ form_errors(form.quantite) }}
                 </div>
             {% endif %}
+            <small class="form-text text-muted"><i class="fas fa-info-circle"></i> Quantité positive obligatoire</small>
         </div>
+
+        {# Montant Total (Read-only car calculé par le serveur) #}
         <div class="col-md-6 mb-3">
-            <label class="form-label">{{ form.idUser.vars.label }}</label>
-            {{ form_widget(form.idUser, {'attr': {'class': 'form-control'}}) }}
-            {% if form.idUser.vars.errors|length > 0 %}
-                <div class="invalid-feedback d-block">
-                    {{ form_errors(form.idUser) }}
+            <label class="form-label">{{ form.montantTotal.vars.label }}</label>
+            {{ form_widget(form.montantTotal, {'attr': {'class': 'form-control bg-light', 'readonly': 'readonly', 'placeholder': 'Calculé automatiquement'}}) }}
+            {% if form.montantTotal.vars.errors|length > 0 %}
+                <div class="invalid-feedback d-block text-danger">
+                    <i class="fas fa-times-circle"></i> {{ form_errors(form.montantTotal) }}
                 </div>
             {% endif %}
+            <small class="form-text text-muted"><i class="fas fa-lock"></i> Calculé automatiquement</small>
         </div>
     </div>
 
+    <div class="row">
+        {# Client #}
+        <div class="col-md-12 mb-3">
+            <label class="form-label">{{ form.idClient.vars.label }} <span class="text-danger">*</span></label>
+            {{ form_widget(form.idClient, {'attr': {'class': 'form-control'}}) }}
+            {% if form.idClient.vars.errors|length > 0 %}
+                <div class="invalid-feedback d-block text-danger">
+                    <i class="fas fa-times-circle"></i> {{ form_errors(form.idClient) }}
+                </div>
+            {% endif %}
+        </div>
+
+        {# idUser est géré automatiquement par le Controller, donc on ne l'affiche pas ici #}
+    </div>
+
     <div class="form-group mt-4">
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> {{ button_label|default('Enregistrer') }}
+        <button type="submit" class="btn btn-success shadow-sm">
+            <i class="fas fa-check-circle"></i> {{ button_label|default('Confirmer la vente') }}
         </button>
-        <a href="{{ path('app_vente_index') }}" class="btn btn-secondary">
-            <i class="fas fa-times"></i> Annuler
+        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
         </a>
     </div>
 {{ form_end(form) }}

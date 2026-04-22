@@ -1,5 +1,5 @@
 {# templates/admin/pages/utilisateur_form_modal.html.twig #}
-{{ form_start(form, {'action': form_action|default(app.request.uri), 'attr': {'class': 'form-horizontal', 'onsubmit': 'return submitForm(this);', 'id': 'userForm', 'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'action': form_action|default(app.request.uri), 'attr': {'class': 'form-horizontal', 'onsubmit': 'return submitForm(this);', 'id': 'userForm', 'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
 
 <div class="row">
     <div class="col-md-6">
