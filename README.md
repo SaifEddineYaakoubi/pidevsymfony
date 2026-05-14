@@ -288,7 +288,7 @@ Projet réalisé dans le cadre du cursus **ESPRIT** — École Supérieure Priv�
 |---|---|
 | **Saif Eddine Yaakoubi** | Intégration, parcelles , cultures |
 | **Maram Abdeladhim** | Stocks, Alertes Email, Brevo |
-| **Maram dhambri** | recoltes|
+| **Maram dhambri** | recoltes , rendement|
 | **Amine Ameur** | Messagerie, Analyse IA, Reset Password |
 | **Ahmed boussaidi** | Ventes, Clients, QR Code, Devises |
 
