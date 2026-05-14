@@ -212,7 +212,7 @@ STOCK_SEUIL=5
 |---|---|---|
 | Admin | `/admin/dashboard` | Créer via `php bin/console app:create-admin` |
 | Agriculteur | `/agriculteur/dashboard` | Inscription via `/register` |
-| Client | `/` | Inscription via `/register` |
+| responsable stock | `/` | Inscription via `/register` |
 
 ### Reconnaissance Faciale
 
