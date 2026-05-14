@@ -286,10 +286,11 @@ Projet réalisé dans le cadre du cursus **ESPRIT** — École Supérieure Priv�
 
 | Membre | Module |
 |---|---|
-| **Saif Eddine Yaakoubi** | Intégration, Admin, Auth, Reconnaissance Faciale |
+| **Saif Eddine Yaakoubi** | Intégration, parcelles , cultures |
 | **Maram Abdeladhim** | Stocks, Alertes Email, Brevo |
+| **Maram dhambri** | recoltes|
 | **Amine Ameur** | Messagerie, Analyse IA, Reset Password |
-| **Ahmed** | Ventes, Clients, QR Code, Devises |
+| **Ahmed boussaidi** | Ventes, Clients, QR Code, Devises |
 
 ---
 
