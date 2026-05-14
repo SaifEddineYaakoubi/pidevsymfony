@@ -15,20 +15,20 @@ class Stock
     #[ORM\Column(type: 'integer')]
     private ?int $id_stock = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'La quantité est obligatoire.')]
     #[Assert\PositiveOrZero(message: 'La quantité doit être supérieure ou égale à 0.')]
-    private ?float $quantite = null;
+    private string $quantite;
 
     #[ORM\Column(type: 'date')]
     #[Assert\NotNull(message: 'La date d\'entrée est obligatoire.')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'La date d\'entrée n\'est pas valide.')]
-    private ?\DateTimeInterface $date_entree = null;
+    private \DateTimeInterface $date_entree;
 
     #[ORM\Column(type: 'date')]
     #[Assert\NotNull(message: 'La date d\'expiration est obligatoire.')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'La date d\'expiration n\'est pas valide.')]
-    private ?\DateTimeInterface $date_expiration = null;
+    private \DateTimeInterface $date_expiration;
 
     #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'stocks')]
     #[ORM\JoinColumn(name: 'id_produit', referencedColumnName: 'id_produit', onDelete: 'CASCADE')]
@@ -63,36 +63,36 @@ class Stock
         return $this->id_stock;
     }
 
-    public function getQuantite(): ?float
+    public function getQuantite(): string
     {
         return $this->quantite;
     }
 
-    public function setQuantite(?float $quantite): self
+    public function setQuantite(string $quantite): self
     {
         $this->quantite = $quantite;
 
         return $this;
     }
 
-    public function getDateEntree(): ?\DateTimeInterface
+    public function getDateEntree(): \DateTimeInterface
     {
         return $this->date_entree;
     }
 
-    public function setDateEntree(?\DateTimeInterface $dateEntree): self
+    public function setDateEntree(\DateTimeInterface $dateEntree): self
     {
         $this->date_entree = $dateEntree;
 
         return $this;
     }
 
-    public function getDateExpiration(): ?\DateTimeInterface
+    public function getDateExpiration(): \DateTimeInterface
     {
         return $this->date_expiration;
     }
 
-    public function setDateExpiration(?\DateTimeInterface $dateExpiration): self
+    public function setDateExpiration(\DateTimeInterface $dateExpiration): self
     {
         $this->date_expiration = $dateExpiration;
 

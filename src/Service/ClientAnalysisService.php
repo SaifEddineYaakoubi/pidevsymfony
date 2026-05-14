@@ -18,6 +18,7 @@ class ClientAnalysisService
 
     /**
      * Analyse complète d'un client
+     * @return array<string, mixed>
      */
     public function analyzeClient(Client $client): array
     {
@@ -43,7 +44,7 @@ class ClientAnalysisService
         $categorie = $this->getClientCategory($score);
         
         // Jours depuis dernier achat
-        $joursDernierAchat = $dernierAchat ? (new \DateTime())->diff($dernierAchat)->days : null;
+        $joursDernierAchat = $dernierAchat ? (int) (new \DateTime())->diff($dernierAchat)->days : null;
         
         // Risque de perte
         $risquePerte = $this->calculateChurnRisk($joursDernierAchat, $nombreVentes);
@@ -67,16 +68,10 @@ class ClientAnalysisService
     private function calculateLoyaltyScore(int $nombreVentes, float $totalDepense, ?\DateTimeInterface $dernierAchat): int
     {
         $score = 0;
-        
-        // Points pour le nombre de ventes (max 40 points)
         $score += min(40, $nombreVentes * 5);
-        
-        // Points pour le montant total (max 30 points)
-        $score += min(30, ($totalDepense / 100) * 2);
-        
-        // Points pour la récence (max 30 points)
+        $score += min(30, (int) (($totalDepense / 100) * 2));
         if ($dernierAchat) {
-            $joursDernierAchat = (new \DateTime())->diff($dernierAchat)->days;
+            $joursDernierAchat = (int) (new \DateTime())->diff($dernierAchat)->days;
             if ($joursDernierAchat <= 30) {
                 $score += 30;
             } elseif ($joursDernierAchat <= 60) {
@@ -86,11 +81,12 @@ class ClientAnalysisService
             }
         }
         
-        return min(100, $score);
+        return min(100, (int) $score);
     }
 
     /**
      * Catégorie du client basée sur le score
+     * @return array<string, string>
      */
     private function getClientCategory(int $score): array
     {
@@ -109,6 +105,7 @@ class ClientAnalysisService
 
     /**
      * Calcul du risque de perte (0-100)
+     * @return array<string, mixed>
      */
     private function calculateChurnRisk(?int $joursDernierAchat, int $nombreVentes): array
     {
@@ -151,6 +148,8 @@ class ClientAnalysisService
 
     /**
      * Recommandations personnalisées
+     * @param array<string, mixed> $risquePerte
+     * @return array<int, array<string, string>>
      */
     private function getRecommendations(int $score, array $risquePerte, ?int $joursDernierAchat): array
     {
@@ -206,6 +205,7 @@ class ClientAnalysisService
 
     /**
      * Statistiques globales des clients
+     * @return array<string, int>
      */
     public function getGlobalStats(): array
     {

@@ -6,6 +6,9 @@ use App\Entity\Soil_analysis;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/** 
+ * @extends ServiceEntityRepository<Soil_analysis>
+ */
 class Soil_analysisRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

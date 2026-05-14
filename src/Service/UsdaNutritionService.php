@@ -114,6 +114,7 @@ class UsdaNutritionService
         return null;
     }
 
+    /** @return array<string, mixed> */
     private function extractNutrients(array $foodNutrients): array
     {
         $nutrients = [];
@@ -149,9 +150,10 @@ class UsdaNutritionService
         return $nutrients;
     }
 
+    /** @return array<string, mixed> */
     private function buildSearchCandidates(string $productName): array
     {
-        $normalized = mb_strtolower(trim($productName));
+        $normalized = mb_strtolower(trim((string) $productName));
         $normalized = $this->removeAccents($normalized);
 
         $translationMap = [

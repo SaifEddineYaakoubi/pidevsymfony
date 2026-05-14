@@ -14,7 +14,7 @@ class UserExtension extends AbstractExtension
         ];
     }
 
-    public function getUserColor($id)
+    public function getUserColor(int $id): string
     {
         $colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#a8edea'];
         return $colors[$id % count($colors)];

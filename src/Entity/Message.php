@@ -22,10 +22,10 @@ class Message
     private ?Utilisateur $receiver = null;
 
     #[ORM\Column(type: "text")]
-    private ?string $content = null;
+    private string $content;
 
     #[ORM\Column(type: "datetime")]
-    private ?\DateTimeInterface $sentAt = null;
+    private \DateTimeInterface $sentAt;
 
     #[ORM\Column(type: "boolean")]
     private bool $isRead = false;
@@ -63,7 +63,7 @@ class Message
         return $this;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -74,16 +74,12 @@ class Message
         return $this;
     }
 
-    public function getSentAt(): ?\DateTimeInterface
+    public function getSentAt(): \DateTimeInterface
     {
         return $this->sentAt;
     }
 
-    public function setSentAt(\DateTimeInterface $sentAt): self
-    {
-        $this->sentAt = $sentAt;
-        return $this;
-    }
+    // Setter supprimé - sentAt est initialisé dans __construct()
 
     public function isRead(): bool
     {

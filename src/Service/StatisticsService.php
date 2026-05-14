@@ -20,6 +20,7 @@ class StatisticsService
     /**
      * Statistiques des ventes par mois (12 derniers mois)
      */
+    /** @return array<string, mixed> */
     public function getVentesParMois(): array
     {
         $sql = "
@@ -42,6 +43,7 @@ class StatisticsService
     /**
      * Top 5 des produits les plus vendus
      */
+    /** @return array<string, mixed> */
     public function getTopProduits(int $limit = 5): array
     {
         $sql = "
@@ -66,6 +68,7 @@ class StatisticsService
     /**
      * Top 5 des meilleurs clients
      */
+    /** @return array<string, mixed> */
     public function getTopClients(int $limit = 5): array
     {
         $sql = "
@@ -89,6 +92,7 @@ class StatisticsService
     /**
      * Comparaison mois actuel vs mois précédent
      */
+    /** @return array<string, mixed> */
     public function getComparaisonMensuelle(): array
     {
         $sql = "
@@ -119,6 +123,7 @@ class StatisticsService
     /**
      * Statistiques globales
      */
+    /** @return array<string, mixed> */
     public function getStatistiquesGlobales(): array
     {
         $totalVentes = $this->venteRepository->count([]);

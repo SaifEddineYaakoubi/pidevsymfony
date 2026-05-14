@@ -18,18 +18,18 @@ class Rendement
     #[ORM\Column(type: "integer")]
     private int $id_rendement;
 
-    #[ORM\Column(type: "float")]
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'La surface exploitée est obligatoire.')]
     #[Assert\Positive(message: 'La surface exploitée doit être strictement supérieure à 0.')]
-    private float $surface_exploitee;
+    private string $surface_exploitee;
 
-    #[ORM\Column(type: "float")]
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'La quantité totale est obligatoire.')]
     #[Assert\Positive(message: 'La quantité totale doit être strictement supérieure à 0.')]
-    private float $quantite_totale;
+    private string $quantite_totale;
 
-    #[ORM\Column(type: "float")]
-    private float $productivite;
+    #[ORM\Column(type: "decimal", precision: 10, scale: 4)]
+    private string $productivite;
 
     #[ORM\ManyToOne(targetEntity: Recolte::class)]
     #[ORM\JoinColumn(name: 'id_recolte', referencedColumnName: 'id_recolte')]
@@ -46,7 +46,9 @@ class Rendement
         // Règle métier: quantité totale saisie ne doit pas dépasser la quantité de la récolte.
         // (Protection si l'utilisateur saisit une valeur incohérente)
         $recolteQuantite = $this->id_recolte->getQuantite();
-        if (is_numeric($recolteQuantite) && $this->quantite_totale > (float) $recolteQuantite) {
+        $quantiteTotale = (float) $this->quantite_totale;
+        
+        if (is_numeric($recolteQuantite) && $quantiteTotale > (float) $recolteQuantite) {
             $context->buildViolation('La quantité totale ne peut pas dépasser la quantité de la récolte sélectionnée ({{ q }} kg).')
                 ->setParameter('{{ q }}', (string) $recolteQuantite)
                 ->atPath('quantite_totale')
@@ -64,34 +66,37 @@ class Rendement
         $this->id_rendement = $value;
     }
 
-    public function getSurface_exploitee()
+    public function getSurface_exploitee(): string
     {
         return $this->surface_exploitee;
     }
 
-    public function setSurface_exploitee($value)
+    public function setSurface_exploitee(string $value): self
     {
         $this->surface_exploitee = $value;
+        return $this;
     }
 
-    public function getQuantite_totale()
+    public function getQuantite_totale(): string
     {
         return $this->quantite_totale;
     }
 
-    public function setQuantite_totale($value)
+    public function setQuantite_totale(string $value): self
     {
         $this->quantite_totale = $value;
+        return $this;
     }
 
-    public function getProductivite()
+    public function getProductivite(): string
     {
         return $this->productivite;
     }
 
-    public function setProductivite($value)
+    public function setProductivite(string $value): self
     {
         $this->productivite = $value;
+        return $this;
     }
 
     public function getId_recolte(): ?Recolte

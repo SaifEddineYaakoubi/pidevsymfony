@@ -18,15 +18,14 @@ class Vente
     #[ORM\Column(type: "date")]
     #[Assert\Range(
         min: "1970-01-01",
-        max: "+1 day", // Zid l-ghodwa bech ma t-7el-lekch machakel
+        max: "+1 day",
         notInRangeMessage: "La date de vente est invalide."
     )]
-    private ?\DateTimeInterface $date_vente = null;
+    private \DateTimeInterface $date_vente;
 
-    #[ORM\Column(type: "float")]
-    // ISLAH: Na77ina el Assert\NotNull bech i-khalli el calcul i-sir automatique
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     #[Assert\Positive(message: "Le montant doit être un nombre positif.")]
-    private ?float $montant_total = null;
+    private string $montant_total;
 
     /**
      * Flag pour indiquer si le montant a été calculé manuellement avec réduction
@@ -34,10 +33,10 @@ class Vente
      */
     private bool $montantCalculatedWithDiscount = false;
 
-    #[ORM\Column(type: "float")]
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     #[Assert\NotNull(message: "La quantité vendue est obligatoire.")]
     #[Assert\Positive(message: "La quantité doit être un nombre positif.")]
-    private ?float $quantite = null;
+    private string $quantite;
 
     #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'ventes')]
     #[ORM\JoinColumn(name: 'id_client', referencedColumnName: 'id_client', onDelete: 'CASCADE')]
@@ -76,7 +75,9 @@ class Vente
 
         if ($this->id_produit !== null && $this->quantite !== null) {
             // Montant = Prix du produit * Quantité (sans réduction)
-            $this->montant_total = $this->id_produit->getPrixUnitaire() * $this->quantite;
+            $prixUnitaire = (float) $this->id_produit->getPrixUnitaire();
+            $quantite = (float) $this->quantite;
+            $this->montant_total = (string) ($prixUnitaire * $quantite);
         }
     }
 
@@ -86,7 +87,7 @@ class Vente
      */
     public function setMontantTotalWithDiscount(float $montant_total): self
     {
-        $this->montant_total = $montant_total;
+        $this->montant_total = (string) $montant_total;
         $this->montantCalculatedWithDiscount = true;
         return $this;
     }
@@ -95,14 +96,14 @@ class Vente
 
     public function getIdVente(): ?int { return $this->id_vente; }
 
-    public function getDateVente(): ?\DateTimeInterface { return $this->date_vente; }
+    public function getDateVente(): \DateTimeInterface { return $this->date_vente; }
     public function setDateVente(\DateTimeInterface $date_vente): self { $this->date_vente = $date_vente; return $this; }
 
-    public function getMontantTotal(): ?float { return $this->montant_total; }
-    public function setMontantTotal(?float $montant_total): self { $this->montant_total = $montant_total; return $this; }
+    public function getMontantTotal(): string { return $this->montant_total; }
+    public function setMontantTotal(string $montant_total): self { $this->montant_total = $montant_total; return $this; }
 
-    public function getQuantite(): ?float { return $this->quantite; }
-    public function setQuantite(?float $quantite): self { $this->quantite = $quantite; return $this; }
+    public function getQuantite(): string { return $this->quantite; }
+    public function setQuantite(string $quantite): self { $this->quantite = $quantite; return $this; }
 
     public function getIdClient(): ?Client { return $this->id_client; }
     public function setIdClient(?Client $client): self { $this->id_client = $client; return $this; }

@@ -18,7 +18,7 @@ final class PdfExporter
         $dompdf->loadHtml($html);
         $dompdf->render();
 
-        return $dompdf->output();
+        return (string) $dompdf->output();
     }
 }
 

@@ -4,61 +4,61 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-
 #[ORM\Entity]
 class Utilisateur_badge
 {
-
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id;
 
-    #[ORM\Column(type: "integer")]
-    private int $id_user;
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
+    private Utilisateur $utilisateur;
 
-    #[ORM\Column(type: "integer")]
-    private int $id_badge;
+    #[ORM\ManyToOne(targetEntity: Badge::class)]
+    #[ORM\JoinColumn(name: 'id_badge', referencedColumnName: 'id', nullable: false)]
+    private Badge $badge;
 
-    #[ORM\Column(type: "date")]
+    #[ORM\Column(type: "datetime")]
     private \DateTimeInterface $date_attribution;
 
-    public function getId()
+    public function __construct()
+    {
+        $this->date_attribution = new \DateTime();
+    }
+
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($value)
+    public function getUtilisateur(): Utilisateur
     {
-        $this->id = $value;
+        return $this->utilisateur;
     }
 
-    public function getId_user()
+    public function setUtilisateur(Utilisateur $utilisateur): self
     {
-        return $this->id_user;
+        $this->utilisateur = $utilisateur;
+        return $this;
     }
 
-    public function setId_user($value)
+    public function getBadge(): Badge
     {
-        $this->id_user = $value;
+        return $this->badge;
     }
 
-    public function getId_badge()
+    public function setBadge(Badge $badge): self
     {
-        return $this->id_badge;
+        $this->badge = $badge;
+        return $this;
     }
 
-    public function setId_badge($value)
-    {
-        $this->id_badge = $value;
-    }
-
-    public function getDate_attribution()
+    public function getDate_attribution(): \DateTimeInterface
     {
         return $this->date_attribution;
     }
 
-    public function setDate_attribution($value)
-    {
-        $this->date_attribution = $value;
-    }
+    // Setter supprimé - date_attribution est gérée automatiquement
 }

@@ -65,7 +65,7 @@ class Client
     #[ORM\Column(type: "string", length: 20, nullable: true)]
     private ?string $badge = null;
 
-    #[ORM\OneToMany(mappedBy: "id_client", targetEntity: Vente::class)]
+    #[ORM\OneToMany(mappedBy: "id_client", targetEntity: Vente::class, cascade: ["remove"])]
     private Collection $ventes;
 
     public function __construct()

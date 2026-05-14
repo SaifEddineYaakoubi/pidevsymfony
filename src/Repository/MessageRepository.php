@@ -24,10 +24,10 @@ class MessageRepository extends ServiceEntityRepository
 
     /**
      * Récupère toutes les conversations d'un utilisateur (le dernier message de chaque conversation)
+     * @return array<int, array{partner_id: int, content: string, sent_at: string, is_read: bool, sender_id: int}>
      */
-    public function findConversations(Utilisateur $user)
+    public function findConversations(Utilisateur $user): array
     {
-        // 1. Récupérer tous les messages impliquant l'utilisateur, triés par date décroissante
         $messages = $this->createQueryBuilder('m')
             ->where('m.sender = :user OR m.receiver = :user')
             ->setParameter('user', $user)
@@ -40,21 +40,27 @@ class MessageRepository extends ServiceEntityRepository
 
         /** @var Message $msg */
         foreach ($messages as $msg) {
-            $partner = ($msg->getSender()->getIdUser() === $user->getIdUser()) 
-                ? $msg->getReceiver() 
-                : $msg->getSender();
-            
-            $partnerId = $partner->getIdUser();
+            $sender   = $msg->getSender();
+            $receiver = $msg->getReceiver();
+            if ($sender === null || $receiver === null) {
+                continue;
+            }
 
-            // Ne garder que le message le plus récent pour chaque partenaire
+            $partner = ($sender->getIdUser() === $user->getIdUser()) ? $receiver : $sender;
+            $partnerId = $partner->getIdUser();
+            if ($partnerId === null) {
+                continue;
+            }
+
             if (!isset($partnersHandled[$partnerId])) {
                 $partnersHandled[$partnerId] = true;
+                $sentAt = $msg->getSentAt();
                 $conversations[] = [
                     'partner_id' => $partnerId,
-                    'content' => $msg->getContent(),
-                    'sent_at' => $msg->getSentAt()->format('Y-m-d H:i:s'),
-                    'is_read' => $msg->isRead(),
-                    'sender_id' => $msg->getSender()->getIdUser()
+                    'content'    => $msg->getContent(),
+                    'sent_at'    => $sentAt !== null ? $sentAt->format('Y-m-d H:i:s') : '',
+                    'is_read'    => $msg->isRead(),
+                    'sender_id'  => $sender->getIdUser() ?? 0,
                 ];
             }
         }
@@ -64,8 +70,9 @@ class MessageRepository extends ServiceEntityRepository
 
     /**
      * Récupère l'historique des messages entre deux utilisateurs
+     * @return Message[]
      */
-    public function findChatHistory(Utilisateur $user1, Utilisateur $user2)
+    public function findChatHistory(Utilisateur $user1, Utilisateur $user2): array
     {
         return $this->createQueryBuilder('m')
             ->where('(m.sender = :user1 AND m.receiver = :user2) OR (m.sender = :user2 AND m.receiver = :user1)')
@@ -79,9 +86,9 @@ class MessageRepository extends ServiceEntityRepository
     /**
      * Compte les messages non lus pour un utilisateur
      */
-    public function countUnreadMessages(Utilisateur $user)
+    public function countUnreadMessages(Utilisateur $user): int
     {
-        return $this->createQueryBuilder('m')
+        return (int) $this->createQueryBuilder('m')
             ->select('count(m.id)')
             ->where('m.receiver = :user')
             ->andWhere('m.isRead = :isRead')

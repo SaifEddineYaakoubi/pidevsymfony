@@ -80,6 +80,7 @@ class ClientBadgeService
     /**
      * Récupère les statistiques des badges
      */
+    /** @return array<string, mixed> */
     public function getBadgeStatistics(): array
     {
         $clients = $this->clientRepository->findAll();
@@ -103,6 +104,7 @@ class ClientBadgeService
     /**
      * Récupère les clients par badge
      */
+    /** @return array<string, mixed> */
     public function getClientsByBadge(ClientBadge $badge): array
     {
         $clients = $this->clientRepository->findAll();
@@ -115,6 +117,7 @@ class ClientBadgeService
     /**
      * Récupère les meilleurs clients (Gold badge)
      */
+    /** @return array<string, mixed> */
     public function getTopClients(): array
     {
         return $this->getClientsByBadge(ClientBadge::GOLD);

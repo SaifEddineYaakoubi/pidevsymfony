@@ -27,17 +27,17 @@ class Parcelle
 
     #[ORM\Column(type: "string", length: 100)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
-    private ?string $nom = null;
+    private string $nom;
 
     #[ORM\Column(type: "float")]
     #[Assert\NotNull(message: 'La superficie est obligatoire.')]
     #[Assert\PositiveOrZero(message: 'La superficie ne peut pas être négative.')]
     #[Assert\LessThanOrEqual(value: self::MAX_SUPERFICIE, message: 'La superficie dépasse la borne maximale.')]
-    private ?float $superficie = null;
+    private float $superficie;
 
     #[ORM\Column(type: "string", length: 150)]
     #[Assert\NotBlank(message: 'La localisation est obligatoire.')]
-    private ?string $localisation = null;
+    private string $localisation;
 
     #[ORM\Column(type: 'float', nullable: true)]
     #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'Latitude invalide.')]
@@ -50,7 +50,7 @@ class Parcelle
     #[ORM\Column(type: "string", length: 50)]
     #[Assert\NotBlank(message: 'L\'état est obligatoire.')]
     #[Assert\Choice(choices: self::ETATS, message: 'État de parcelle invalide.')]
-    private ?string $etat = null;
+    private string $etat;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "parcelles")]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: true, onDelete: 'SET NULL')]
@@ -69,36 +69,36 @@ class Parcelle
         return $this->id_parcelle;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
 
-    public function setNom(?string $value): self
+    public function setNom(string $value): self
     {
         $this->nom = $value;
 
         return $this;
     }
 
-    public function getSuperficie(): ?float
+    public function getSuperficie(): float
     {
         return $this->superficie;
     }
 
-    public function setSuperficie(?float $value): self
+    public function setSuperficie(float $value): self
     {
         $this->superficie = $value;
 
         return $this;
     }
 
-    public function getLocalisation(): ?string
+    public function getLocalisation(): string
     {
         return $this->localisation;
     }
 
-    public function setLocalisation(?string $value): self
+    public function setLocalisation(string $value): self
     {
         $this->localisation = $value;
 
@@ -129,12 +129,12 @@ class Parcelle
         return $this;
     }
 
-    public function getEtat(): ?string
+    public function getEtat(): string
     {
         return $this->etat;
     }
 
-    public function setEtat(?string $value): self
+    public function setEtat(string $value): self
     {
         $this->etat = $value;
 

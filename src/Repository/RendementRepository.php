@@ -8,6 +8,9 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 
+/** 
+ * @extends ServiceEntityRepository<Rendement>
+ */
 class RendementRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -35,8 +38,8 @@ class RendementRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('re')
             ->leftJoin('re.id_recolte', 'r')
             ->addSelect('r')
-            ->andWhere('r.id_user = :uid')
-            ->setParameter('uid', $user->getIdUser());
+            ->andWhere('r.utilisateur = :user')
+            ->setParameter('user', $user);
 
         $q = trim((string) $q);
         if ($q !== '') {
@@ -204,9 +207,9 @@ class RendementRepository extends ServiceEntityRepository
             ->leftJoin('re.id_recolte', 'r')
             ->addSelect('r')
             ->andWhere('re.id_rendement = :id')
-            ->andWhere('r.id_user = :uid')
+            ->andWhere('r.utilisateur = :user')
             ->setParameter('id', $id)
-            ->setParameter('uid', $user->getIdUser())
+            ->setParameter('user', $user)
             ->setMaxResults(1);
 
         $res = $qb->getQuery()->getOneOrNullResult();

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Stock;
 use App\Repository\StockRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -34,6 +35,7 @@ class StockAlertService
      *
      * @return array Retourne un tableau avec le nombre d'alertes, produits et erreurs
      */
+    /** @return array<string, mixed> */
     public function checkAndSendAlerts(): array
     {
         $stocks = $this->stockRepository->findAll();
@@ -42,9 +44,13 @@ class StockAlertService
         $erreurs = [];
 
         foreach ($stocks as $stock) {
+            if (!$stock instanceof Stock) {
+                continue;
+            }
             // Vérification du stock selon le getter exact de l'entité Stock
             if ($stock->getQuantite() <= $this->seuil) {
-                $produitNom = $stock->getIdProduit()->getNom();
+                $produit = $stock->getIdProduit();
+                $produitNom = $produit !== null ? ($produit->getNom() ?? 'Produit inconnu') : 'Produit inconnu';
                 $stockActuel = (int) $stock->getQuantite();
 
                 // Tentative d'envoi de l'alerte

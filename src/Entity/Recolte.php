@@ -28,7 +28,7 @@ class Recolte
     #[ORM\Column(type: "string", length: 50)]
     #[Assert\NotBlank(message: 'La qualité est obligatoire.')]
     #[Assert\Choice(choices: ['excellente','bonne','moyenne','mauvaise'], message: 'Qualité invalide.')]
-    private ?string $qualite = null;
+    private string $qualite = '';
 
     #[ORM\ManyToOne(targetEntity: Culture::class, inversedBy: "recoltes")]
     #[ORM\JoinColumn(name: 'id_culture', referencedColumnName: 'id_culture', nullable: true, onDelete: 'CASCADE')]
@@ -42,7 +42,7 @@ class Recolte
         minMessage: 'Le type de culture doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le type de culture ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $type_culture = null;
+    private string $type_culture = '';
 
     #[ORM\Column(type: "string", length: 150)]
     #[Assert\NotBlank(message: 'La localisation est obligatoire.')]
@@ -52,12 +52,12 @@ class Recolte
         minMessage: 'La localisation doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'La localisation ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $localisation = null;
+    private string $localisation = '';
 
-    #[ORM\Column(type: "integer")]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: false)]
     #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
-    #[Assert\Positive(message: 'L\'ID utilisateur doit être un entier positif.')]
-    private int $id_user;
+    private Utilisateur $utilisateur;
 
     public function __construct()
     {
@@ -67,7 +67,6 @@ class Recolte
         $this->id_culture = null;
         $this->type_culture = '';
         $this->localisation = '';
-        $this->id_user = 0;
     }
 
     public function getId_recolte()
@@ -140,14 +139,26 @@ class Recolte
         $this->localisation = $value;
     }
 
-    public function getId_user()
+    public function getUtilisateur(): Utilisateur
     {
-        return $this->id_user;
+        return $this->utilisateur;
     }
 
-    public function setId_user($value)
+    public function setUtilisateur(Utilisateur $utilisateur): self
     {
-        $this->id_user = $value;
+        $this->utilisateur = $utilisateur;
+        return $this;
+    }
+
+    public function getId_user(): ?int
+    {
+        return $this->utilisateur?->getIdUser();
+    }
+
+    public function setId_user(int $value): self
+    {
+        // Kept for compatibility - use setUtilisateur() instead
+        return $this;
     }
 
     public function getDateRecolte()
@@ -194,14 +205,14 @@ class Recolte
         return $this;
     }
 
-    public function getIdUser()
+    public function getIdUser(): ?int
     {
-        return $this->getId_user();
+        return $this->getUtilisateur()?->getIdUser();
     }
 
-    public function setIdUser($value)
+    public function setIdUser(int $value): self
     {
-        $this->setId_user($value);
+        // Kept for compatibility - use setUtilisateur() instead
         return $this;
     }
 }

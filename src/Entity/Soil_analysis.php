@@ -40,8 +40,8 @@ class Soil_analysis
     #[ORM\Column(type: "float")]
     private float $potassium;
 
-    #[ORM\Column(type: "float")]
-    private float $organic_carbon;
+    #[ORM\Column(type: "decimal", precision: 8, scale: 4)]
+    private string $organic_carbon;
 
     #[ORM\Column(type: "string", length: 128)]
     private string $source;
@@ -61,8 +61,8 @@ class Soil_analysis
     #[ORM\Column(type: "float")]
     private float $organic_matter;
 
-    #[ORM\Column(type: "float")]
-    private float $cation_exchange_capacity;
+    #[ORM\Column(type: "decimal", precision: 8, scale: 4)]
+    private string $cation_exchange_capacity;
 
     #[ORM\Column(type: "string", length: 100)]
     private string $soil_type;
@@ -167,14 +167,15 @@ class Soil_analysis
         $this->potassium = $value;
     }
 
-    public function getOrganic_carbon()
+    public function getOrganic_carbon(): string
     {
         return $this->organic_carbon;
     }
 
-    public function setOrganic_carbon($value)
+    public function setOrganic_carbon(string $value): self
     {
         $this->organic_carbon = $value;
+        return $this;
     }
 
     public function getSource()
@@ -192,10 +193,7 @@ class Soil_analysis
         return $this->collected_at;
     }
 
-    public function setCollected_at($value)
-    {
-        $this->collected_at = $value;
-    }
+    // Setter supprimé - collected_at est géré automatiquement
 
     public function getSand()
     {
@@ -237,14 +235,15 @@ class Soil_analysis
         $this->organic_matter = $value;
     }
 
-    public function getCation_exchange_capacity()
+    public function getCation_exchange_capacity(): string
     {
         return $this->cation_exchange_capacity;
     }
 
-    public function setCation_exchange_capacity($value)
+    public function setCation_exchange_capacity(string $value): self
     {
         $this->cation_exchange_capacity = $value;
+        return $this;
     }
 
     public function getSoil_type()

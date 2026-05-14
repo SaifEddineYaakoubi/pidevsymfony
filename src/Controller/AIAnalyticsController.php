@@ -38,6 +38,10 @@ class AIAnalyticsController extends AbstractController
         return new JsonResponse($stats);
     }
 
+    /**
+     * @param Utilisateur[] $users
+     * @return array<string, mixed>
+     */
     private function calculateStatistics(array $users): array
     {
         $totalUsers = count($users);
@@ -147,6 +151,11 @@ class AIAnalyticsController extends AbstractController
         ];
     }
 
+    /**
+     * @param int[] $ages
+     * @param array<string, int> $sexes
+     * @return array<string, mixed>
+     */
     private function generatePredictions(array $ages, array $sexes, int $totalUsers): array
     {
         $predictions = [];
@@ -170,12 +179,17 @@ class AIAnalyticsController extends AbstractController
         }
 
         // Prédiction de genre dominant
-        $maxSexe = array_keys($sexes, max($sexes))[0];
+        $maxSexe = array_keys($sexes, max($sexes))[0] ?? 'non_specifie';
         $predictions['dominant_gender'] = $maxSexe;
 
         return $predictions;
     }
 
+    /**
+     * @param array<string, int> $sexes
+     * @param array<string, int> $ageRanges
+     * @return array<int, array<string, string>>
+     */
     private function generateInsights(float $averageAge, array $sexes, array $ageRanges, int $totalUsers): array
     {
         $insights = [];
@@ -232,7 +246,7 @@ class AIAnalyticsController extends AbstractController
         }
 
         // Insight sur la tranche d'âge dominante
-        $maxAgeRange = array_keys($ageRanges, max($ageRanges))[0];
+        $maxAgeRange = count($ageRanges) > 0 ? (array_keys($ageRanges, max($ageRanges))[0] ?? '18-24') : '18-24';
         $insights[] = [
             'type' => 'info',
             'icon' => 'fa-chart-pie',

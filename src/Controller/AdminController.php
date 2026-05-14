@@ -129,23 +129,34 @@ final class AdminController extends AbstractController
             throw $this->createAccessDeniedException('Accès refusé.');
         }
 
-        $q = $request->query->getString('q');
-        $sort = $request->query->getString('sort') ?: 'dateEntreeDesc';
-        $dir = strtoupper($request->query->getString('dir') ?: 'DESC');
-        $dir = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+        $isResponsableStock = $user instanceof \App\Entity\Utilisateur
+            && $user->getRole() === 'responsable_stock';
 
-        $stocks = $stockRepository->findBySearchAndSort($q, 'idProduit', $sort, $dir);
-        $countsByStatus = $stockRepository->countByStatus($q);
-        $totalAll = $stockRepository->count([]);
+        $q    = $request->query->getString('q');
+        $sort = $request->query->getString('sort') ?: 'dateEntreeDesc';
+        $dir  = strtoupper($request->query->getString('dir') ?: 'DESC');
+        $dir  = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+
+        if ($isResponsableStock) {
+            $stocks       = $stockRepository->findBySearchAndSortForUser($user, $q, 'idProduit', $sort);
+            $totalAll     = $stockRepository->count(['id_user' => $user]);
+            $countsByStatus = $stockRepository->countByStatusForUser($user, $q);
+        } else {
+            $stocks       = $stockRepository->findBySearchAndSort($q, 'idProduit', $sort);
+            $totalAll     = $stockRepository->count([]);
+            $countsByStatus = $stockRepository->countByStatus($q);
+        }
 
         $viewData = [
-            'stocks' => $stocks,
-            'q' => $q,
-            'sort' => $sort,
-            'dir' => $dir,
-            'stats' => [
-                'total_all' => $totalAll,
-                'total_filtered' => count($stocks),
+            'stocks'  => $stocks,
+            'q'       => $q,
+            'sort'    => $sort,
+            'dir'     => $dir,
+            'stats'   => [
+                'total_all'        => $totalAll,
+                'total_filtered'   => count($stocks),
                 'counts_by_status' => $countsByStatus,
             ],
         ];

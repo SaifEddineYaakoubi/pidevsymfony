@@ -24,6 +24,7 @@ class HuggingFaceService
         $this->modelName = $modelName;
     }
 
+    /** @return array<string, mixed> */
     public function predict(array $data): array
     {
         // For testing, return mock data with various predictions
@@ -80,6 +81,7 @@ class HuggingFaceService
     /**
      * Générer des prédictions intelligentes basées sur les données d'entrée
      */
+    /** @return array<string, mixed> */
     private function generatePredictions(int $surface, int $quantite, string $typeCulture): array
     {
         // Calculer la productivité (quantite / surface)
@@ -122,6 +124,7 @@ class HuggingFaceService
     /**
      * Obtenir les infos sur un type de culture
      */
+    /** @return array<string, mixed> */
     private function getCultureInfo(string $typeCulture): array
     {
         $cultures = [
@@ -142,6 +145,7 @@ class HuggingFaceService
     /**
      * Proposition d'irrigation
      */
+    /** @return array<string, mixed> */
     private function propositionIrrigation(float $productivite, array $cultureInfo): array
     {
         $besoins = $cultureInfo['eau_min'];
@@ -167,6 +171,7 @@ class HuggingFaceService
     /**
      * Recommandation d'engrais
      */
+    /** @return array<string, mixed> */
     private function recommandationEngrais(int $quantite, array $cultureInfo): array
     {
         $azoteNeeded = $cultureInfo['azote'];
@@ -187,6 +192,7 @@ class HuggingFaceService
     /**
      * Analyse des risques de maladie
      */
+    /** @return array<string, mixed> */
     private function analyseRisqueMaladie(string $typeCulture, float $productivite): array
     {
         $maladies = [];
@@ -214,6 +220,7 @@ class HuggingFaceService
     /**
      * Déterminer l'époque optimale de récolte
      */
+    /** @return array<string, mixed> */
     private function determinerEpoqueRecolte(string $typeCulture): array
     {
         $epoques = [
@@ -239,6 +246,7 @@ class HuggingFaceService
     /**
      * Calculer le potentiel de rendement
      */
+    /** @return array<string, mixed> */
     private function calculerPotentielRendement(int $surface, int $quantite, array $cultureInfo): array
     {
         $rendementActuel = $surface > 0 ? round($quantite / $surface, 2) : 0;

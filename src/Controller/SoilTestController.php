@@ -30,7 +30,7 @@ class SoilTestController extends AbstractController
         }
 
         // Récupérer les récoltes de l'utilisateur
-        $recoltes = $recolteRepository->findBy(['id_user' => $user->getIdUser()], ['date_recolte' => 'DESC'], 10);
+        $recoltes = $recolteRepository->findBy(['utilisateur' => $user], ['date_recolte' => 'DESC'], 10);
 
         // Récupérer seulement les rendements avec récoltes valides (INNER JOIN en base)
         $rendements = $rendementRepository->findAllWithValidRecoltes();
@@ -98,7 +98,7 @@ class SoilTestController extends AbstractController
 
         // Vérifier propriété
         $recolte = $rendement->getId_recolte();
-        if (!$recolte || $recolte->getId_user() !== $user->getIdUser()) {
+        if (!$recolte || $recolte->getUtilisateur()?->getIdUser() !== $user->getIdUser()) {
             throw $this->createAccessDeniedException();
         }
 
@@ -170,7 +170,7 @@ class SoilTestController extends AbstractController
         }
 
         $recolte = $rendement->getId_recolte();
-        if (!$recolte || $recolte->getId_user() !== $user->getIdUser()) {
+        if (!$recolte || $recolte->getUtilisateur()?->getIdUser() !== $user->getIdUser()) {
             return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 

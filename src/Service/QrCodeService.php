@@ -35,8 +35,7 @@ class QrCodeService
             size: 300,
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            labelText: 'Vente #' . $vente->getIdVente(),
-            labelAlignment: LabelAlignment::Center
+            labelText: 'Vente #' . $vente->getIdVente(),            labelAlignment: LabelAlignment::Center
         );
 
         $result = $builder->build();
@@ -64,7 +63,7 @@ class QrCodeService
             size: 300,
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            labelText: $client->getNom(),
+            labelText: $client->getNom() ?? 'Client',
             labelAlignment: LabelAlignment::Center
         );
 
@@ -101,6 +100,9 @@ class QrCodeService
         return base64_encode($result->getString());
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function prepareQrCodeForDownload(string $base64QrCode, string $filename = 'qrcode.png'): array
     {
         return [
@@ -110,6 +112,10 @@ class QrCodeService
         ];
     }
 
+    /**
+     * @param array<mixed> $items
+     * @return array<int|string, string|object>
+     */
     public function generateBatchQrCodes(array $items): array
     {
         $qrCodes = [];

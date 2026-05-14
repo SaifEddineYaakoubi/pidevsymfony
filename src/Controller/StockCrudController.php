@@ -29,10 +29,19 @@ class StockCrudController extends AbstractController
     public function index(Request $request, StockRepository $stockRepository): Response
     {
         $search = trim((string) $request->query->get('q', ''));
-        $searchField = $request->query->get('searchField', 'idProduit');
-        $sort = $request->query->get('sort', 'dateEntreeDesc');
+        $searchField = (string) $request->query->get('searchField', 'idProduit');
+        $sort = (string) $request->query->get('sort', 'dateEntreeDesc');
 
-        $stocks = $stockRepository->findBySearchAndSort($search, $searchField, $sort);
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+
+        // Responsable stock voit uniquement ses propres stocks
+        // Admin voit tous les stocks
+        if ($user instanceof \App\Entity\Utilisateur && $user->getRole() === 'responsable_stock') {
+            $stocks = $stockRepository->findBySearchAndSortForUser($user, $search, $searchField, $sort);
+        } else {
+            $stocks = $stockRepository->findBySearchAndSort($search, $searchField, $sort);
+        }
 
         $sortOptions = [
             'dateEntreeAsc' => 'Date entrée - premier',
@@ -67,7 +76,7 @@ class StockCrudController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof \App\Entity\Utilisateur) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour ajouter du stock.');
         }
 
@@ -116,7 +125,15 @@ class StockCrudController extends AbstractController
     #[Route('/export-pdf', name: 'stock_export_pdf', methods: ['GET'])]
     public function exportPdf(StockRepository $stockRepository): Response
     {
-        $stocks = $stockRepository->findAll();
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+
+        // Responsable stock exporte uniquement ses propres stocks
+        if ($user instanceof \App\Entity\Utilisateur && $user->getRole() === 'responsable_stock') {
+            $stocks = $stockRepository->findBySearchAndSortForUser($user, null, null);
+        } else {
+            $stocks = $stockRepository->findAll();
+        }
 
         $html = $this->twig->render('stock/export-pdf.html.twig', [
             'stocks' => $stocks,
@@ -191,7 +208,7 @@ class StockCrudController extends AbstractController
         if (!$stock) {
             throw $this->createNotFoundException('Stock not found');
         }
-        if ($this->isCsrfTokenValid('delete' . $stock->getId_stock(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $stock->getId_stock(), (string) $request->request->get('_token'))) {
             $em->remove($stock);
             $em->flush();
         }

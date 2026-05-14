@@ -30,34 +30,68 @@ final class StockController extends AbstractController
     #[Route('/stock', name: 'app_stock_home')]
     public function home(): Response
     {
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+        $isResponsableStock = $user instanceof \App\Entity\Utilisateur
+            && $user->getRole() === 'responsable_stock';
+
         $produitRepository = $this->entityManager->getRepository(\App\Entity\Produit::class);
-        $stockRepository = $this->entityManager->getRepository(\App\Entity\Stock::class);
+        $stockRepository   = $this->entityManager->getRepository(\App\Entity\Stock::class);
 
-        $totalProduits = $produitRepository->count([]);
-        $totalStocks = $stockRepository->count([]);
+        if ($isResponsableStock) {
+            // Statistiques filtrées par utilisateur
+            $totalProduits = $produitRepository->count(['utilisateur' => $user]);
+            $totalStocks   = $stockRepository->count(['id_user' => $user]);
 
-        $totalQuantity = $stockRepository->createQueryBuilder('s')
-            ->select('SUM(s.quantite) as total')
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            $totalQuantity = $stockRepository->createQueryBuilder('s')
+                ->select('SUM(s.quantite) as total')
+                ->where('s.id_user = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getSingleScalarResult() ?? 0;
 
-        $averagePrice = $produitRepository->createQueryBuilder('p')
-            ->select('AVG(p.prix_unitaire) as avg')
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            $averagePrice = $produitRepository->createQueryBuilder('p')
+                ->select('AVG(p.prix_unitaire) as avg')
+                ->where('p.utilisateur = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getSingleScalarResult() ?? 0;
 
-        $productTypes = $produitRepository->createQueryBuilder('p')
-            ->select('p.type, COUNT(p.id_produit) as count')
-            ->groupBy('p.type')
-            ->getQuery()
-            ->getResult();
+            $productTypes = $produitRepository->createQueryBuilder('p')
+                ->select('p.type, COUNT(p.id_produit) as count')
+                ->where('p.utilisateur = :user')
+                ->setParameter('user', $user)
+                ->groupBy('p.type')
+                ->getQuery()
+                ->getResult();
+        } else {
+            // Admin : toutes les données
+            $totalProduits = $produitRepository->count([]);
+            $totalStocks   = $stockRepository->count([]);
+
+            $totalQuantity = $stockRepository->createQueryBuilder('s')
+                ->select('SUM(s.quantite) as total')
+                ->getQuery()
+                ->getSingleScalarResult() ?? 0;
+
+            $averagePrice = $produitRepository->createQueryBuilder('p')
+                ->select('AVG(p.prix_unitaire) as avg')
+                ->getQuery()
+                ->getSingleScalarResult() ?? 0;
+
+            $productTypes = $produitRepository->createQueryBuilder('p')
+                ->select('p.type, COUNT(p.id_produit) as count')
+                ->groupBy('p.type')
+                ->getQuery()
+                ->getResult();
+        }
 
         return $this->render('stock/pages/home.html.twig', [
             'stats' => [
                 'totalProduits' => $totalProduits,
-                'totalStocks' => $totalStocks,
+                'totalStocks'   => $totalStocks,
                 'totalQuantity' => $totalQuantity,
-                'averagePrice' => round($averagePrice, 2),
+                'averagePrice'  => round((float) $averagePrice, 2),
             ],
             'productTypes' => $productTypes,
         ]);
@@ -105,32 +139,47 @@ final class StockController extends AbstractController
     public function getStatistics(): JsonResponse
     {
         try {
+            /** @var \App\Entity\Utilisateur $user */
+            $user = $this->getUser();
+            $isResponsableStock = $user instanceof \App\Entity\Utilisateur
+                && $user->getRole() === 'responsable_stock';
+
             $stockRepository = $this->entityManager->getRepository(\App\Entity\Stock::class);
-
-            // Compter le nombre total de stocks
-            $totalStocks = $stockRepository->count([]);
-
-            // Compter les stocks faibles (inférieurs ou égaux au seuil)
             $seuil = $_ENV['STOCK_SEUIL'] ?? 5;
-            $lowStocksQuery = $stockRepository->createQueryBuilder('s')
-                ->select('COUNT(s.id_stock)')
-                ->where('s.quantite <= :seuil')
-                ->setParameter('seuil', $seuil)
-                ->getQuery();
 
-            $lowStocks = $lowStocksQuery->getSingleScalarResult();
+            if ($isResponsableStock) {
+                $totalStocks = $stockRepository->count(['id_user' => $user]);
+
+                $lowStocks = $stockRepository->createQueryBuilder('s')
+                    ->select('COUNT(s.id_stock)')
+                    ->where('s.quantite <= :seuil')
+                    ->andWhere('s.id_user = :user')
+                    ->setParameter('seuil', $seuil)
+                    ->setParameter('user', $user)
+                    ->getQuery()
+                    ->getSingleScalarResult();
+            } else {
+                $totalStocks = $stockRepository->count([]);
+
+                $lowStocks = $stockRepository->createQueryBuilder('s')
+                    ->select('COUNT(s.id_stock)')
+                    ->where('s.quantite <= :seuil')
+                    ->setParameter('seuil', $seuil)
+                    ->getQuery()
+                    ->getSingleScalarResult();
+            }
 
             return new JsonResponse([
-                'status' => 'ok',
+                'status'      => 'ok',
                 'totalStocks' => $totalStocks,
-                'lowStocks' => $lowStocks,
-                'seuil' => $seuil
+                'lowStocks'   => $lowStocks,
+                'seuil'       => $seuil,
             ]);
 
         } catch (\Exception $e) {
             return new JsonResponse([
-                'status' => 'error',
-                'message' => 'Erreur lors de la récupération des statistiques: ' . $e->getMessage()
+                'status'  => 'error',
+                'message' => 'Erreur lors de la récupération des statistiques: ' . $e->getMessage(),
             ], 500);
         }
     }

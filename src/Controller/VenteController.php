@@ -27,10 +27,10 @@ class VenteController extends AbstractController
     public function adminIndex(Request $request, VenteRepository $venteRepository, \App\Service\StatisticsService $statisticsService): Response
     {
         $search = $request->query->get('search');
-        $sortBy = $request->query->get('sortBy', 'date_vente');
-        $order = $request->query->get('order', 'DESC');
+        $sortBy = (string) $request->query->get('sortBy', 'date_vente');
+        $order = (string) $request->query->get('order', 'DESC');
 
-        $ventes = $venteRepository->findBySearchAndSort($search, $sortBy, $order);
+        $ventes = $venteRepository->findBySearchAndSort((string) $search, $sortBy, $order);
         $stats = $venteRepository->getVenteStats();
 
         // Données pour le modal statistiques
@@ -46,7 +46,7 @@ class VenteController extends AbstractController
         $moisVentes = [];
         $moisRevenus = [];
         foreach ($ventesParMois as $data) {
-            $moisLabels[]  = date('M Y', strtotime($data['mois'] . '-01'));
+            $moisLabels[]  = date('M Y', (int) strtotime($data['mois'] . '-01'));
             $moisVentes[]  = $data['nombre_ventes'];
             $moisRevenus[] = round($data['total_revenus'], 2);
         }
@@ -169,7 +169,7 @@ class VenteController extends AbstractController
         $vente = $entityManager->getRepository(Vente::class)->find($idVente);
         if (!$vente) throw $this->createNotFoundException('Vente non trouvée.');
 
-        if ($this->isCsrfTokenValid('delete' . $vente->getIdVente(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $vente->getIdVente(), (string) $request->request->get('_token'))) {
             $entityManager->remove($vente);
             $entityManager->flush();
             $this->addFlash('success', 'Vente supprimée.');
@@ -188,9 +188,9 @@ class VenteController extends AbstractController
         $user = $this->getUser();
         if (!$user instanceof Utilisateur) throw $this->createAccessDeniedException();
 
-        $search = $request->query->get('search', '');
-        $sortBy = $request->query->get('sortBy', 'date_vente');
-        $order = $request->query->get('order', 'DESC');
+        $search = (string) $request->query->get('search', '');
+        $sortBy = (string) $request->query->get('sortBy', 'date_vente');
+        $order = (string) $request->query->get('order', 'DESC');
 
         $ventes = $venteRepository->findBySearchAndSortForUser($user, $search, $sortBy, $order);
 
@@ -328,7 +328,7 @@ class VenteController extends AbstractController
 
             if ($produit && $quantite !== null && $client) {
                 // Récupérer l'IP du visiteur
-                $clientIp = $request->getClientIp();
+                $clientIp = $request->getClientIp() ?? '127.0.0.1';
                 
                 // Obtenir la localisation et les frais de livraison
                 $locationData = $geoLocationService->getLocationWithShipping($clientIp);
@@ -522,12 +522,11 @@ class VenteController extends AbstractController
         }
 
         // Verify CSRF token
-        if (!$this->isCsrfTokenValid('delete' . $vente->getIdVente(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete' . $vente->getIdVente(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide.');
             return $this->redirectToRoute('app_vente_index');
         }
 
-        // If user is not admin, verify ownership
         $isAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
         if (!$isAdmin && $vente->getIdUser() !== $user) {
             throw $this->createAccessDeniedException();

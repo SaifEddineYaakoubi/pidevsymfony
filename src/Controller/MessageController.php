@@ -97,15 +97,16 @@ class MessageController extends AbstractController
         $message = new Message();
         $message->setSender($user);
         $message->setReceiver($receiver);
-        $message->setContent($content);
+        $message->setContent((string) $content);
         
         $em->persist($message);
         $em->flush();
 
+        $sentAt = $message->getSentAt();
         return new JsonResponse([
             'success' => true,
             'message' => 'Message envoyé',
-            'sentAt' => $message->getSentAt()->format('d/m H:i')
+            'sentAt' => $sentAt !== null ? $sentAt->format('d/m H:i') : ''
         ]);
     }
 

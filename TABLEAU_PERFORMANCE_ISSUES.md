@@ -1,0 +1,9 @@
+# Table 4 – Détail des Problèmes de Performance Détectés
+
+| Indicateur | Avant (par défaut) | Après optimisation |
+|---|---|---|
+| **N+1 Query** | **5 requêtes séparées** détectées dans `MessageController::index()` : `findConversations()` charge tous les messages sans JOIN, puis `$utilisateurRepository->find($conv['partner_id'])` est appelé **dans une boucle** → 1 requête par conversation | Eager loading appliqué : JOIN FETCH sur `sender` et `receiver` dans `findConversations()`. Performance tab : **No performance issues detected** |
+| **Slow Query** | `MessageRepository::findConversations()` : chargement de **tous les messages** sans index sur `sender_id` / `receiver_id` / `sentAt` → full table scan. Risque de dépassement du seuil 100 ms sur table `message` | 3 index ajoutés : `sender_id`, `receiver_id`, `sentAt`. Requête filtrée avec `WHERE sender = :user OR receiver = :user` |
+| **findAll() sans LIMIT** | `MessageController::index()` : `$utilisateurRepository->findAll()` charge **tous les utilisateurs** en mémoire sans filtre ni pagination. Risque out-of-memory si la table grandit | Remplacé par `findBy([], null, 50)` avec pagination et LIMIT |
+| **Requêtes répétées sans cache** | `RendementRepository::getIndexStats()` : **5 requêtes identiques** sur la même table `rendement` (1 pour AVG/MAX + 4 COUNT par classe de productivité) — recalculées à chaque chargement de page | `useResultCache()` ajouté sur les requêtes COUNT répétées. Résultat mis en cache 60 secondes |
+| **findAll() sans JOIN** | `VenteController::exportPdf()` : `$venteRepository->findAll()` charge toutes les ventes **sans JOIN** sur `id_client` ni `id_produit` → Doctrine génère N requêtes lazy pour chaque relation accédée dans le template PDF | Remplacé par une requête avec `leftJoin('v.id_client', 'c')->addSelect('c')` et `leftJoin('v.id_produit', 'p')->addSelect('p')` |

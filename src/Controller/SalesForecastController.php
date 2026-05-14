@@ -26,7 +26,7 @@ class SalesForecastController extends AbstractController
         // Vérifier que l'historique existe
         if (isset($forecast['historique']) && is_array($forecast['historique'])) {
             foreach ($forecast['historique'] as $data) {
-                $historiqueLabels[] = date('M Y', strtotime($data['mois'] . '-01'));
+                $historiqueLabels[] = date('M Y', (int) strtotime($data['mois'] . '-01'));
                 $historiqueVentes[] = $data['nombre_ventes'];
                 $historiqueRevenus[] = round($data['revenus'], 2);
             }

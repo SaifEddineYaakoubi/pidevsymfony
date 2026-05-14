@@ -38,6 +38,7 @@ class SoilAnalysisService
      * @param Recolte $recolte
      * @return array Données NPK, pH, humidité, recommandations
      */
+    /** @return array<string, mixed> */
     public function getSoilAnalysisForRecolte(Recolte $recolte): array
     {
         $cacheKey = 'soil_analysis_' . md5($recolte->getLocalisation());
@@ -91,6 +92,7 @@ class SoilAnalysisService
      * @param Rendement $rendement
      * @return array Analyse impact sol/rendement
      */
+    /** @return array<string, mixed> */
     public function analyzeImpactOnYield(Rendement $rendement): array
     {
         $recolte = $rendement->getId_recolte();
@@ -127,6 +129,7 @@ class SoilAnalysisService
     /**
      * Récupérer données du sol depuis AgroAPI
      */
+    /** @return array<string, mixed> */
     private function fetchSoilDataFromAPI(string $location): array
     {
         try {
@@ -178,6 +181,7 @@ class SoilAnalysisService
     /**
      * Retourner des données de test quand l'API n'est pas disponible
      */
+    /** @return array<string, mixed> */
     private function getTestSoilData(string $location): array
     {
         $location = strtolower(trim($location));
@@ -417,6 +421,7 @@ class SoilAnalysisService
     /**
      * Générer recommandations de fertilisation
      */
+    /** @return array<string, mixed> */
     private function generateRecommendations(array $soilData, Recolte $recolte): array
     {
         $recommendations = [];
@@ -493,6 +498,7 @@ class SoilAnalysisService
     /**
      * Analyser compatibilité du sol avec la récolte
      */
+    /** @return array<string, mixed> */
     private function analyzeCompatibilityWithHarvest(array $soilData, Recolte $recolte): array
     {
         $soilType = $soilData['soil_type'] ?? '';
@@ -549,6 +555,7 @@ class SoilAnalysisService
     /**
      * Identifier facteurs limitants
      */
+    /** @return array<string, mixed> */
     private function identifyLimitingFactors(array $soilAnalysis): array
     {
         $factors = [];
@@ -570,6 +577,7 @@ class SoilAnalysisService
     /**
      * Recommander améliorations
      */
+    /** @return array<string, mixed> */
     private function recommendImprovements(array $soilAnalysis, float $currentProductivity): array
     {
         $improvements = [];

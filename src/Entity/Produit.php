@@ -21,7 +21,7 @@ class Produit
         max: 100,
         maxMessage: 'Le nom ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $nom = null;
+    private string $nom;
 
     #[ORM\Column(type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'Le type est obligatoire.')]
@@ -29,7 +29,7 @@ class Produit
         max: 50,
         maxMessage: 'Le type ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $type = null;
+    private string $type;
 
     #[ORM\Column(type: 'string', length: 20)]
     #[Assert\NotBlank(message: 'L\'unité est obligatoire.')]
@@ -37,15 +37,15 @@ class Produit
         max: 20,
         maxMessage: 'L\'unité ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $unite = null;
+    private string $unite;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Le prix unitaire est obligatoire.')]
     #[Assert\PositiveOrZero(message: 'Le prix unitaire doit être supérieur ou égal à 0.')]
-    private ?float $prix_unitaire = null;
+    private string $prix_unitaire;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private ?bool $alertEnvoyee = false;
+    private bool $alertEnvoyee = false;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user', nullable: true)]
@@ -69,48 +69,48 @@ class Produit
         return $this->id_produit;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
 
-    public function setNom(?string $nom): self
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
 
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function setType(?string $type): self
+    public function setType(string $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getUnite(): ?string
+    public function getUnite(): string
     {
         return $this->unite;
     }
 
-    public function setUnite(?string $unite): self
+    public function setUnite(string $unite): self
     {
         $this->unite = $unite;
 
         return $this;
     }
 
-    public function getPrixUnitaire(): ?float
+    public function getPrixUnitaire(): string
     {
         return $this->prix_unitaire;
     }
 
-    public function setPrixUnitaire(?float $prixUnitaire): self
+    public function setPrixUnitaire(string $prixUnitaire): self
     {
         $this->prix_unitaire = $prixUnitaire;
 
@@ -156,7 +156,8 @@ class Produit
         $total = 0.0;
 
         foreach ($this->getStocks() as $stock) {
-            $total += $stock->getQuantite() ?? 0.0;
+            $stockQuantite = $stock->getQuantite();
+            $total += is_numeric($stockQuantite) ? (float) $stockQuantite : 0.0;
         }
 
         return $total;
@@ -262,12 +263,12 @@ class Produit
         return '🥬';
     }
 
-    public function isAlertEnvoyee(): ?bool
+    public function isAlertEnvoyee(): bool
     {
         return $this->alertEnvoyee;
     }
 
-    public function setAlertEnvoyee(?bool $alertEnvoyee): self
+    public function setAlertEnvoyee(bool $alertEnvoyee): self
     {
         $this->alertEnvoyee = $alertEnvoyee;
 

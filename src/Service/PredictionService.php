@@ -54,6 +54,7 @@ class PredictionService
      * 
      * @return array ['success' => bool, 'prediction' => float|null, 'statistics' => array|null, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function predictNextMonthSales(): array
     {
         // Si Python n'est pas disponible ou que le script échoue → fallback PHP direct
@@ -194,6 +195,7 @@ class PredictionService
      * Fallback PHP: régression linéaire simple sans Python
      * Utilisé quand Python n'est pas disponible
      */
+    /** @return array<string, mixed> */
     private function predictWithPhpFallback(): array
     {
         try {
@@ -215,6 +217,10 @@ class PredictionService
                 GROUP BY DATE_FORMAT(date_vente, '%Y-%m')
                 ORDER BY mois ASC
             ");
+
+            if ($stmt === false) {
+                throw new \RuntimeException('Échec de la requête SQL');
+            }
 
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -325,6 +331,7 @@ class PredictionService
     /**
      * Vérifie si les dépendances Python sont installées
      */
+    /** @return array<string, mixed> */
     public function checkPythonDependencies(): array
     {
         $pythonPath = $this->detectPythonPath();

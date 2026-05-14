@@ -28,6 +28,7 @@ class CurrencyService
      * @param float $montantTND Montant en Dinars Tunisiens
      * @return array ['success' => bool, 'montant_eur' => float|null, 'taux' => float|null, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function convertTNDtoEUR(float $montantTND): array
     {
         try {
@@ -134,6 +135,7 @@ class CurrencyService
      * 
      * @return array ['success' => bool, 'taux' => float|null, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function getTauxTNDtoEUR(): array
     {
         try {
@@ -184,6 +186,7 @@ class CurrencyService
      * @param float $montantTND Montant en Dinars Tunisiens
      * @return array ['success' => bool, 'montant_usd' => float|null, 'taux' => float|null, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function convertTNDtoUSD(float $montantTND): array
     {
         try {
@@ -256,6 +259,7 @@ class CurrencyService
      * 
      * @return array ['success' => bool, 'taux' => array, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function getAllRates(): array
     {
         try {
@@ -308,6 +312,7 @@ class CurrencyService
      * @param float $montantTND Montant en Dinars Tunisiens
      * @return array
      */
+    /** @return array<string, mixed> */
     public function convertTNDtoMultiple(float $montantTND): array
     {
         $rates = $this->getAllRates();

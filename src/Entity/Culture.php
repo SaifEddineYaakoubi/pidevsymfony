@@ -24,15 +24,15 @@ class Culture
 
     #[ORM\Column(type: "string", length: 100)]
     #[Assert\NotBlank(message: 'Le type de culture est obligatoire.')]
-    private ?string $type_culture = null;
+    private string $type_culture = '';
 
     #[ORM\Column(type: "date")]
     #[Assert\NotNull(message: 'La date de plantation est obligatoire.')]
-    private ?\DateTimeInterface $date_plantation = null;
+    private \DateTimeInterface $date_plantation;
 
     #[ORM\Column(type: "date")]
     #[Assert\NotNull(message: 'La date de récolte prévue est obligatoire.')]
-    private ?\DateTimeInterface $date_recolte_prevue = null;
+    private \DateTimeInterface $date_recolte_prevue;
 
     #[ORM\Column(type: "string", length: 50)]
     #[Assert\NotBlank(message: 'L\'état de croissance est obligatoire.')]
@@ -42,14 +42,14 @@ class Culture
         'floraison',
         'maturite',
     ], message: 'État de croissance invalide.')]
-    private ?string $etat_croissance = null;
+    private string $etat_croissance = 'germination';
 
     #[ORM\ManyToOne(targetEntity: Parcelle::class, inversedBy: "cultures")]
     #[ORM\JoinColumn(name: 'id_parcelle', referencedColumnName: 'id_parcelle', nullable: false)]
     #[Assert\NotNull(message: 'Vous devez choisir une parcelle.')]
     private ?Parcelle $id_parcelle = null;
 
-    #[ORM\OneToMany(mappedBy: "id_culture", targetEntity: Recolte::class)]
+    #[ORM\OneToMany(mappedBy: "id_culture", targetEntity: Recolte::class, cascade: ["remove"])]
     private Collection $recoltes;
 
     public function __construct()
@@ -63,90 +63,90 @@ class Culture
         return $this->id_culture;
     }
 
-    public function getType_culture(): ?string
+    public function getType_culture(): string
     {
         return $this->type_culture;
     }
 
-    public function setType_culture(?string $value): self
+    public function setType_culture(string $value): self
     {
         $this->type_culture = $value;
 
         return $this;
     }
 
-    public function getTypeCulture(): ?string
+    public function getTypeCulture(): string
     {
         return $this->getType_culture();
     }
 
-    public function setTypeCulture(?string $value): self
+    public function setTypeCulture(string $value): self
     {
         return $this->setType_culture($value);
     }
 
-    public function getDate_plantation(): ?\DateTimeInterface
+    public function getDate_plantation(): \DateTimeInterface
     {
         return $this->date_plantation;
     }
 
-    public function setDate_plantation(?\DateTimeInterface $value): self
+    public function setDate_plantation(\DateTimeInterface $value): self
     {
         $this->date_plantation = $value;
 
         return $this;
     }
 
-    public function getDatePlantation(): ?\DateTimeInterface
+    public function getDatePlantation(): \DateTimeInterface
     {
         return $this->getDate_plantation();
     }
 
-    public function setDatePlantation(?\DateTimeInterface $value): self
+    public function setDatePlantation(\DateTimeInterface $value): self
     {
         return $this->setDate_plantation($value);
     }
 
-    public function getDate_recolte_prevue(): ?\DateTimeInterface
+    public function getDate_recolte_prevue(): \DateTimeInterface
     {
         return $this->date_recolte_prevue;
     }
 
-    public function setDate_recolte_prevue(?\DateTimeInterface $value): self
+    public function setDate_recolte_prevue(\DateTimeInterface $value): self
     {
         $this->date_recolte_prevue = $value;
 
         return $this;
     }
 
-    public function getDateRecoltePrevue(): ?\DateTimeInterface
+    public function getDateRecoltePrevue(): \DateTimeInterface
     {
         return $this->getDate_recolte_prevue();
     }
 
-    public function setDateRecoltePrevue(?\DateTimeInterface $value): self
+    public function setDateRecoltePrevue(\DateTimeInterface $value): self
     {
         return $this->setDate_recolte_prevue($value);
     }
 
-    public function getEtat_croissance(): ?string
+    public function getEtat_croissance(): string
     {
         return $this->etat_croissance;
     }
 
-    public function setEtat_croissance(?string $value): self
+    public function setEtat_croissance(string $value): self
     {
         $this->etat_croissance = $value;
 
         return $this;
     }
 
-    public function getEtatCroissance(): ?string
+    public function getEtatCroissance(): string
     {
         return $this->getEtat_croissance();
     }
 
-    public function setEtatCroissance(?string $value): self
+    public function setEtatCroissance(string $value): self
     {
         return $this->setEtat_croissance($value);
     }

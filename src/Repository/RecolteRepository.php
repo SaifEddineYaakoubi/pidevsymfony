@@ -8,6 +8,9 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 
+/** 
+ * @extends ServiceEntityRepository<Recolte>
+ */
 class RecolteRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -34,8 +37,8 @@ class RecolteRepository extends ServiceEntityRepository
     public function createListQueryBuilderForUser(Utilisateur $user, ?string $search): QueryBuilder
     {
         $qb = $this->createQueryBuilder('r')
-            ->andWhere('r.id_user = :uid')
-            ->setParameter('uid', $user->getIdUser());
+            ->andWhere('r.utilisateur = :uid')
+            ->setParameter('uid', $user);
 
         $search = trim((string) $search);
         if ($search !== '') {
@@ -163,7 +166,7 @@ class RecolteRepository extends ServiceEntityRepository
     {
         $r = $this->findOneBy([
             'id_recolte' => $id,
-            'id_user' => $user->getIdUser(),
+            'utilisateur' => $user,
         ]);
 
         return $r instanceof Recolte ? $r : null;

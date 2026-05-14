@@ -27,7 +27,7 @@ class StatisticsController extends AbstractController
         $moisRevenus = [];
         
         foreach ($ventesParMois as $data) {
-            $moisLabels[] = date('M Y', strtotime($data['mois'] . '-01'));
+            $moisLabels[] = date('M Y', (int) strtotime($data['mois'] . '-01'));
             $moisVentes[] = $data['nombre_ventes'];
             $moisRevenus[] = round($data['total_revenus'], 2);
         }

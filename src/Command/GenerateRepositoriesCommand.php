@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -8,9 +9,12 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
+#[AsCommand(
+    name: 'app:generate:Repositories',
+    description: 'Generates repository classes for all entities.'
+)]
 class GenerateRepositoriesCommand extends Command
 {
-    protected static $defaultName = 'app:generate:Repositories';
 
     private Filesystem $filesystem;
     private string $projectDir;
@@ -26,14 +30,12 @@ class GenerateRepositoriesCommand extends Command
         $this->projectDir = rtrim($projectDir, DIRECTORY_SEPARATOR);
     }
 
-    protected function configure()
+    protected function configure(): void
     {
-        $this
-            ->setDescription('Generates repository classes for all entities.')
-            ->setHelp('This command will generate repository classes for all entities in src/Entity.');
+        $this->setHelp('This command will generate repository classes for all entities in src/Entity.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('Generating repositories for all entities...');
 

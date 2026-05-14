@@ -26,7 +26,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $nom = null;
+    private string $nom;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
@@ -36,13 +36,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $prenom = null;
+    private string $prenom;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Assert\NotBlank(message: 'L\'email est obligatoire.')]
     #[Assert\Email(message: 'Format d\'email invalide.')]
     #[Assert\Length(max: 255, maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.')]
-    private ?string $email = null;
+    private string $email;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Le rôle est obligatoire.')]
@@ -50,16 +50,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         choices: ['admin', 'responsable_stock', 'agriculteur'],
         message: 'Rôle invalide.'
     )]
-    private ?string $role = null;
+    private string $role;
 
     #[ORM\Column(length: 255)]
-    private ?string $mot_de_passe = null;
+    private string $mot_de_passe;
 
     #[ORM\Column(type: "boolean")]
-    private ?bool $statut = null;
+    private bool $statut;
 
     #[ORM\Column(type: "datetime")]
-    private ?\DateTimeInterface $date_creation = null;
+    private \DateTimeInterface $date_creation;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $faceDescriptor = null;
@@ -89,7 +89,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * Inverse side for Vente::id_user
      * @var Collection<int, Vente>
      */
-    #[ORM\OneToMany(mappedBy: 'id_user', targetEntity: Vente::class, orphanRemoval: false)]
+    #[ORM\OneToMany(mappedBy: 'id_user', targetEntity: Vente::class, cascade: ["remove"])]
     private Collection $ventes;
 
     public function __construct()
@@ -107,7 +107,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id_user;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
@@ -118,7 +118,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPrenom(): ?string
+    public function getPrenom(): string
     {
         return $this->prenom;
     }
@@ -129,7 +129,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -140,7 +140,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -151,7 +151,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getMotDePasse(): ?string
+    public function getMotDePasse(): string
     {
         return $this->mot_de_passe;
     }
@@ -162,7 +162,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getStatut(): ?bool
+    public function getStatut(): bool
     {
         return $this->statut;
     }
@@ -173,7 +173,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeInterface
+    public function getDateCreation(): \DateTimeInterface
     {
         return $this->date_creation;
     }
@@ -190,12 +190,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return (string) $this->email;
     }
 
     public function getUsername(): string
     {
-        return $this->email;
+        return (string) $this->email;
     }
 
     public function getRoles(): array
@@ -219,7 +219,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPassword(): string
     {
-        return $this->mot_de_passe;
+        return (string) $this->mot_de_passe;
     }
 
     public function getSalt(): ?string

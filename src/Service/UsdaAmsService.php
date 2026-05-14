@@ -155,23 +155,20 @@ class UsdaAmsService
      */
     private function normalizeString(string $str): string
     {
-        // Supprimer les accents
-        $str = preg_replace('/[éèêë]/i', 'e', $str);
-        $str = preg_replace('/[àâä]/i', 'a', $str);
-        $str = preg_replace('/[ùûü]/i', 'u', $str);
-        $str = preg_replace('/[ôö]/i', 'o', $str);
-        $str = preg_replace('/[îï]/i', 'i', $str);
-        $str = preg_replace('/[ç]/i', 'c', $str);
-        
-        // Supprimer les espaces multiples
-        $str = preg_replace('/\s+/', ' ', $str);
-        
+        $str = (string) preg_replace('/[éèêë]/i', 'e', $str);
+        $str = (string) preg_replace('/[àâä]/i', 'a', $str);
+        $str = (string) preg_replace('/[ùûü]/i', 'u', $str);
+        $str = (string) preg_replace('/[ôö]/i', 'o', $str);
+        $str = (string) preg_replace('/[îï]/i', 'i', $str);
+        $str = (string) preg_replace('/[ç]/i', 'c', $str);
+        $str = (string) preg_replace('/\s+/', ' ', $str);
         return trim($str);
     }
 
     /**
      * Recherche les rapports disponibles avec gestion des erreurs
      */
+    /** @return array<string, mixed> */
     private function searchReports(string $englishTerm): array
     {
         try {
@@ -300,6 +297,7 @@ class UsdaAmsService
     /**
      * Fallback avec données simulées réalistes si l'API ne fonctionne pas
      */
+    /** @return array<string, mixed> */
     private function getFallbackPriceData(string $productName, string $englishTerm): array
     {
         // Données de secours réalistes basées sur les prix typiques du marché

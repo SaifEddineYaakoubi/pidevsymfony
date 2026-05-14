@@ -26,10 +26,10 @@ class AdminProfileController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 403);
         }
 
-        $nom = $request->request->get('nom');
-        $prenom = $request->request->get('prenom');
-        $email = $request->request->get('email');
-        $currentPassword = $request->request->get('current_password');
+        $nom = (string) $request->request->get('nom', '');
+        $prenom = (string) $request->request->get('prenom', '');
+        $email = (string) $request->request->get('email', '');
+        $currentPassword = (string) $request->request->get('current_password', '');
         $newPassword = $request->request->get('new_password');
         $profilePictureData = $request->request->get('profile_picture_data');
 
@@ -50,17 +50,18 @@ class AdminProfileController extends AbstractController
 
         // Mise à jour du mot de passe si fourni
         if ($newPassword) {
-            if (strlen($newPassword) < 6) {
+            $newPasswordStr = (string) $newPassword;
+            if (strlen($newPasswordStr) < 6) {
                 return new JsonResponse(['success' => false, 'message' => 'Le nouveau mot de passe doit faire au moins 6 caractères'], 400);
             }
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPasswordStr);
             $user->setMotDePasse($hashedPassword);
         }
 
         // Gestion de l'upload de la photo de profil
         if ($profilePictureData) {
             try {
-                $filename = $this->saveProfilePicture($user, $profilePictureData);
+                $filename = $this->saveProfilePicture($user, (string) $profilePictureData);
                 $user->setProfilePicture($filename);
             } catch (\Exception $e) {
                 return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload de l\'image: ' . $e->getMessage()], 400);
@@ -85,7 +86,7 @@ class AdminProfileController extends AbstractController
     {
         // Décoder l'image base64
         $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $base64Image);
-        $imageData = str_replace(' ', '+', $imageData);
+        $imageData = str_replace(' ', '+', (string) $imageData);
         $imageData = base64_decode($imageData);
 
         if ($imageData === false) {

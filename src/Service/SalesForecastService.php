@@ -16,6 +16,7 @@ class SalesForecastService
     /**
      * Prévisions pour les 3 prochains mois
      */
+    /** @return array<string, mixed> */
     public function getForecast(): array
     {
         $historique = $this->getHistoricalData(12); // 12 derniers mois
@@ -66,6 +67,7 @@ class SalesForecastService
     /**
      * Analyse des produits les plus rentables
      */
+    /** @return array<string, mixed> */
     public function getProfitabilityAnalysis(): array
     {
         $sql = "
@@ -92,6 +94,7 @@ class SalesForecastService
     /**
      * Analyse des périodes de vente
      */
+    /** @return array<string, mixed> */
     public function getSeasonalityAnalysis(): array
     {
         $sql = "
@@ -137,6 +140,7 @@ class SalesForecastService
     /**
      * Recommandations stratégiques
      */
+    /** @return array<string, mixed> */
     public function getStrategicRecommendations(): array
     {
         $forecast = $this->getForecast();
@@ -194,6 +198,7 @@ class SalesForecastService
     /**
      * Données historiques
      */
+    /** @return array<string, mixed> */
     private function getHistoricalData(int $months): array
     {
         $sql = "
@@ -216,6 +221,7 @@ class SalesForecastService
     /**
      * Calcul de la tendance (régression linéaire)
      */
+    /** @return array<string, mixed> */
     private function calculateTrend(array $data): array
     {
         $n = count($data);
@@ -246,6 +252,7 @@ class SalesForecastService
     /**
      * Prédiction d'une valeur future
      */
+    /** @return array<string, mixed> */
     private function predictValue(int $x, array $tendance, array $historique): array
     {
         $revenusPredit = $tendance['slope'] * $x + $tendance['intercept'];

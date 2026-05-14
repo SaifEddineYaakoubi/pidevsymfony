@@ -6,6 +6,9 @@ use App\Entity\Produit;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/** 
+ * @extends ServiceEntityRepository<Produit>
+ */
 class ProduitRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -13,7 +16,7 @@ class ProduitRepository extends ServiceEntityRepository
         parent::__construct($registry, Produit::class);
     }
 
-    public function findBySearchAndSort(?string $search, ?string $searchField, string $sort = 'idProduit', string $direction = 'ASC'): array
+    public function findBySearchAndSort(?string $search, ?string $searchField, string $sort = 'idProduit', string $direction = 'ASC', ?\App\Entity\Utilisateur $user = null): array
     {
         $fields = [
             'idProduit' => 'p.id_produit',
@@ -21,7 +24,7 @@ class ProduitRepository extends ServiceEntityRepository
             'type' => 'p.type',
             'unite' => 'p.unite',
             'prixUnitaire' => 'p.prix_unitaire',
-            'idUser' => 'u.email', // Tri par email de l'utilisateur
+            'idUser' => 'u.email',
         ];
 
         $searchFields = [
@@ -38,6 +41,12 @@ class ProduitRepository extends ServiceEntityRepository
             ->addSelect('u')
             ->orderBy($sortColumn, $direction);
 
+        // Filtrer par utilisateur si fourni (responsable_stock voit uniquement ses produits)
+        if ($user !== null) {
+            $qb->andWhere('p.utilisateur = :user')
+               ->setParameter('user', $user);
+        }
+
         if ($search) {
             if (isset($searchFields[$searchField])) {
                 $qb->andWhere($searchFields[$searchField] . ' LIKE :search')
@@ -49,6 +58,11 @@ class ProduitRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findBySearchAndSortForUser(\App\Entity\Utilisateur $user, ?string $search, ?string $searchField, string $sort = 'idProduit', string $direction = 'ASC'): array
+    {
+        return $this->findBySearchAndSort($search, $searchField, $sort, $direction, $user);
     }
 
     public function countByType(?string $search = null): array

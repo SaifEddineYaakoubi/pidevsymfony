@@ -4,61 +4,72 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-
 #[ORM\Entity]
 class User_badge
 {
-
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id;
 
-    #[ORM\Column(type: "integer")]
-    private int $user_id;
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user', nullable: false)]
+    private Utilisateur $user;
 
-    #[ORM\Column(type: "integer")]
-    private int $badge_id;
+    #[ORM\ManyToOne(targetEntity: Badge::class)]
+    #[ORM\JoinColumn(name: 'badge_id', referencedColumnName: 'id', nullable: false)]
+    private Badge $badge;
 
     #[ORM\Column(type: "datetime")]
     private \DateTimeInterface $created_at;
 
-    public function getId()
+    public function __construct()
+    {
+        $this->created_at = new \DateTime();
+    }
+
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($value)
+    public function getUser(): Utilisateur
     {
-        $this->id = $value;
+        return $this->user;
     }
 
-    public function getUser_id()
+    public function setUser(Utilisateur $user): self
     {
-        return $this->user_id;
+        $this->user = $user;
+        return $this;
     }
 
-    public function setUser_id($value)
+    public function getBadge(): Badge
     {
-        $this->user_id = $value;
+        return $this->badge;
     }
 
-    public function getBadge_id()
+    public function setBadge(Badge $badge): self
     {
-        return $this->badge_id;
+        $this->badge = $badge;
+        return $this;
     }
 
-    public function setBadge_id($value)
-    {
-        $this->badge_id = $value;
-    }
-
-    public function getCreated_at()
+    public function getCreated_at(): \DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreated_at($value)
+    // Setter removed - created_at is managed automatically
+
+    // Legacy methods for compatibility
+    public function getUser_id(): ?int
     {
-        $this->created_at = $value;
+        return $this->user?->getIdUser();
+    }
+
+    public function getBadge_id(): ?int
+    {
+        return $this->badge?->getId();
     }
 }

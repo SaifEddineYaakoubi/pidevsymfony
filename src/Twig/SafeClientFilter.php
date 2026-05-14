@@ -3,7 +3,6 @@
 namespace App\Twig;
 
 use App\Entity\Client;
-use Doctrine\ORM\Proxy\Proxy;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -24,12 +23,6 @@ class SafeClientFilter extends AbstractExtension
             if ($client === null) {
                 return $default;
             }
-
-            // Vérifier si c'est un proxy Doctrine non initialisé
-            if ($client instanceof Proxy && !$client->__isInitialized()) {
-                return $default;
-            }
-
             return $client->getNom() ?? $default;
         } catch (\Exception $e) {
             return $default;
@@ -42,11 +35,6 @@ class SafeClientFilter extends AbstractExtension
             if ($client === null) {
                 return $default;
             }
-
-            if ($client instanceof Proxy && !$client->__isInitialized()) {
-                return $default;
-            }
-
             return $client->getContact() ?? $default;
         } catch (\Exception $e) {
             return $default;
@@ -59,11 +47,6 @@ class SafeClientFilter extends AbstractExtension
             if ($client === null) {
                 return $default;
             }
-
-            if ($client instanceof Proxy && !$client->__isInitialized()) {
-                return $default;
-            }
-
             return $client->getAdresse() ?? $default;
         } catch (\Exception $e) {
             return $default;

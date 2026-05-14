@@ -6,6 +6,9 @@ use App\Entity\Face_images;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/** 
+ * @extends ServiceEntityRepository<Face_images>
+ */
 class Face_imagesRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

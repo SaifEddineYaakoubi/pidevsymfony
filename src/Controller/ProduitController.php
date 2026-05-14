@@ -34,11 +34,19 @@ class ProduitController extends AbstractController
     public function index(Request $request, ProduitRepository $produitRepository): Response
     {
         $search = trim((string) $request->query->get('q', ''));
-        $searchField = $request->query->get('searchField', 'nom');
-        $sort = $request->query->get('sort', 'idProduit');
-        $direction = strtoupper($request->query->get('direction', 'ASC')) === 'DESC' ? 'DESC' : 'ASC';
+        $searchField = (string) $request->query->get('searchField', 'nom');
+        $sort = (string) $request->query->get('sort', 'idProduit');
+        $direction = strtoupper((string) $request->query->get('direction', 'ASC')) === 'DESC' ? 'DESC' : 'ASC';
 
-        $produits = $produitRepository->findBySearchAndSort($search, $searchField, $sort, $direction);
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+
+        // Responsable stock voit uniquement ses propres produits
+        if ($user instanceof \App\Entity\Utilisateur && $user->getRole() === 'responsable_stock') {
+            $produits = $produitRepository->findBySearchAndSortForUser($user, $search, $searchField, $sort, $direction);
+        } else {
+            $produits = $produitRepository->findBySearchAndSort($search, $searchField, $sort, $direction);
+        }
 
         $sortOptions = [
             'idProduit' => 'ID',
@@ -94,7 +102,15 @@ class ProduitController extends AbstractController
     #[Route('/export-pdf', name: 'produit_export_pdf', methods: ['GET'])]
     public function exportPdf(ProduitRepository $produitRepository): Response
     {
-        $produits = $produitRepository->findAll();
+        /** @var \App\Entity\Utilisateur $user */
+        $user = $this->getUser();
+
+        // Responsable stock exporte uniquement ses propres produits
+        if ($user instanceof \App\Entity\Utilisateur && $user->getRole() === 'responsable_stock') {
+            $produits = $produitRepository->findBySearchAndSortForUser($user, null, null);
+        } else {
+            $produits = $produitRepository->findAll();
+        }
 
         $html = $this->twig->render('produit/export-pdf.html.twig', [
             'produits' => $produits,
@@ -266,7 +282,7 @@ class ProduitController extends AbstractController
         if (!$produit) {
             throw $this->createNotFoundException('Produit not found');
         }
-        if ($this->isCsrfTokenValid('delete' . $produit->getId_produit(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $produit->getId_produit(), (string) $request->request->get('_token'))) {
             // Supprimer toutes les entrées de stock associées à ce produit
             $stockRepository = $em->getRepository(\App\Entity\Stock::class);
             $stocks = $stockRepository->createQueryBuilder('s')

@@ -63,7 +63,7 @@ class SoilAnalysisController extends AbstractController
 
         // Vérifier que le rendement appartient à l'utilisateur via la récolte
         $recolte = $rendement->getId_recolte();
-        if (!$recolte || $recolte->getId_user() !== $user->getIdUser()) {
+        if (!$recolte || $recolte->getUtilisateur()?->getIdUser() !== $user->getIdUser()) {
             throw $this->createAccessDeniedException();
         }
 
@@ -96,7 +96,7 @@ class SoilAnalysisController extends AbstractController
         }
 
         $recolte = $rendement->getId_recolte();
-        if (!$recolte || $recolte->getId_user() !== $user->getIdUser()) {
+        if (!$recolte || $recolte->getUtilisateur()?->getIdUser() !== $user->getIdUser()) {
             return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 

@@ -28,6 +28,7 @@ class GeoLocationService
      * @param string $ip Adresse IP du visiteur
      * @return array ['success' => bool, 'city' => string|null, 'region' => string|null, 'country' => string|null, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function getLocation(string $ip): array
     {
         try {
@@ -176,6 +177,7 @@ class GeoLocationService
      * @param string $ip Adresse IP du visiteur
      * @return array ['success' => bool, 'city' => string|null, 'region' => string|null, 'frais_livraison' => float, 'error' => string|null]
      */
+    /** @return array<string, mixed> */
     public function getLocationWithShipping(string $ip): array
     {
         $location = $this->getLocation($ip);

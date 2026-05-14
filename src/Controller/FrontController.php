@@ -37,7 +37,7 @@ final class FrontController extends AbstractController
                 'cultures' => count($cultureRepository->searchByQueryForUser($user, null, null, null)),
                 'ventes' => $venteRepository->count(['id_user' => $user]),
                 'clients' => $clientRepository->count(['id_user' => $user->getIdUser()]),
-                'recoltes' => $recolteRepository->count(['id_user' => $user->getIdUser()]),
+                'recoltes' => $recolteRepository->count(['utilisateur' => $user]),
                 // Rendement is scoped via recolte owner; repository doesn't expose countForUser, so approximate via filtered query.
                 'rendements' => count($rendementRepository->findForIndexForUser($user, null, 'prod_desc')),
             ],

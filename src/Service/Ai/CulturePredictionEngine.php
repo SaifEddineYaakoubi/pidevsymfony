@@ -2,6 +2,8 @@
 
 namespace App\Service\Ai;
 
+use App\Entity\Culture;
+use App\Entity\Parcelle;
 use App\Entity\Utilisateur;
 use App\Repository\CultureRepository;
 use App\Repository\ParcelleRepository;
@@ -102,11 +104,11 @@ final class CulturePredictionEngine
     public function __construct(
         private readonly CultureRepository   $cultureRepo,
         private readonly ParcelleRepository  $parcelleRepo,
-        private readonly EntityManagerInterface $em,
     ) {}
 
     /**
      * Point d'entrée principal : génère toutes les prédictions pour un utilisateur.
+     * @return array<string, mixed>
      */
     public function generateForUser(Utilisateur $user): array
     {
@@ -122,10 +124,13 @@ final class CulturePredictionEngine
         // ── Recommandations par parcelle ─────────────────────────────
         $parcelleRecs = [];
         foreach ($parcelles as $parcelle) {
+            if (!$parcelle instanceof Parcelle) {
+                continue;
+            }
             // Cherche la culture actuelle sur cette parcelle
             $currentCulture = null;
             foreach ($cultures as $c) {
-                if ($c->getParcelle() && $c->getParcelle()->getId_parcelle() === $parcelle->getId_parcelle()) {
+                if ($c instanceof Culture && $c->getParcelle() && $c->getParcelle()->getId_parcelle() === $parcelle->getId_parcelle()) {
                     $currentCulture = $c;
                     break;
                 }
@@ -154,8 +159,10 @@ final class CulturePredictionEngine
     //  PRIVATE helpers
     // ─────────────────────────────────────────────────────────────
 
-    /** Prédiction théorique pour une culture active */
-    private function predictForCulture(object $culture): array
+    /** Prédiction théorique pour une culture active
+     * @return array<string, mixed>
+     */
+    private function predictForCulture(Culture $culture): array
     {
         $type   = mb_strtolower((string) $culture->getTypeCulture());
         $etat   = $culture->getEtatCroissance();
@@ -166,7 +173,7 @@ final class CulturePredictionEngine
         $urgence = 'normal';
         if ($culture->getDateRecoltePrevue()) {
             $diff = $today->diff($culture->getDateRecoltePrevue());
-            $jours = $diff->invert ? -$diff->days : $diff->days;
+            $jours = $diff->invert ? -$diff->days : (int) $diff->days;
             if ($jours <= 0)        $urgence = 'depasse';
             elseif ($jours <= 7)    $urgence = 'urgent';
             elseif ($jours <= 14)   $urgence = 'proche';
@@ -195,7 +202,7 @@ final class CulturePredictionEngine
         }
 
         // Score risque 0-100
-        $risqueScore = $this->computeRisque($etat, $jours);
+        $risqueScore = $this->computeRisque((string) ($etat ?? ''), $jours);
         $risqueLabel = match(true) {
             $risqueScore >= 75 => 'élevé',
             $risqueScore >= 40 => 'modéré',
@@ -243,8 +250,10 @@ final class CulturePredictionEngine
         return $base;
     }
 
-    /** Recommandation de rotation pour une parcelle */
-    private function recommendForParcelle(object $parcelle, ?object $currentCulture): array
+    /** Recommandation de rotation pour une parcelle
+     * @return array<string, mixed>
+     */
+    private function recommendForParcelle(Parcelle $parcelle, ?Culture $currentCulture): array
     {
         $last = $currentCulture ? mb_strtolower((string) $currentCulture->getTypeCulture()) : null;
         $suggestions = [];
@@ -269,7 +278,10 @@ final class CulturePredictionEngine
         ];
     }
 
-    /** Score de santé globale (0-100) basé sur l'état des cultures */
+    /** Score de santé globale (0-100) basé sur l'état des cultures
+     * @param Culture[] $cultures
+     * @return array<string, mixed>
+     */
     private function computeGlobalScore(array $cultures): array
     {
         if (empty($cultures)) {
@@ -302,7 +314,9 @@ final class CulturePredictionEngine
         return compact('score', 'label', 'color', 'message');
     }
 
-    /** Recommandations saisonnières basées sur le mois actuel */
+    /** Recommandations saisonnières basées sur le mois actuel
+     * @return array<int, array<string, mixed>>
+     */
     private function getSeasonalRecommendations(): array
     {
         $moisActuel = (int) date('n');

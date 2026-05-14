@@ -19,6 +19,7 @@ class PricingService
     /**
      * Calcule le prix avec réduction pour un client
      */
+    /** @return array<string, mixed> */
     public function calculatePriceWithDiscount(
         float $basePrice, 
         Client $client
@@ -41,6 +42,7 @@ class PricingService
     /**
      * Calcule le prix d'un produit avec réduction pour un client
      */
+    /** @return array<string, mixed> */
     public function calculateProductPrice(
         Produit $produit, 
         float $quantity, 
@@ -53,6 +55,7 @@ class PricingService
     /**
      * Calcule le total d'une commande avec réduction
      */
+    /** @return array<string, mixed> */
     public function calculateOrderTotal(
         array $items, // ['produit' => Produit, 'quantity' => float]
         Client $client

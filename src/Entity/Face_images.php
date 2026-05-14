@@ -60,18 +60,12 @@ class Face_images
         return $this->created_at;
     }
 
-    public function setCreated_at($value)
-    {
-        $this->created_at = $value;
-    }
+    // Setter supprimé - created_at est géré automatiquement
 
     public function getUpdated_at()
     {
         return $this->updated_at;
     }
 
-    public function setUpdated_at($value)
-    {
-        $this->updated_at = $value;
-    }
+    // Setter supprimé - updated_at est géré automatiquement
 }

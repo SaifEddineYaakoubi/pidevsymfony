@@ -401,7 +401,7 @@ function togglePassword() {
 </script>
 
 <!-- Face-API.js pour la reconnaissance faciale -->
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="{{ asset('js/face-api.min.js') }}"></script>
 
 <script>
 let faceLoginStream = null;
@@ -420,7 +420,7 @@ window.addEventListener('load', function() {
 
 // Charger les modèles Face-API.js
 async function loadFaceModels() {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+    const MODEL_URL = '/models';
     
     try {
         await Promise.all([

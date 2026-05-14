@@ -135,7 +135,7 @@ class RecolteController extends AbstractController
         }
 
         $recolte = new Recolte();
-        $recolte->setId_user($user->getIdUser());
+        $recolte->setUtilisateur($user);
         $form = $this->createForm(RecolteType::class, $recolte);
         $form->handleRequest($request);
 

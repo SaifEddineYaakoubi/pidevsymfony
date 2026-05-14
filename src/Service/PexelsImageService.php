@@ -110,9 +110,10 @@ class PexelsImageService
         return null;
     }
 
+    /** @return array<string, mixed> */
     private function buildSearchCandidates(string $productName): array
     {
-        $normalized = mb_strtolower(trim($productName));
+        $normalized = mb_strtolower(trim((string) $productName));
 
         $translationMap = [
             'tomate' => 'tomato',

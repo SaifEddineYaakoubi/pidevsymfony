@@ -1,0 +1,37 @@
+when@dev:
+    doctrine_doctor:
+        enabled: true
+        profiler:
+            show_in_toolbar: true
+        analyzers:
+            n_plus_one:
+                enabled: true
+                threshold: 5
+            slow_query:
+                enabled: true
+                threshold: 100
+            missing_index:
+                enabled: true
+                slow_query_threshold: 1
+                explain_queries: true
+                min_rows_scanned: 5
+            hydration:
+                enabled: true
+                row_threshold: 50
+                critical_threshold: 500
+            eager_loading:
+                enabled: true
+                join_threshold: 4
+                critical_join_threshold: 7
+            flush_in_loop:
+                enabled: true
+                flush_count_threshold: 5
+                time_window_ms: 1000
+            lazy_loading:
+                enabled: true
+                threshold: 10
+            dql_injection:
+                enabled: true
+            bulk_operation:
+                enabled: true
+                threshold: 20

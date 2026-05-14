@@ -6,6 +6,9 @@ use App\Entity\Stock;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/** 
+ * @extends ServiceEntityRepository<Stock>
+ */
 class StockRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -13,7 +16,12 @@ class StockRepository extends ServiceEntityRepository
         parent::__construct($registry, Stock::class);
     }
 
-    public function findBySearchAndSort(?string $search, ?string $searchField, string $sort = 'dateEntreeDesc'): array
+    public function findBySearchAndSortForUser(\App\Entity\Utilisateur $user, ?string $search, ?string $searchField, string $sort = 'dateEntreeDesc'): array
+    {
+        return $this->findBySearchAndSort($search, $searchField, $sort, $user);
+    }
+
+    public function findBySearchAndSort(?string $search, ?string $searchField, string $sort = 'dateEntreeDesc', ?\App\Entity\Utilisateur $user = null): array
     {
         $sortFields = [
             'dateEntreeAsc' => ['column' => 's.date_entree', 'direction' => 'ASC', 'dql' => true],
@@ -44,6 +52,12 @@ class StockRepository extends ServiceEntityRepository
             ->addSelect('p')
             ->addSelect('u')
             ->orderBy($sortConfig['column'], $sortConfig['direction']);
+
+        // Filtrer par utilisateur si fourni (responsable_stock voit uniquement ses stocks)
+        if ($user !== null) {
+            $qb->andWhere('s.id_user = :user')
+               ->setParameter('user', $user);
+        }
 
         if ($search) {
             if (isset($searchFields[$searchField])) {
@@ -83,6 +97,16 @@ class StockRepository extends ServiceEntityRepository
 
     public function countByStatus(?string $search = null): array
     {
+        return $this->countByStatusQuery($search, null);
+    }
+
+    public function countByStatusForUser(\App\Entity\Utilisateur $user, ?string $search = null): array
+    {
+        return $this->countByStatusQuery($search, $user);
+    }
+
+    private function countByStatusQuery(?string $search, ?\App\Entity\Utilisateur $user): array
+    {
         $qb = $this->createQueryBuilder('s')
             ->leftJoin('s.id_produit', 'p')
             ->leftJoin('s.id_user', 'u')
@@ -95,6 +119,10 @@ class StockRepository extends ServiceEntityRepository
             ->setParameter('now', new \DateTime())
             ->setParameter('warningDate', new \DateTime('+30 days'))
             ->groupBy('status');
+
+        if ($user !== null) {
+            $qb->andWhere('s.id_user = :user')->setParameter('user', $user);
+        }
 
         if ($search) {
             $qb->andWhere('p.nom LIKE :search OR s.quantite LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search')
